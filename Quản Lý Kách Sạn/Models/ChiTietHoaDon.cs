@@ -1,10 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Quản_Lý_Kách_Sạn.Models
+﻿namespace Quản_Lý_Khách_Sạn.Models
 {
-    internal class ChiTietHoaDon
+    public class ChiTietHoaDon
     {
+        public string MaHoaDon { get; set; } = "";
+        public string MaDichVu { get; set; } = "";
+        public string NoiDung { get; set; } = "";
+        public int SoLuong { get; set; }
+        public decimal DonGia { get; set; }
+        public decimal ThanhTien { get; set; }
     }
 }

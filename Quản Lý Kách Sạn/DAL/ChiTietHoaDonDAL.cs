@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Quản_Lý_Kách_Sạn.DAL
+namespace Quản_Lý_Khách_Sạn.DAL
 {
     internal class ChiTietHoaDonDAL
     {

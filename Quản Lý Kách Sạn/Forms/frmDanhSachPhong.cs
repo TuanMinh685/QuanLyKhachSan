@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Quản_Lý_Kách_Sạn.Forms
+namespace Quản_Lý_Khách_Sạn.Forms
 {
     public partial class frmDanhSachPhong : Form
     {

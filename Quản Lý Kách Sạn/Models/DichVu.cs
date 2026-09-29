@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Quản_Lý_Kách_Sạn.Models
+﻿namespace Quản_Lý_Khách_Sạn.Models
 {
-    internal class DichVu
+    public class DichVu
     {
+        public string MaDichVu { get; set; } = string.Empty;
+        public string TenDichVu { get; set; } = string.Empty;
+        public decimal DonGia { get; set; }
+        public string LoaiDichVu { get; set; } = string.Empty;
     }
 }

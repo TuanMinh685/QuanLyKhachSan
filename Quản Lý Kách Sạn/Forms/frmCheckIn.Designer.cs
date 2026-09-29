@@ -1,4 +1,4 @@
-﻿namespace Quản_Lý_Kách_Sạn.Forms
+﻿namespace Quản_Lý_Khách_Sạn.Forms
 {
     partial class frmCheckIn
     {

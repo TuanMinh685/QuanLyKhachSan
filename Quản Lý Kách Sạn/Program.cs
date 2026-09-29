@@ -1,5 +1,5 @@
-using Quản_Lý_Kách_Sạn.Forms;
-namespace Quản_Lý_Kách_Sạn
+using Quản_Lý_Khách_Sạn.Forms;
+namespace Quản_Lý_Khách_Sạn
 {
     internal static class Program
     {
@@ -12,7 +12,7 @@ namespace Quản_Lý_Kách_Sạn
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new frmDangNhap());
+            Application.Run(new frmVoucher());
         }
     }
 }
