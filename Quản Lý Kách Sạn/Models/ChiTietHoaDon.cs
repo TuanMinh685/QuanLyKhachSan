@@ -1,12 +1,13 @@
-﻿namespace Quản_Lý_Khách_Sạn.Models
+﻿namespace QuanLyKhachSan.Models
 {
     public class ChiTietHoaDon
     {
-        public string MaHoaDon { get; set; } = "";
-        public string MaDichVu { get; set; } = "";
-        public string NoiDung { get; set; } = "";
-        public int SoLuong { get; set; }
+        public int MaCTHD { get; set; }
+        public string MaHoaDon { get; set; } = string.Empty;
+        public string MaDichVu { get; set; } = string.Empty;
+        public string TenDichVu { get; set; } = string.Empty;
+        public int SoLuong { get; set; } = 1;
         public decimal DonGia { get; set; }
-        public decimal ThanhTien { get; set; }
+        public decimal ThanhTien => SoLuong * DonGia;
     }
 }

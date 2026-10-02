@@ -1,25 +1,50 @@
-﻿using System;
+﻿using Quản_Lý_Khách_Sạn.Models;
+using QuanLyKhachSan.Models;
+using System;
 using System.Collections.Generic;
-using Quản_Lý_Khách_Sạn.Models;
-using Quản_Lý_Khách_Sạn.DAL;
 
 namespace Quản_Lý_Khách_Sạn.BLL
 {
     public class HoaDonBLL
     {
-        public int LapHoaDon(string maDatPhong, decimal tienPhong, List<ChiTietHoaDon> danhSachDichVu, string maVoucher, string maPhuongThuc, decimal tienCoc, out string loi)
+        public decimal TinhTongTienDichVu(List<ChiTietHoaDon> cthdList)
         {
-            loi = "";
-            try
+            if (cthdList == null) return 0;
+            decimal sum = 0;
+            foreach (var item in cthdList)
             {
-                // Logic xử lý lưu hóa đơn
-                return 1;
+                sum += item.ThanhTien;
             }
-            catch (Exception ex)
+            return sum;
+        }
+
+        public decimal TinhGiamGiaVoucher(Voucher voucher, decimal tongTienTruocGiam)
+        {
+            if (voucher == null || !voucher.ConHieuLuc) return 0;
+            if (DateTime.Now < voucher.NgayBatDau || DateTime.Now > voucher.NgayKetThuc) return 0;
+            if (tongTienTruocGiam < voucher.DonGiaToiThieu) return 0;
+
+            decimal discount = 0;
+            if (voucher.LoaiGiamGia != null && voucher.LoaiGiamGia.Equals("PhanTram", StringComparison.OrdinalIgnoreCase))
             {
-                loi = ex.Message;
-                return -1;
+                discount = tongTienTruocGiam * (voucher.GiaTriGiam / 100m);
+                if (voucher.GiamToiDa > 0 && discount > voucher.GiamToiDa)
+                {
+                    discount = voucher.GiamToiDa;
+                }
             }
+            else
+            {
+                discount = voucher.GiaTriGiam;
+            }
+
+            return discount > tongTienTruocGiam ? tongTienTruocGiam : discount;
+        }
+
+        public decimal TinhTongThanhToan(decimal tienPhong, decimal tienDichVu, decimal tienGiamGia, decimal tienDatCoc)
+        {
+            decimal total = (tienPhong + tienDichVu) - tienGiamGia - tienDatCoc;
+            return total > 0 ? total : 0;
         }
     }
 }

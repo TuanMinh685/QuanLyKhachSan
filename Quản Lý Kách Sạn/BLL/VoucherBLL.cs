@@ -1,31 +1,42 @@
-﻿using System;
-using System.Linq;
-using Quản_Lý_Khách_Sạn.DAL;
-using Quản_Lý_Khách_Sạn.Models;
+﻿using Quản_Lý_Khách_Sạn.DAL;
+using QuanLyKhachSan.DAL;
+using QuanLyKhachSan.Models;
+using System.Collections.Generic;
 
-namespace Quản_Lý_Khách_Sạn.BLL
+namespace QuanLyKhachSan.BLL
 {
     public class VoucherBLL
     {
-        private VoucherDAL voucherDAL = new VoucherDAL();
+        private VoucherDAL dal = new VoucherDAL();
 
-        public Voucher KiemTraVoucher(string maVoucher)
+        public List<Voucher> LayDanhSachVoucher()
         {
-            if (string.IsNullOrWhiteSpace(maVoucher)) return null;
-            return voucherDAL.GetAll().FirstOrDefault(v => v.MaVoucher.ToString().Trim().Equals(maVoucher.Trim(), StringComparison.OrdinalIgnoreCase) && v.TrangThai && v.NgayHetHan >= DateTime.Now);
+            return dal.GetAll();
         }
 
-        public decimal TinhTienGiam(string maVoucher, decimal tongTien)
+        public Voucher TimVoucherTheoMa(int id)
         {
-            var voucher = KiemTraVoucher(maVoucher);
-            if (voucher == null) return 0;
+            return dal.GetById(id);
+        }
 
-            decimal tienGiam = tongTien * (voucher.PhanTramGiam / 100m);
-            if (voucher.GiamToiDa > 0 && tienGiam > voucher.GiamToiDa)
-            {
-                tienGiam = voucher.GiamToiDa;
-            }
-            return tienGiam;
+        public Voucher TimVoucherTheoCode(string code)
+        {
+            return dal.GetByCode(code);
+        }
+
+        public bool ThemVoucher(Voucher v)
+        {
+            return dal.Insert(v);
+        }
+
+        public bool CapNhatVoucher(Voucher v)
+        {
+            return dal.Update(v);
+        }
+
+        public bool XoaVoucher(int id)
+        {
+            return dal.Delete(id);
         }
     }
 }
