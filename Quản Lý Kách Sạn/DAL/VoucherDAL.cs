@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using Microsoft.Data.SqlClient;
 using Quản_Lý_Khách_Sạn.Models;
 
@@ -8,90 +7,151 @@ namespace Quản_Lý_Khách_Sạn.DAL
 {
     public class VoucherDAL
     {
-        // 1. Lấy danh sách toàn bộ voucher
         public List<Voucher> GetAll()
         {
-            List<Voucher> list = new List<Voucher>();
-            string query = "SELECT * FROM Voucher";
-            using (DataTable dt = DatabaseHelper.ExecuteQuery(query))
+            var list = new List<Voucher>();
+            string sql = "SELECT * FROM Voucher";
+            try
             {
-                if (dt != null)
+                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
-                    foreach (DataRow row in dt.Rows)
+                    conn.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        list.Add(new Voucher
+                        while (reader.Read())
                         {
-                            MaVoucher = row.Table.Columns.Contains("MaVoucher") && row["MaVoucher"] != DBNull.Value
-                                ? Convert.ToInt32(row["MaVoucher"])
-                                : (row.Table.Columns.Contains("Id") && row["Id"] != DBNull.Value ? Convert.ToInt32(row["Id"]) : 0),
-                            Code = row.Table.Columns.Contains("Code") ? row["Code"]?.ToString() ?? "" : "",
-                            LoaiGiam = row.Table.Columns.Contains("LoaiGiam") ? row["LoaiGiam"]?.ToString() ?? "PhanTram" : "PhanTram",
-                            GiaTri = row.Table.Columns.Contains("GiaTri") && row["GiaTri"] != DBNull.Value ? Convert.ToDecimal(row["GiaTri"]) : 0,
-                            DonToiThieu = row.Table.Columns.Contains("DonToiThieu") && row["DonToiThieu"] != DBNull.Value ? Convert.ToDecimal(row["DonToiThieu"]) : 0,
-                            SoLuong = row.Table.Columns.Contains("SoLuong") && row["SoLuong"] != DBNull.Value ? Convert.ToInt32(row["SoLuong"]) : null,
-                            NgayBatDau = row.Table.Columns.Contains("NgayBatDau") && row["NgayBatDau"] != DBNull.Value ? Convert.ToDateTime(row["NgayBatDau"]) : DateTime.Now,
-                            NgayHetHan = row.Table.Columns.Contains("NgayHetHan") && row["NgayHetHan"] != DBNull.Value ? Convert.ToDateTime(row["NgayHetHan"]) : DateTime.MaxValue,
-                            TrangThai = row.Table.Columns.Contains("TrangThai") && row["TrangThai"] != DBNull.Value && Convert.ToBoolean(row["TrangThai"])
-                        });
+                            list.Add(MapVoucher(reader));
+                        }
                     }
                 }
             }
+            catch { }
             return list;
         }
 
-        // 2. Thêm voucher mới
+        public Voucher GetById(int id)
+        {
+            return GetByCode(id.ToString());
+        }
+
+        public Voucher GetById(int? id)
+        {
+            if (!id.HasValue) return null;
+            return GetById(id.Value);
+        }
+
+        public Voucher GetByCode(string code)
+        {
+            if (string.IsNullOrWhiteSpace(code)) return null;
+
+            string sql = "SELECT TOP 1 * FROM Voucher WHERE MaVoucher = @code OR Code = @code";
+            try
+            {
+                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@code", code);
+                    conn.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return MapVoucher(reader);
+                        }
+                    }
+                }
+            }
+            catch { }
+            return null;
+        }
+
         public bool Insert(Voucher v)
         {
-            string query = @"INSERT INTO Voucher(Code, LoaiGiam, GiaTri, DonToiThieu, SoLuong, NgayBatDau, NgayHetHan, TrangThai) 
-                             VALUES(@Code, @LoaiGiam, @GiaTri, @DonToiThieu, @SoLuong, @NgayBatDau, @NgayHetHan, @TrangThai)";
-            SqlParameter[] p = {
-                new SqlParameter("@Code", v.Code),
-                new SqlParameter("@LoaiGiam", v.LoaiGiam ?? "PhanTram"),
-                new SqlParameter("@GiaTri", v.GiaTri),
-                new SqlParameter("@DonToiThieu", v.DonToiThieu),
-                new SqlParameter("@SoLuong", (object)v.SoLuong ?? DBNull.Value),
-                new SqlParameter("@NgayBatDau", v.NgayBatDau),
-                new SqlParameter("@NgayHetHan", v.NgayHetHan),
-                new SqlParameter("@TrangThai", v.TrangThai)
-            };
-            return DatabaseHelper.ExecuteNonQuery(query, p) > 0;
+            string sql = @"INSERT INTO Voucher (GiaTri, LoaiGiam, DonToiThieu, NgayHetHan, SoLuong, TrangThai)
+                           VALUES (@GiaTri, @LoaiGiam, @DonToiThieu, @NgayHetHan, @SoLuong, @TrangThai)";
+            return ExecuteCmd(sql, v);
         }
 
-        // 3. Cập nhật voucher
         public bool Update(Voucher v)
         {
-            string query = @"UPDATE Voucher 
-                             SET Code=@Code, LoaiGiam=@LoaiGiam, GiaTri=@GiaTri, DonToiThieu=@DonToiThieu, 
-                                 SoLuong=@SoLuong, NgayBatDau=@NgayBatDau, NgayHetHan=@NgayHetHan, TrangThai=@TrangThai 
-                             WHERE MaVoucher=@MaVoucher";
-            SqlParameter[] p = {
-                new SqlParameter("@MaVoucher", v.MaVoucher),
-                new SqlParameter("@Code", v.Code),
-                new SqlParameter("@LoaiGiam", v.LoaiGiam ?? "PhanTram"),
-                new SqlParameter("@GiaTri", v.GiaTri),
-                new SqlParameter("@DonToiThieu", v.DonToiThieu),
-                new SqlParameter("@SoLuong", (object)v.SoLuong ?? DBNull.Value),
-                new SqlParameter("@NgayBatDau", v.NgayBatDau),
-                new SqlParameter("@NgayHetHan", v.NgayHetHan),
-                new SqlParameter("@TrangThai", v.TrangThai)
-            };
-            return DatabaseHelper.ExecuteNonQuery(query, p) > 0;
+            string sql = @"UPDATE Voucher SET GiaTri=@GiaTri, LoaiGiam=@LoaiGiam, DonToiThieu=@DonToiThieu, 
+                           NgayHetHan=@NgayHetHan, SoLuong=@SoLuong, TrangThai=@TrangThai 
+                           WHERE MaVoucher=@MaVoucher";
+            return ExecuteCmd(sql, v);
         }
 
-        // 4. Xóa voucher theo mã số int (MaVoucher)
-        public bool Delete(int maVoucher)
+        public bool Delete(int id)
         {
-            string query = "DELETE FROM Voucher WHERE MaVoucher = @Ma";
-            SqlParameter[] p = { new SqlParameter("@Ma", maVoucher) };
-            return DatabaseHelper.ExecuteNonQuery(query, p) > 0;
+            return Delete(id.ToString());
         }
 
-        // 5. Xóa voucher theo mã chuỗi string (Code)
+        public bool Delete(int? id)
+        {
+            if (!id.HasValue) return false;
+            return Delete(id.Value);
+        }
+
         public bool Delete(string code)
         {
-            string query = "DELETE FROM Voucher WHERE Code = @Code";
-            SqlParameter[] p = { new SqlParameter("@Code", code) };
-            return DatabaseHelper.ExecuteNonQuery(query, p) > 0;
+            string sql = "DELETE FROM Voucher WHERE MaVoucher = @code OR Code = @code";
+            try
+            {
+                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@code", code);
+                    conn.Open();
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+            catch { return false; }
+        }
+
+        private bool ExecuteCmd(string sql, Voucher v)
+        {
+            try
+            {
+                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@MaVoucher", v.MaVoucher.HasValue ? (object)v.MaVoucher.Value : DBNull.Value);
+                    cmd.Parameters.AddWithValue("@GiaTri", v.GiaTri);
+                    cmd.Parameters.AddWithValue("@LoaiGiam", v.LoaiGiam ?? "PhanTram");
+                    cmd.Parameters.AddWithValue("@DonToiThieu", v.DonToiThieu);
+                    cmd.Parameters.AddWithValue("@NgayHetHan", v.NgayHetHan);
+                    cmd.Parameters.AddWithValue("@SoLuong", v.SoLuong);
+                    cmd.Parameters.AddWithValue("@TrangThai", v.TrangThai);
+                    conn.Open();
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+            catch { return false; }
+        }
+
+        private Voucher MapVoucher(SqlDataReader reader)
+        {
+            var v = new Voucher();
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                string col = reader.GetName(i).ToLower();
+                object val = reader.GetValue(i);
+                if (val == DBNull.Value) continue;
+
+                if (col == "mavoucher" || col == "id")
+                {
+                    if (int.TryParse(val.ToString(), out int idVal))
+                        v.MaVoucher = idVal;
+                }
+                else if (col == "code") v.Code = val.ToString();
+                else if (col == "giatri" || col == "giatrigiam") v.GiaTri = Convert.ToDecimal(val);
+                else if (col == "loaigiam" || col == "loaigiamgia") v.LoaiGiam = val.ToString();
+                else if (col == "dontoithieu" || col == "dongiatoithieu") v.DonToiThieu = Convert.ToDecimal(val);
+                else if (col == "ngayhethan" || col == "ngayketthuc") v.NgayHetHan = Convert.ToDateTime(val);
+                else if (col == "soluong") v.SoLuong = Convert.ToInt32(val);
+                else if (col == "trangthai" || col == "conhieuluc") v.TrangThai = Convert.ToBoolean(val);
+            }
+            return v;
         }
     }
 }
