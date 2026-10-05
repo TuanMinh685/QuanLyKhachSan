@@ -12,7 +12,7 @@ namespace Quản_Lý_Khách_Sạn
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new frmVoucher());
+            Application.Run(new frmKhachHang());
         }
     }
 }

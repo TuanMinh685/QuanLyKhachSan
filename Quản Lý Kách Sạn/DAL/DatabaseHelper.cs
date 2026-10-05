@@ -7,7 +7,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
     public static class DatabaseHelper
     {
         // Bạn có thể chỉnh lại Data Source và Initial Catalog theo đúng SQL Server trên máy mình
-        public static string connectionString = @"Data Source=.;Initial Catalog=QLKS;Integrated Security=True;TrustServerCertificate=True";
+        public static string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=QLKS;Integrated Security=True;TrustServerCertificate=True";
 
         public static SqlConnection GetConnection()
         {
