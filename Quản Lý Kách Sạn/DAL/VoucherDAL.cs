@@ -10,7 +10,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
         public List<Voucher> GetAll()
         {
             var list = new List<Voucher>();
-            string sql = "SELECT * FROM Voucher";
+            string sql = "SELECT * FROM Voucher ORDER BY MaVoucher DESC";
             try
             {
                 using (SqlConnection conn = DatabaseHelper.GetConnection())
@@ -26,16 +26,38 @@ namespace Quản_Lý_Khách_Sạn.DAL
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Lỗi lấy danh sách Voucher: " + ex.Message);
+            }
             return list;
         }
 
+        // Bổ sung hàm GetById(int)
         public Voucher GetById(int id)
         {
-            return GetByCode(id.ToString());
+            string sql = "SELECT TOP 1 * FROM Voucher WHERE MaVoucher = @Id";
+            try
+            {
+                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Id", id);
+                    conn.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return MapVoucher(reader);
+                        }
+                    }
+                }
+            }
+            catch { }
+            return null;
         }
 
-        // Hỗ trợ truyền int? mà không bị lỗi ép kiểu
+        // Hỗ trợ kiểu nullable int?
         public Voucher GetById(int? id)
         {
             if (!id.HasValue) return null;
@@ -46,7 +68,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
         {
             if (string.IsNullOrWhiteSpace(code)) return null;
 
-            string sql = "SELECT TOP 1 * FROM Voucher WHERE Code = @code OR MaVoucher = @code";
+            string sql = "SELECT TOP 1 * FROM Voucher WHERE Code = @code";
             try
             {
                 using (SqlConnection conn = DatabaseHelper.GetConnection())
@@ -69,17 +91,61 @@ namespace Quản_Lý_Khách_Sạn.DAL
 
         public bool Insert(Voucher v)
         {
-            string sql = @"INSERT INTO Voucher (GiaTri, LoaiGiam, DonToiThieu, NgayHetHan, SoLuong, TrangThai)
-                           VALUES (@GiaTri, @LoaiGiam, @DonToiThieu, @NgayHetHan, @SoLuong, @TrangThai)";
-            return ExecuteCmd(sql, v);
+            string sql = @"INSERT INTO Voucher (Code, TenChuongTrinh, GiaTri, LoaiGiam, DonToiThieu, NgayBatDau, NgayHetHan, SoLuong, TrangThai)
+                           VALUES (@Code, @Ten, @GiaTri, @LoaiGiam, @DonToiThieu, @NgayBD, @NgayKT, @SoLuong, @TrangThai)";
+            try
+            {
+                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Code", string.IsNullOrEmpty(v.Code) ? "VC" + DateTime.Now.ToString("HHmmss") : v.Code);
+                    cmd.Parameters.AddWithValue("@Ten", string.IsNullOrEmpty(v.TenChuongTrinh) ? "Khuyến mãi" : v.TenChuongTrinh);
+                    cmd.Parameters.AddWithValue("@GiaTri", v.GiaTri);
+                    cmd.Parameters.AddWithValue("@LoaiGiam", v.LoaiGiam ?? "PhanTram");
+                    cmd.Parameters.AddWithValue("@DonToiThieu", v.DonToiThieu);
+                    cmd.Parameters.AddWithValue("@NgayBD", v.NgayBatDau);
+                    cmd.Parameters.AddWithValue("@NgayKT", v.NgayHetHan);
+                    cmd.Parameters.AddWithValue("@SoLuong", v.SoLuong);
+                    cmd.Parameters.AddWithValue("@TrangThai", v.TrangThai);
+                    conn.Open();
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Lỗi lưu vào SQL: " + ex.Message, "SQL Error");
+                return false;
+            }
         }
 
         public bool Update(Voucher v)
         {
-            string sql = @"UPDATE Voucher SET GiaTri=@GiaTri, LoaiGiam=@LoaiGiam, DonToiThieu=@DonToiThieu, 
-                           NgayHetHan=@NgayHetHan, SoLuong=@SoLuong, TrangThai=@TrangThai 
+            string sql = @"UPDATE Voucher SET Code=@Code, GiaTri=@GiaTri, LoaiGiam=@LoaiGiam, DonToiThieu=@DonToiThieu, 
+                           NgayBatDau=@NgayBD, NgayHetHan=@NgayKT, SoLuong=@SoLuong, TrangThai=@TrangThai 
                            WHERE MaVoucher=@MaVoucher";
-            return ExecuteCmd(sql, v);
+            try
+            {
+                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@MaVoucher", v.MaVoucher ?? 0);
+                    cmd.Parameters.AddWithValue("@Code", v.Code);
+                    cmd.Parameters.AddWithValue("@GiaTri", v.GiaTri);
+                    cmd.Parameters.AddWithValue("@LoaiGiam", v.LoaiGiam ?? "PhanTram");
+                    cmd.Parameters.AddWithValue("@DonToiThieu", v.DonToiThieu);
+                    cmd.Parameters.AddWithValue("@NgayBD", v.NgayBatDau);
+                    cmd.Parameters.AddWithValue("@NgayKT", v.NgayHetHan);
+                    cmd.Parameters.AddWithValue("@SoLuong", v.SoLuong);
+                    cmd.Parameters.AddWithValue("@TrangThai", v.TrangThai);
+                    conn.Open();
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Lỗi cập nhật SQL: " + ex.Message, "SQL Error");
+                return false;
+            }
         }
 
         public bool Delete(int id)
@@ -95,34 +161,17 @@ namespace Quản_Lý_Khách_Sạn.DAL
                     return cmd.ExecuteNonQuery() > 0;
                 }
             }
-            catch { return false; }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Lỗi xóa SQL: " + ex.Message, "SQL Error");
+                return false;
+            }
         }
 
         public bool Delete(int? id)
         {
             if (!id.HasValue) return false;
             return Delete(id.Value);
-        }
-
-        private bool ExecuteCmd(string sql, Voucher v)
-        {
-            try
-            {
-                using (SqlConnection conn = DatabaseHelper.GetConnection())
-                using (SqlCommand cmd = new SqlCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@MaVoucher", v.MaVoucher);
-                    cmd.Parameters.AddWithValue("@GiaTri", v.GiaTri);
-                    cmd.Parameters.AddWithValue("@LoaiGiam", v.LoaiGiam ?? "PhanTram");
-                    cmd.Parameters.AddWithValue("@DonToiThieu", v.DonToiThieu);
-                    cmd.Parameters.AddWithValue("@NgayHetHan", v.NgayHetHan);
-                    cmd.Parameters.AddWithValue("@SoLuong", v.SoLuong);
-                    cmd.Parameters.AddWithValue("@TrangThai", v.TrangThai);
-                    conn.Open();
-                    return cmd.ExecuteNonQuery() > 0;
-                }
-            }
-            catch { return false; }
         }
 
         private Voucher MapVoucher(SqlDataReader reader)
@@ -134,17 +183,16 @@ namespace Quản_Lý_Khách_Sạn.DAL
                 object val = reader.GetValue(i);
                 if (val == DBNull.Value) continue;
 
-                if (col == "mavoucher" || col == "id")
-                {
-                    if (int.TryParse(val.ToString(), out int idVal)) v.MaVoucher = idVal;
-                }
+                if (col == "mavoucher") v.MaVoucher = Convert.ToInt32(val);
                 else if (col == "code") v.Code = val.ToString() ?? "";
-                else if (col == "giatri" || col == "giatrigiam") v.GiaTri = Convert.ToDecimal(val);
-                else if (col == "loaigiam" || col == "loaigiamgia") v.LoaiGiam = val.ToString() ?? "PhanTram";
-                else if (col == "dontoithieu" || col == "dongiatoithieu") v.DonToiThieu = Convert.ToDecimal(val);
-                else if (col == "ngayhethan" || col == "ngayketthuc") v.NgayHetHan = Convert.ToDateTime(val);
+                else if (col == "tenchuongtrinh") v.TenChuongTrinh = val.ToString() ?? "";
+                else if (col == "giatri") v.GiaTri = Convert.ToDecimal(val);
+                else if (col == "loaigiam") v.LoaiGiam = val.ToString() ?? "PhanTram";
+                else if (col == "dontoithieu") v.DonToiThieu = Convert.ToDecimal(val);
+                else if (col == "ngaybatdau") v.NgayBatDau = Convert.ToDateTime(val);
+                else if (col == "ngayhethan") v.NgayHetHan = Convert.ToDateTime(val);
                 else if (col == "soluong") v.SoLuong = Convert.ToInt32(val);
-                else if (col == "trangthai" || col == "conhieuluc") v.TrangThai = Convert.ToBoolean(val);
+                else if (col == "trangthai") v.TrangThai = Convert.ToBoolean(val);
             }
             return v;
         }

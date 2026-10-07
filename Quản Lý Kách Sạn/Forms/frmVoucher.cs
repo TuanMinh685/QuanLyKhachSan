@@ -22,10 +22,10 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private void frmVoucher_Load(object sender, EventArgs e)
         {
             UITheme.StyleModernGrid(dgvVoucher);
+            dgvVoucher.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             TaiDanhSach();
         }
 
-        // Hàm vẽ viền Card phẳng màu xám nhạt (Sửa lỗi thiếu định nghĩa)
         private void DrawCardBorder(object sender, PaintEventArgs e)
         {
             if (sender is Panel pnl)
@@ -53,33 +53,63 @@ namespace Quản_Lý_Khách_Sạn.Forms
             dgvVoucher.DataSource = null;
             dgvVoucher.DataSource = danhSach;
 
-            if (dgvVoucher.Columns["MaVoucher"] != null) dgvVoucher.Columns["MaVoucher"].HeaderText = "ID";
-            if (dgvVoucher.Columns["Code"] != null) dgvVoucher.Columns["Code"].HeaderText = "Mã Code";
-            if (dgvVoucher.Columns["LoaiGiam"] != null) dgvVoucher.Columns["LoaiGiam"].HeaderText = "Loại giảm";
+            // 1. ẨN TẤT CẢ CÁC CỘT DƯ THỪA ĐANG LÀM DÀI BẢNG
+            string[] cotAn = { "Id", "TenChuongTrinh", "GiaTriGiam", "LoaiGiamGia", "DonGiaToiThieu", "GiamToiDa", "PhanTramGiam", "NgayKetThuc", "ConHieuLuc" };
+            foreach (var col in cotAn)
+            {
+                if (dgvVoucher.Columns[col] != null) dgvVoucher.Columns[col].Visible = false;
+            }
+
+            // 2. ĐỊNH DẠNG CÁC CỘT CHÍNH CÒN LẠI
+            if (dgvVoucher.Columns["MaVoucher"] != null)
+            {
+                dgvVoucher.Columns["MaVoucher"].HeaderText = "ID";
+                dgvVoucher.Columns["MaVoucher"].FillWeight = 40;
+            }
+            if (dgvVoucher.Columns["Code"] != null)
+            {
+                dgvVoucher.Columns["Code"].HeaderText = "Mã Voucher";
+                dgvVoucher.Columns["Code"].FillWeight = 90;
+            }
+            if (dgvVoucher.Columns["LoaiGiam"] != null)
+            {
+                dgvVoucher.Columns["LoaiGiam"].HeaderText = "Hình thức";
+                dgvVoucher.Columns["LoaiGiam"].FillWeight = 75;
+            }
             if (dgvVoucher.Columns["GiaTri"] != null)
             {
                 dgvVoucher.Columns["GiaTri"].HeaderText = "Mức giảm";
                 dgvVoucher.Columns["GiaTri"].DefaultCellStyle.Format = "N0";
+                dgvVoucher.Columns["GiaTri"].FillWeight = 75;
             }
             if (dgvVoucher.Columns["DonToiThieu"] != null)
             {
                 dgvVoucher.Columns["DonToiThieu"].HeaderText = "Đơn tối thiểu";
                 dgvVoucher.Columns["DonToiThieu"].DefaultCellStyle.Format = "N0";
+                dgvVoucher.Columns["DonToiThieu"].FillWeight = 85;
             }
-            if (dgvVoucher.Columns["SoLuong"] != null) dgvVoucher.Columns["SoLuong"].HeaderText = "Số lượng";
+            if (dgvVoucher.Columns["SoLuong"] != null)
+            {
+                dgvVoucher.Columns["SoLuong"].HeaderText = "SL";
+                dgvVoucher.Columns["SoLuong"].FillWeight = 40;
+            }
             if (dgvVoucher.Columns["NgayBatDau"] != null)
             {
                 dgvVoucher.Columns["NgayBatDau"].HeaderText = "Bắt đầu";
                 dgvVoucher.Columns["NgayBatDau"].DefaultCellStyle.Format = "dd/MM/yyyy";
+                dgvVoucher.Columns["NgayBatDau"].FillWeight = 75;
             }
             if (dgvVoucher.Columns["NgayHetHan"] != null)
             {
                 dgvVoucher.Columns["NgayHetHan"].HeaderText = "Hết hạn";
                 dgvVoucher.Columns["NgayHetHan"].DefaultCellStyle.Format = "dd/MM/yyyy";
+                dgvVoucher.Columns["NgayHetHan"].FillWeight = 75;
             }
-            if (dgvVoucher.Columns["TrangThai"] != null) dgvVoucher.Columns["TrangThai"].HeaderText = "Kích hoạt";
-            if (dgvVoucher.Columns["GiamToiDa"] != null) dgvVoucher.Columns["GiamToiDa"].Visible = false;
-            if (dgvVoucher.Columns["PhanTramGiam"] != null) dgvVoucher.Columns["PhanTramGiam"].Visible = false;
+            if (dgvVoucher.Columns["TrangThai"] != null)
+            {
+                dgvVoucher.Columns["TrangThai"].HeaderText = "Kích hoạt";
+                dgvVoucher.Columns["TrangThai"].FillWeight = 60;
+            }
         }
 
         private void txtTimKiem_TextChanged(object sender, EventArgs e)
@@ -145,7 +175,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             {
                 if (!int.TryParse(txtSoLuong.Text.Trim(), out int sl) || sl < 0)
                 {
-                    MessageBox.Show("Số lượng phải là số nguyên không âm (hoặc để trống).", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Số lượng phải là số nguyên không âm.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     txtSoLuong.Focus();
                     return false;
                 }
@@ -162,27 +192,25 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private void btnThem_Click(object sender, EventArgs e)
         {
             if (!KiemTraHopLe(out decimal giaTri, out decimal donToiThieu, out int? soLuong)) return;
-            try
+
+            var v = new Voucher
             {
-                var v = new Voucher
-                {
-                    Code = txtCode.Text.Trim().ToUpper(),
-                    LoaiGiam = rdoPhanTram.Checked ? "PhanTram" : "SoTien",
-                    GiaTri = giaTri,
-                    DonToiThieu = donToiThieu,
-                    SoLuong = soLuong ?? 100,
-                    NgayBatDau = dtpNgayBatDau.Value.Date,
-                    NgayHetHan = dtpNgayHetHan.Value.Date,
-                    TrangThai = chkTrangThai.Checked
-                };
-                voucherDAL.Insert(v);
+                Code = txtCode.Text.Trim().ToUpper(),
+                TenChuongTrinh = "Ưu đãi phòng",
+                LoaiGiam = rdoPhanTram.Checked ? "PhanTram" : "SoTien",
+                GiaTri = giaTri,
+                DonToiThieu = donToiThieu,
+                SoLuong = soLuong ?? 100,
+                NgayBatDau = dtpNgayBatDau.Value.Date,
+                NgayHetHan = dtpNgayHetHan.Value.Date,
+                TrangThai = chkTrangThai.Checked
+            };
+
+            if (voucherDAL.Insert(v))
+            {
                 MessageBox.Show("Thêm voucher thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 TaiDanhSach();
                 LamMoiForm();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi khi thêm: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -195,28 +223,25 @@ namespace Quản_Lý_Khách_Sạn.Forms
             }
             if (!KiemTraHopLe(out decimal giaTri, out decimal donToiThieu, out int? soLuong)) return;
 
-            try
+            var v = new Voucher
             {
-                var v = new Voucher
-                {
-                    MaVoucher = maVoucherDangChon.Value,
-                    Code = txtCode.Text.Trim().ToUpper(),
-                    LoaiGiam = rdoPhanTram.Checked ? "PhanTram" : "SoTien",
-                    GiaTri = giaTri,
-                    DonToiThieu = donToiThieu,
-                    SoLuong = soLuong ?? 100,
-                    NgayBatDau = dtpNgayBatDau.Value.Date,
-                    NgayHetHan = dtpNgayHetHan.Value.Date,
-                    TrangThai = chkTrangThai.Checked
-                };
-                voucherDAL.Update(v);
+                MaVoucher = maVoucherDangChon.Value,
+                Code = txtCode.Text.Trim().ToUpper(),
+                TenChuongTrinh = "Ưu đãi phòng",
+                LoaiGiam = rdoPhanTram.Checked ? "PhanTram" : "SoTien",
+                GiaTri = giaTri,
+                DonToiThieu = donToiThieu,
+                SoLuong = soLuong ?? 100,
+                NgayBatDau = dtpNgayBatDau.Value.Date,
+                NgayHetHan = dtpNgayHetHan.Value.Date,
+                TrangThai = chkTrangThai.Checked
+            };
+
+            if (voucherDAL.Update(v))
+            {
                 MessageBox.Show("Cập nhật thông tin voucher thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 TaiDanhSach();
                 LamMoiForm();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi khi cập nhật: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -230,16 +255,11 @@ namespace Quản_Lý_Khách_Sạn.Forms
             if (MessageBox.Show("Bạn có chắc chắn muốn xóa mã voucher này không?", "Xác nhận xóa",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
 
-            try
+            if (voucherDAL.Delete(maVoucherDangChon.Value))
             {
-                voucherDAL.Delete(maVoucherDangChon.Value);
                 MessageBox.Show("Đã xóa voucher khỏi hệ thống.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 TaiDanhSach();
                 LamMoiForm();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi khi xóa: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

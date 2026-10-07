@@ -4,7 +4,7 @@ using System.Windows.Forms;
 using Quản_Lý_Khách_Sạn.BLL;
 using Quản_Lý_Khách_Sạn.DAL;
 using Quản_Lý_Khách_Sạn.Models;
-
+using System.Drawing;
 namespace Quản_Lý_Khách_Sạn.Forms
 {
     public partial class frmHoaDon : Form
@@ -16,7 +16,14 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private decimal tienPhong = 2900000m;
         private decimal tienCoc = 1000000m;
         private List<ChiTietHoaDon> listDV = new List<ChiTietHoaDon>();
-
+        private void DrawCardBorder(object sender, PaintEventArgs e)
+        {
+            if (sender is Panel pnl)
+            {
+                ControlPaint.DrawBorder(e.Graphics, pnl.ClientRectangle,
+                    ColorTranslator.FromHtml("#E2E8F0"), ButtonBorderStyle.Solid);
+            }
+        }
         public frmHoaDon()
         {
             InitializeComponent();

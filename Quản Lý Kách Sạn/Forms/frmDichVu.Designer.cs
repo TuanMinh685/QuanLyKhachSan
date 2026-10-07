@@ -17,13 +17,8 @@
 
         private void InitializeComponent()
         {
-            this.pnlHeader = new System.Windows.Forms.Panel();
-            this.lblHeader = new System.Windows.Forms.Label();
-            this.pnlLeft = new System.Windows.Forms.Panel();
-            this.txtTimKiem = new System.Windows.Forms.TextBox();
-            this.cboLoai = new System.Windows.Forms.ComboBox();
-            this.dgvDichVu = new System.Windows.Forms.DataGridView();
-            this.pnlRight = new System.Windows.Forms.Panel();
+            this.tblMainLayout = new System.Windows.Forms.TableLayoutPanel();
+            this.cardRight = new System.Windows.Forms.Panel();
             this.lblRightTitle = new System.Windows.Forms.Label();
             this.lblTen = new System.Windows.Forms.Label();
             this.txtTen = new System.Windows.Forms.TextBox();
@@ -36,108 +31,62 @@
             this.btnSave = new System.Windows.Forms.Button();
             this.btnXoa = new System.Windows.Forms.Button();
             this.btnLamMoi = new System.Windows.Forms.Button();
-            this.pnlHeader.SuspendLayout();
-            this.pnlLeft.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvDichVu)).BeginInit();
-            this.pnlRight.SuspendLayout();
+            this.cardLeft = new System.Windows.Forms.Panel();
+            this.txtTimKiem = new System.Windows.Forms.TextBox();
+            this.cboLoai = new System.Windows.Forms.ComboBox();
+            this.dgvDichVu = new System.Windows.Forms.DataGridView();
+            this.tblMainLayout.SuspendLayout();
+            this.cardRight.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numGia)).BeginInit();
+            this.cardLeft.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvDichVu)).BeginInit();
             this.SuspendLayout();
             // 
-            // pnlHeader
+            // tblMainLayout
             // 
-            this.pnlHeader.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(37)))), ((int)(((byte)(55)))));
-            this.pnlHeader.Controls.Add(this.lblHeader);
-            this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlHeader.Location = new System.Drawing.Point(0, 0);
-            this.pnlHeader.Name = "pnlHeader";
-            this.pnlHeader.Size = new System.Drawing.Size(1164, 55);
-            this.pnlHeader.TabIndex = 0;
+            this.tblMainLayout.ColumnCount = 2;
+            this.tblMainLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 65F));
+            this.tblMainLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 35F));
+            this.tblMainLayout.Controls.Add(this.cardRight, 1, 0);
+            this.tblMainLayout.Controls.Add(this.cardLeft, 0, 0);
+            this.tblMainLayout.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tblMainLayout.Location = new System.Drawing.Point(20, 20);
+            this.tblMainLayout.Name = "tblMainLayout";
+            this.tblMainLayout.RowCount = 1;
+            this.tblMainLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tblMainLayout.Size = new System.Drawing.Size(1160, 680);
+            this.tblMainLayout.TabIndex = 0;
             // 
-            // lblHeader
+            // cardRight
             // 
-            this.lblHeader.AutoSize = true;
-            this.lblHeader.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblHeader.ForeColor = System.Drawing.Color.White;
-            this.lblHeader.Location = new System.Drawing.Point(20, 16);
-            this.lblHeader.Name = "lblHeader";
-            this.lblHeader.Size = new System.Drawing.Size(364, 28);
-            this.lblHeader.TabIndex = 0;
-            this.lblHeader.Text = "QUẢN LÝ DỊCH VỤ - AN NHIÊN HOTEL";
-            // 
-            // pnlLeft
-            // 
-            this.pnlLeft.BackColor = System.Drawing.Color.White;
-            this.pnlLeft.Controls.Add(this.txtTimKiem);
-            this.pnlLeft.Controls.Add(this.cboLoai);
-            this.pnlLeft.Controls.Add(this.dgvDichVu);
-            this.pnlLeft.Location = new System.Drawing.Point(25, 75);
-            this.pnlLeft.Name = "pnlLeft";
-            this.pnlLeft.Size = new System.Drawing.Size(720, 580);
-            this.pnlLeft.TabIndex = 1;
-            // 
-            // txtTimKiem
-            // 
-            this.txtTimKiem.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.txtTimKiem.Location = new System.Drawing.Point(15, 15);
-            this.txtTimKiem.Name = "txtTimKiem";
-            this.txtTimKiem.PlaceholderText = "Tìm theo tên dịch vụ, mã...";
-            this.txtTimKiem.Size = new System.Drawing.Size(260, 29);
-            this.txtTimKiem.TabIndex = 0;
-            this.txtTimKiem.TextChanged += new System.EventHandler(this.txtTimKiem_TextChanged);
-            // 
-            // cboLoai
-            // 
-            this.cboLoai.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboLoai.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.cboLoai.FormattingEnabled = true;
-            this.cboLoai.Items.AddRange(new object[] {
-            "Tất cả",
-            "Ăn uống",
-            "Giặt ủi",
-            "Đưa đón",
-            "Khác"});
-            this.cboLoai.Location = new System.Drawing.Point(290, 15);
-            this.cboLoai.Name = "cboLoai";
-            this.cboLoai.Size = new System.Drawing.Size(160, 29);
-            this.cboLoai.TabIndex = 1;
-            this.cboLoai.SelectedIndexChanged += new System.EventHandler(this.cboLoai_SelectedIndexChanged);
-            // 
-            // dgvDichVu
-            // 
-            this.dgvDichVu.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvDichVu.Location = new System.Drawing.Point(15, 60);
-            this.dgvDichVu.Name = "dgvDichVu";
-            this.dgvDichVu.RowHeadersWidth = 51;
-            this.dgvDichVu.Size = new System.Drawing.Size(690, 500);
-            this.dgvDichVu.TabIndex = 2;
-            this.dgvDichVu.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvDichVu_CellClick);
-            // 
-            // pnlRight
-            // 
-            this.pnlRight.BackColor = System.Drawing.Color.White;
-            this.pnlRight.Controls.Add(this.lblRightTitle);
-            this.pnlRight.Controls.Add(this.lblTen);
-            this.pnlRight.Controls.Add(this.txtTen);
-            this.pnlRight.Controls.Add(this.lblLoaiDV);
-            this.pnlRight.Controls.Add(this.cboLoaiDVForm);
-            this.pnlRight.Controls.Add(this.lblGia);
-            this.pnlRight.Controls.Add(this.numGia);
-            this.pnlRight.Controls.Add(this.lblDVT);
-            this.pnlRight.Controls.Add(this.cboDVT);
-            this.pnlRight.Controls.Add(this.btnSave);
-            this.pnlRight.Controls.Add(this.btnXoa);
-            this.pnlRight.Controls.Add(this.btnLamMoi);
-            this.pnlRight.Location = new System.Drawing.Point(765, 75);
-            this.pnlRight.Name = "pnlRight";
-            this.pnlRight.Size = new System.Drawing.Size(370, 580);
-            this.pnlRight.TabIndex = 2;
+            this.cardRight.BackColor = System.Drawing.Color.White;
+            this.cardRight.Controls.Add(this.lblRightTitle);
+            this.cardRight.Controls.Add(this.lblTen);
+            this.cardRight.Controls.Add(this.txtTen);
+            this.cardRight.Controls.Add(this.lblLoaiDV);
+            this.cardRight.Controls.Add(this.cboLoaiDVForm);
+            this.cardRight.Controls.Add(this.lblGia);
+            this.cardRight.Controls.Add(this.numGia);
+            this.cardRight.Controls.Add(this.lblDVT);
+            this.cardRight.Controls.Add(this.cboDVT);
+            this.cardRight.Controls.Add(this.btnSave);
+            this.cardRight.Controls.Add(this.btnXoa);
+            this.cardRight.Controls.Add(this.btnLamMoi);
+            this.cardRight.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cardRight.Location = new System.Drawing.Point(754, 0);
+            this.cardRight.Margin = new System.Windows.Forms.Padding(0);
+            this.cardRight.Name = "cardRight";
+            this.cardRight.Padding = new System.Windows.Forms.Padding(20);
+            this.cardRight.Size = new System.Drawing.Size(406, 680);
+            this.cardRight.TabIndex = 1;
+            this.cardRight.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawCardBorder);
             // 
             // lblRightTitle
             // 
             this.lblRightTitle.AutoSize = true;
             this.lblRightTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
             this.lblRightTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(41)))), ((int)(((byte)(59)))));
-            this.lblRightTitle.Location = new System.Drawing.Point(20, 15);
+            this.lblRightTitle.Location = new System.Drawing.Point(20, 16);
             this.lblRightTitle.Name = "lblRightTitle";
             this.lblRightTitle.Size = new System.Drawing.Size(182, 28);
             this.lblRightTitle.TabIndex = 0;
@@ -156,10 +105,12 @@
             // 
             // txtTen
             // 
-            this.txtTen.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.txtTen.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtTen.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtTen.Location = new System.Drawing.Point(20, 85);
             this.txtTen.Name = "txtTen";
-            this.txtTen.Size = new System.Drawing.Size(325, 29);
+            this.txtTen.Size = new System.Drawing.Size(365, 30);
             this.txtTen.TabIndex = 2;
             // 
             // lblLoaiDV
@@ -175,8 +126,10 @@
             // 
             // cboLoaiDVForm
             // 
+            this.cboLoaiDVForm.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.cboLoaiDVForm.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboLoaiDVForm.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.cboLoaiDVForm.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.cboLoaiDVForm.FormattingEnabled = true;
             this.cboLoaiDVForm.Items.AddRange(new object[] {
             "Ăn uống",
@@ -185,7 +138,7 @@
             "Khác"});
             this.cboLoaiDVForm.Location = new System.Drawing.Point(20, 155);
             this.cboLoaiDVForm.Name = "cboLoaiDVForm";
-            this.cboLoaiDVForm.Size = new System.Drawing.Size(325, 29);
+            this.cboLoaiDVForm.Size = new System.Drawing.Size(365, 31);
             this.cboLoaiDVForm.TabIndex = 4;
             // 
             // lblGia
@@ -201,7 +154,9 @@
             // 
             // numGia
             // 
-            this.numGia.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.numGia.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.numGia.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.numGia.Increment = new decimal(new int[] {
             10000,
             0,
@@ -214,7 +169,7 @@
             0,
             0});
             this.numGia.Name = "numGia";
-            this.numGia.Size = new System.Drawing.Size(325, 29);
+            this.numGia.Size = new System.Drawing.Size(365, 30);
             this.numGia.TabIndex = 6;
             // 
             // lblDVT
@@ -230,7 +185,9 @@
             // 
             // cboDVT
             // 
-            this.cboDVT.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.cboDVT.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cboDVT.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.cboDVT.FormattingEnabled = true;
             this.cboDVT.Items.AddRange(new object[] {
             "Lần",
@@ -240,19 +197,21 @@
             "Chuyến"});
             this.cboDVT.Location = new System.Drawing.Point(20, 295);
             this.cboDVT.Name = "cboDVT";
-            this.cboDVT.Size = new System.Drawing.Size(325, 29);
+            this.cboDVT.Size = new System.Drawing.Size(365, 31);
             this.cboDVT.TabIndex = 8;
             // 
             // btnSave
             // 
+            this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSave.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(232)))), ((int)(((byte)(119)))), ((int)(((byte)(26)))));
             this.btnSave.FlatAppearance.BorderSize = 0;
             this.btnSave.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSave.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+            this.btnSave.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnSave.ForeColor = System.Drawing.Color.White;
             this.btnSave.Location = new System.Drawing.Point(20, 360);
             this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(325, 40);
+            this.btnSave.Size = new System.Drawing.Size(365, 42);
             this.btnSave.TabIndex = 9;
             this.btnSave.Text = "LƯU DỊCH VỤ";
             this.btnSave.UseVisualStyleBackColor = false;
@@ -263,10 +222,11 @@
             this.btnXoa.BackColor = System.Drawing.Color.White;
             this.btnXoa.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(226)))), ((int)(((byte)(232)))), ((int)(((byte)(240)))));
             this.btnXoa.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnXoa.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.btnXoa.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.btnXoa.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(239)))), ((int)(((byte)(68)))), ((int)(((byte)(68)))));
             this.btnXoa.Location = new System.Drawing.Point(20, 415);
             this.btnXoa.Name = "btnXoa";
-            this.btnXoa.Size = new System.Drawing.Size(155, 36);
+            this.btnXoa.Size = new System.Drawing.Size(175, 40);
             this.btnXoa.TabIndex = 10;
             this.btnXoa.Text = "Xóa dịch vụ";
             this.btnXoa.UseVisualStyleBackColor = false;
@@ -274,53 +234,111 @@
             // 
             // btnLamMoi
             // 
+            this.btnLamMoi.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnLamMoi.BackColor = System.Drawing.Color.White;
             this.btnLamMoi.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(226)))), ((int)(((byte)(232)))), ((int)(((byte)(240)))));
             this.btnLamMoi.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnLamMoi.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.btnLamMoi.Location = new System.Drawing.Point(190, 415);
+            this.btnLamMoi.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.btnLamMoi.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(116)))), ((int)(((byte)(139)))));
+            this.btnLamMoi.Location = new System.Drawing.Point(210, 415);
             this.btnLamMoi.Name = "btnLamMoi";
-            this.btnLamMoi.Size = new System.Drawing.Size(155, 36);
+            this.btnLamMoi.Size = new System.Drawing.Size(175, 40);
             this.btnLamMoi.TabIndex = 11;
             this.btnLamMoi.Text = "Làm mới";
             this.btnLamMoi.UseVisualStyleBackColor = false;
             this.btnLamMoi.Click += new System.EventHandler(this.btnLamMoi_Click);
+            // 
+            // cardLeft
+            // 
+            this.cardLeft.BackColor = System.Drawing.Color.White;
+            this.cardLeft.Controls.Add(this.txtTimKiem);
+            this.cardLeft.Controls.Add(this.cboLoai);
+            this.cardLeft.Controls.Add(this.dgvDichVu);
+            this.cardLeft.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cardLeft.Location = new System.Drawing.Point(0, 0);
+            this.cardLeft.Margin = new System.Windows.Forms.Padding(0, 0, 15, 0);
+            this.cardLeft.Name = "cardLeft";
+            this.cardLeft.Padding = new System.Windows.Forms.Padding(16);
+            this.cardLeft.Size = new System.Drawing.Size(739, 680);
+            this.cardLeft.TabIndex = 0;
+            this.cardLeft.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawCardBorder);
+            // 
+            // txtTimKiem
+            // 
+            this.txtTimKiem.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtTimKiem.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.txtTimKiem.Location = new System.Drawing.Point(16, 16);
+            this.txtTimKiem.Name = "txtTimKiem";
+            this.txtTimKiem.PlaceholderText = "🔍 Tìm theo tên dịch vụ, mã...";
+            this.txtTimKiem.Size = new System.Drawing.Size(514, 30);
+            this.txtTimKiem.TabIndex = 0;
+            this.txtTimKiem.TextChanged += new System.EventHandler(this.txtTimKiem_TextChanged);
+            // 
+            // cboLoai
+            // 
+            this.cboLoai.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.cboLoai.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboLoai.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.cboLoai.FormattingEnabled = true;
+            this.cboLoai.Items.AddRange(new object[] {
+            "Tất cả",
+            "Ăn uống",
+            "Giặt ủi",
+            "Đưa đón",
+            "Khác"});
+            this.cboLoai.Location = new System.Drawing.Point(544, 16);
+            this.cboLoai.Name = "cboLoai";
+            this.cboLoai.Size = new System.Drawing.Size(176, 31);
+            this.cboLoai.TabIndex = 1;
+            this.cboLoai.SelectedIndexChanged += new System.EventHandler(this.cboLoai_SelectedIndexChanged);
+            // 
+            // dgvDichVu
+            // 
+            this.dgvDichVu.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dgvDichVu.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvDichVu.Location = new System.Drawing.Point(16, 62);
+            this.dgvDichVu.Name = "dgvDichVu";
+            this.dgvDichVu.RowHeadersWidth = 51;
+            this.dgvDichVu.Size = new System.Drawing.Size(704, 598);
+            this.dgvDichVu.TabIndex = 2;
+            this.dgvDichVu.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvDichVu_CellClick);
             // 
             // frmDichVu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(244)))), ((int)(((byte)(246)))), ((int)(((byte)(249)))));
-            this.ClientSize = new System.Drawing.Size(1164, 675);
-            this.Controls.Add(this.pnlRight);
-            this.Controls.Add(this.pnlLeft);
-            this.Controls.Add(this.pnlHeader);
+            this.ClientSize = new System.Drawing.Size(1160, 720);
+            this.Controls.Add(this.tblMainLayout);
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "frmDichVu";
+            this.Padding = new System.Windows.Forms.Padding(20);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Quản Lý Dịch Vụ";
             this.Load += new System.EventHandler(this.frmDichVu_Load);
-            this.pnlHeader.ResumeLayout(false);
-            this.pnlHeader.PerformLayout();
-            this.pnlLeft.ResumeLayout(false);
-            this.pnlLeft.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvDichVu)).EndInit();
-            this.pnlRight.ResumeLayout(false);
-            this.pnlRight.PerformLayout();
+            this.tblMainLayout.ResumeLayout(false);
+            this.cardRight.ResumeLayout(false);
+            this.cardRight.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numGia)).EndInit();
+            this.cardLeft.ResumeLayout(false);
+            this.cardLeft.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvDichVu)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Panel pnlHeader;
-        private System.Windows.Forms.Label lblHeader;
-        private System.Windows.Forms.Panel pnlLeft;
+        private System.Windows.Forms.TableLayoutPanel tblMainLayout;
+        private System.Windows.Forms.Panel cardLeft;
         private System.Windows.Forms.TextBox txtTimKiem;
         private System.Windows.Forms.ComboBox cboLoai;
         private System.Windows.Forms.DataGridView dgvDichVu;
-        private System.Windows.Forms.Panel pnlRight;
+        private System.Windows.Forms.Panel cardRight;
         private System.Windows.Forms.Label lblRightTitle;
         private System.Windows.Forms.Label lblTen;
         private System.Windows.Forms.TextBox txtTen;

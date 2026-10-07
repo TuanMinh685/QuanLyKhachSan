@@ -7,8 +7,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
     public static class DatabaseHelper
     {
         // Đã cấu hình theo đúng tên máy LAPTOP-8IL5TIHE và database QuanLyKhachSan của bạn
-        private static string connectionString = @"Server=LAPTOP-8IL5TIHE;Database=QuanLyKhachSan;Trusted_Connection=True;TrustServerCertificate=True;";
-
+        private static string connectionString = @"Server=.\SQLEXPRESS;Database=QuanLyKhachSan;Trusted_Connection=True;TrustServerCertificate=True;";
         // Thêm lại hàm GetConnection bị thiếu tên ở code cũ
         public static SqlConnection GetConnection()
         {
