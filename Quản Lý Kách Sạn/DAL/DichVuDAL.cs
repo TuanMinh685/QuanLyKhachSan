@@ -7,83 +7,118 @@ namespace Quản_Lý_Khách_Sạn.DAL
 {
     public class DichVuDAL
     {
-        public List<DichVu> GetAll(string keyword = "", string loai = "")
+        public List<DichVu> GetAll()
         {
             var list = new List<DichVu>();
-            string sql = "SELECT * FROM DichVu WHERE 1=1 ";
-            if (!string.IsNullOrWhiteSpace(keyword))
-                sql += " AND (MaDichVu LIKE @kw OR TenDichVu LIKE @kw)";
-            if (!string.IsNullOrWhiteSpace(loai) && loai != "Tất cả")
-                sql += " AND LoaiDichVu = @loai";
-
+            string sql = "SELECT * FROM DichVu ORDER BY MaDichVu ASC";
             try
             {
                 using (SqlConnection conn = DatabaseHelper.GetConnection())
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
-                    if (!string.IsNullOrWhiteSpace(keyword))
-                        cmd.Parameters.AddWithValue("@kw", "%" + keyword + "%");
-                    if (!string.IsNullOrWhiteSpace(loai) && loai != "Tất cả")
-                        cmd.Parameters.AddWithValue("@loai", loai);
-
                     conn.Open();
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            list.Add(new DichVu
+                            var dv = new DichVu();
+                            for (int i = 0; i < reader.FieldCount; i++)
                             {
-                                MaDichVu = reader["MaDichVu"].ToString() ?? "",
-                                TenDichVu = reader["TenDichVu"].ToString() ?? "",
-                                LoaiDichVu = reader["LoaiDichVu"].ToString() ?? "",
-                                DonGia = Convert.ToDecimal(reader["DonGia"]),
-                                DonViTinh = reader["DonViTinh"].ToString() ?? "",
-                                TrangThai = Convert.ToBoolean(reader["TrangThai"])
-                            });
+                                string col = reader.GetName(i).ToLower();
+                                object val = reader.GetValue(i);
+                                if (val == DBNull.Value) continue;
+
+                                if (col == "madichvu") dv.MaDichVu = val.ToString() ?? "";
+                                else if (col == "tendichvu") dv.TenDichVu = val.ToString() ?? "";
+                                else if (col == "loaidichvu") dv.LoaiDichVu = val.ToString() ?? "Ăn uống";
+                                else if (col == "dongia") dv.DonGia = Convert.ToDecimal(val);
+                                else if (col == "donvitinh") dv.DonViTinh = val.ToString() ?? "Lần";
+                                else if (col == "trangthai") dv.TrangThai = Convert.ToBoolean(val);
+                            }
+                            list.Add(dv);
                         }
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Lỗi lấy danh sách Dịch Vụ: " + ex.Message);
+            }
             return list;
         }
 
         public bool Insert(DichVu dv)
         {
-            string sql = @"INSERT INTO DichVu (MaDichVu, TenDichVu, LoaiDichVu, DonGia, DonViTinh, TrangThai) 
-                           VALUES (@Ma, @Ten, @Loai, @Gia, @DVT, @TrangThai)";
+            string sql = @"INSERT INTO DichVu (MaDichVu, TenDichVu, LoaiDichVu, DonGia, DonViTinh, TrangThai)
+                           VALUES (@MaDV, @TenDV, @LoaiDV, @DonGia, @DVT, @TrangThai)";
             try
             {
                 using (SqlConnection conn = DatabaseHelper.GetConnection())
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@Ma", dv.MaDichVu);
-                    cmd.Parameters.AddWithValue("@Ten", dv.TenDichVu);
-                    cmd.Parameters.AddWithValue("@Loai", dv.LoaiDichVu);
-                    cmd.Parameters.AddWithValue("@Gia", dv.DonGia);
-                    cmd.Parameters.AddWithValue("@DVT", dv.DonViTinh);
+                    cmd.Parameters.AddWithValue("@MaDV", dv.MaDichVu);
+                    cmd.Parameters.AddWithValue("@TenDV", dv.TenDichVu);
+                    cmd.Parameters.AddWithValue("@LoaiDV", dv.LoaiDichVu ?? "Ăn uống");
+                    cmd.Parameters.AddWithValue("@DonGia", dv.DonGia);
+                    cmd.Parameters.AddWithValue("@DVT", dv.DonViTinh ?? "Lần");
                     cmd.Parameters.AddWithValue("@TrangThai", dv.TrangThai);
                     conn.Open();
                     return cmd.ExecuteNonQuery() > 0;
                 }
             }
-            catch { return false; }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Lỗi thêm dịch vụ: " + ex.Message, "SQL Error");
+                return false;
+            }
         }
 
-        public bool Delete(string maDV)
+        // Bổ sung hàm Update
+        public bool Update(DichVu dv)
         {
-            string sql = "DELETE FROM DichVu WHERE MaDichVu = @Ma";
+            string sql = @"UPDATE DichVu 
+                           SET TenDichVu = @TenDV, LoaiDichVu = @LoaiDV, DonGia = @DonGia, DonViTinh = @DVT, TrangThai = @TrangThai
+                           WHERE MaDichVu = @MaDV";
             try
             {
                 using (SqlConnection conn = DatabaseHelper.GetConnection())
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@Ma", maDV);
+                    cmd.Parameters.AddWithValue("@MaDV", dv.MaDichVu);
+                    cmd.Parameters.AddWithValue("@TenDV", dv.TenDichVu);
+                    cmd.Parameters.AddWithValue("@LoaiDV", dv.LoaiDichVu ?? "Ăn uống");
+                    cmd.Parameters.AddWithValue("@DonGia", dv.DonGia);
+                    cmd.Parameters.AddWithValue("@DVT", dv.DonViTinh ?? "Lần");
+                    cmd.Parameters.AddWithValue("@TrangThai", dv.TrangThai);
                     conn.Open();
                     return cmd.ExecuteNonQuery() > 0;
                 }
             }
-            catch { return false; }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Lỗi cập nhật dịch vụ: " + ex.Message, "SQL Error");
+                return false;
+            }
+        }
+
+        public bool Delete(string maDV)
+        {
+            string sql = "DELETE FROM DichVu WHERE MaDichVu = @MaDV";
+            try
+            {
+                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@MaDV", maDV);
+                    conn.Open();
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Lỗi xóa dịch vụ: " + ex.Message, "SQL Error");
+                return false;
+            }
         }
     }
 }
