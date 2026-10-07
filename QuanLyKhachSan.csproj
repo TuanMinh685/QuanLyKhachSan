@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>QuanLyKhachSan_Phan1</RootNamespace>
+    <AssemblyName>QuanLyKhachSan_Phan1</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Sau khi mo bang Visual Studio, neu package chua duoc tu dong khoi phuc,
+         vao Tools > NuGet Package Manager > Manage NuGet Packages for Solution,
+         tim "Microsoft.Data.SqlClient" va cai dat. -->
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.1" />
+  </ItemGroup>
+
+</Project>
