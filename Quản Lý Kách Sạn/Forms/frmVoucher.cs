@@ -21,7 +21,18 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void frmVoucher_Load(object sender, EventArgs e)
         {
+            UITheme.StyleModernGrid(dgvVoucher);
             TaiDanhSach();
+        }
+
+        // Hàm vẽ viền Card phẳng màu xám nhạt (Sửa lỗi thiếu định nghĩa)
+        private void DrawCardBorder(object sender, PaintEventArgs e)
+        {
+            if (sender is Panel pnl)
+            {
+                ControlPaint.DrawBorder(e.Graphics, pnl.ClientRectangle,
+                    ColorTranslator.FromHtml("#E2E8F0"), ButtonBorderStyle.Solid);
+            }
         }
 
         private void TaiDanhSach()
@@ -42,7 +53,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
             dgvVoucher.DataSource = null;
             dgvVoucher.DataSource = danhSach;
 
-            // Tùy biến tiêu đề và ẩn các cột không cần hiển thị
             if (dgvVoucher.Columns["MaVoucher"] != null) dgvVoucher.Columns["MaVoucher"].HeaderText = "ID";
             if (dgvVoucher.Columns["Code"] != null) dgvVoucher.Columns["Code"].HeaderText = "Mã Code";
             if (dgvVoucher.Columns["LoaiGiam"] != null) dgvVoucher.Columns["LoaiGiam"].HeaderText = "Loại giảm";
@@ -98,7 +108,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             rdoSoTien.Checked = v.LoaiGiam == "SoTien";
             txtGiaTri.Text = v.GiaTri.ToString("N0");
             txtDonToiThieu.Text = v.DonToiThieu.ToString("N0");
-            txtSoLuong.Text = v.SoLuong?.ToString() ?? "";
+            txtSoLuong.Text = v.SoLuong.ToString();
             dtpNgayBatDau.Value = v.NgayBatDau;
             dtpNgayHetHan.Value = v.NgayHetHan;
             chkTrangThai.Checked = v.TrangThai;
@@ -160,7 +170,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     LoaiGiam = rdoPhanTram.Checked ? "PhanTram" : "SoTien",
                     GiaTri = giaTri,
                     DonToiThieu = donToiThieu,
-                    SoLuong = soLuong,
+                    SoLuong = soLuong ?? 100,
                     NgayBatDau = dtpNgayBatDau.Value.Date,
                     NgayHetHan = dtpNgayHetHan.Value.Date,
                     TrangThai = chkTrangThai.Checked
@@ -172,7 +182,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi khi thêm (mã Code có thể đã tồn tại): " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi khi thêm: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -194,7 +204,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     LoaiGiam = rdoPhanTram.Checked ? "PhanTram" : "SoTien",
                     GiaTri = giaTri,
                     DonToiThieu = donToiThieu,
-                    SoLuong = soLuong,
+                    SoLuong = soLuong ?? 100,
                     NgayBatDau = dtpNgayBatDau.Value.Date,
                     NgayHetHan = dtpNgayHetHan.Value.Date,
                     TrangThai = chkTrangThai.Checked
@@ -229,7 +239,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi khi xóa (voucher có thể đã liên kết với hóa đơn): " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi khi xóa: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

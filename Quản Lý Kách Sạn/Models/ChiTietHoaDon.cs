@@ -1,4 +1,4 @@
-﻿namespace QuanLyKhachSan.Models
+﻿namespace Quản_Lý_Khách_Sạn.Models
 {
     public class ChiTietHoaDon
     {

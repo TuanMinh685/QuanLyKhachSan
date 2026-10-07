@@ -35,6 +35,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
             return GetByCode(id.ToString());
         }
 
+        // Hỗ trợ truyền int? mà không bị lỗi ép kiểu
         public Voucher GetById(int? id)
         {
             if (!id.HasValue) return null;
@@ -45,7 +46,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
         {
             if (string.IsNullOrWhiteSpace(code)) return null;
 
-            string sql = "SELECT TOP 1 * FROM Voucher WHERE MaVoucher = @code OR Code = @code";
+            string sql = "SELECT TOP 1 * FROM Voucher WHERE Code = @code OR MaVoucher = @code";
             try
             {
                 using (SqlConnection conn = DatabaseHelper.GetConnection())
@@ -83,29 +84,24 @@ namespace Quản_Lý_Khách_Sạn.DAL
 
         public bool Delete(int id)
         {
-            return Delete(id.ToString());
+            string sql = "DELETE FROM Voucher WHERE MaVoucher = @Id";
+            try
+            {
+                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Id", id);
+                    conn.Open();
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+            catch { return false; }
         }
 
         public bool Delete(int? id)
         {
             if (!id.HasValue) return false;
             return Delete(id.Value);
-        }
-
-        public bool Delete(string code)
-        {
-            string sql = "DELETE FROM Voucher WHERE MaVoucher = @code OR Code = @code";
-            try
-            {
-                using (SqlConnection conn = DatabaseHelper.GetConnection())
-                using (SqlCommand cmd = new SqlCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@code", code);
-                    conn.Open();
-                    return cmd.ExecuteNonQuery() > 0;
-                }
-            }
-            catch { return false; }
         }
 
         private bool ExecuteCmd(string sql, Voucher v)
@@ -115,7 +111,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
                 using (SqlConnection conn = DatabaseHelper.GetConnection())
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@MaVoucher", v.MaVoucher.HasValue ? (object)v.MaVoucher.Value : DBNull.Value);
+                    cmd.Parameters.AddWithValue("@MaVoucher", v.MaVoucher);
                     cmd.Parameters.AddWithValue("@GiaTri", v.GiaTri);
                     cmd.Parameters.AddWithValue("@LoaiGiam", v.LoaiGiam ?? "PhanTram");
                     cmd.Parameters.AddWithValue("@DonToiThieu", v.DonToiThieu);
@@ -140,12 +136,11 @@ namespace Quản_Lý_Khách_Sạn.DAL
 
                 if (col == "mavoucher" || col == "id")
                 {
-                    if (int.TryParse(val.ToString(), out int idVal))
-                        v.MaVoucher = idVal;
+                    if (int.TryParse(val.ToString(), out int idVal)) v.MaVoucher = idVal;
                 }
-                else if (col == "code") v.Code = val.ToString();
+                else if (col == "code") v.Code = val.ToString() ?? "";
                 else if (col == "giatri" || col == "giatrigiam") v.GiaTri = Convert.ToDecimal(val);
-                else if (col == "loaigiam" || col == "loaigiamgia") v.LoaiGiam = val.ToString();
+                else if (col == "loaigiam" || col == "loaigiamgia") v.LoaiGiam = val.ToString() ?? "PhanTram";
                 else if (col == "dontoithieu" || col == "dongiatoithieu") v.DonToiThieu = Convert.ToDecimal(val);
                 else if (col == "ngayhethan" || col == "ngayketthuc") v.NgayHetHan = Convert.ToDateTime(val);
                 else if (col == "soluong") v.SoLuong = Convert.ToInt32(val);

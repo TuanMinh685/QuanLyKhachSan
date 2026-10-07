@@ -1,9 +1,8 @@
-﻿using Quản_Lý_Khách_Sạn.DAL;
-using QuanLyKhachSan.DAL;
-using QuanLyKhachSan.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Quản_Lý_Khách_Sạn.DAL;
+using Quản_Lý_Khách_Sạn.Models;
 
-namespace QuanLyKhachSan.BLL
+namespace Quản_Lý_Khách_Sạn.BLL
 {
     public class VoucherBLL
     {
@@ -17,6 +16,12 @@ namespace QuanLyKhachSan.BLL
         public Voucher TimVoucherTheoMa(int id)
         {
             return dal.GetById(id);
+        }
+
+        public Voucher TimVoucherTheoMa(int? id)
+        {
+            if (!id.HasValue) return null;
+            return dal.GetById(id.Value);
         }
 
         public Voucher TimVoucherTheoCode(string code)
@@ -37,6 +42,12 @@ namespace QuanLyKhachSan.BLL
         public bool XoaVoucher(int id)
         {
             return dal.Delete(id);
+        }
+
+        public bool XoaVoucher(int? id)
+        {
+            if (!id.HasValue) return false;
+            return dal.Delete(id.Value);
         }
     }
 }

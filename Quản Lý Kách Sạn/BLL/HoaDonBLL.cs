@@ -1,7 +1,6 @@
-﻿using Quản_Lý_Khách_Sạn.Models;
-using QuanLyKhachSan.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Quản_Lý_Khách_Sạn.Models;
 
 namespace Quản_Lý_Khách_Sạn.BLL
 {

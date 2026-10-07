@@ -1,11 +1,9 @@
-﻿using Microsoft.Data.SqlClient;
-using Quản_Lý_Khách_Sạn.DAL;
-using QuanLyKhachSan.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Data;
+using Microsoft.Data.SqlClient;
+using Quản_Lý_Khách_Sạn.Models;
 
-namespace QuanLyKhachSan.DAL
+namespace Quản_Lý_Khách_Sạn.DAL
 {
     public class DichVuDAL
     {
@@ -18,68 +16,74 @@ namespace QuanLyKhachSan.DAL
             if (!string.IsNullOrWhiteSpace(loai) && loai != "Tất cả")
                 sql += " AND LoaiDichVu = @loai";
 
-            using (SqlConnection conn = DatabaseHelper.GetConnection())
-            using (SqlCommand cmd = new SqlCommand(sql, conn))
+            try
             {
-                if (!string.IsNullOrWhiteSpace(keyword))
-                    cmd.Parameters.AddWithValue("@kw", "%" + keyword + "%");
-                if (!string.IsNullOrWhiteSpace(loai) && loai != "Tất cả")
-                    cmd.Parameters.AddWithValue("@loai", loai);
-
-                conn.Open();
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
-                    while (reader.Read())
+                    if (!string.IsNullOrWhiteSpace(keyword))
+                        cmd.Parameters.AddWithValue("@kw", "%" + keyword + "%");
+                    if (!string.IsNullOrWhiteSpace(loai) && loai != "Tất cả")
+                        cmd.Parameters.AddWithValue("@loai", loai);
+
+                    conn.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        list.Add(new DichVu
+                        while (reader.Read())
                         {
-                            MaDichVu = reader["MaDichVu"].ToString()!,
-                            TenDichVu = reader["TenDichVu"].ToString()!,
-                            LoaiDichVu = reader["LoaiDichVu"].ToString()!,
-                            DonGia = Convert.ToDecimal(reader["DonGia"]),
-                            DonViTinh = reader["DonViTinh"].ToString()!,
-                            TrangThai = Convert.ToBoolean(reader["TrangThai"])
-                        });
+                            list.Add(new DichVu
+                            {
+                                MaDichVu = reader["MaDichVu"].ToString() ?? "",
+                                TenDichVu = reader["TenDichVu"].ToString() ?? "",
+                                LoaiDichVu = reader["LoaiDichVu"].ToString() ?? "",
+                                DonGia = Convert.ToDecimal(reader["DonGia"]),
+                                DonViTinh = reader["DonViTinh"].ToString() ?? "",
+                                TrangThai = Convert.ToBoolean(reader["TrangThai"])
+                            });
+                        }
                     }
                 }
             }
+            catch { }
             return list;
         }
 
         public bool Insert(DichVu dv)
         {
-            string sql = "INSERT INTO DichVu (MaDichVu, TenDichVu, LoaiDichVu, DonGia, DonViTinh, TrangThai) " +
-                         "VALUES (@Ma, @Ten, @Loai, @Gia, @DVT, @TrangThai)";
-            using (SqlConnection conn = DatabaseHelper.GetConnection())
-            using (SqlCommand cmd = new SqlCommand(sql, conn))
+            string sql = @"INSERT INTO DichVu (MaDichVu, TenDichVu, LoaiDichVu, DonGia, DonViTinh, TrangThai) 
+                           VALUES (@Ma, @Ten, @Loai, @Gia, @DVT, @TrangThai)";
+            try
             {
-                cmd.Parameters.AddWithValue("@Ma", dv.MaDichVu);
-                cmd.Parameters.AddWithValue("@Ten", dv.TenDichVu);
-                cmd.Parameters.AddWithValue("@Loai", dv.LoaiDichVu);
-                cmd.Parameters.AddWithValue("@Gia", dv.DonGia);
-                cmd.Parameters.AddWithValue("@DVT", dv.DonViTinh);
-                cmd.Parameters.AddWithValue("@TrangThai", dv.TrangThai);
-                conn.Open();
-                return cmd.ExecuteNonQuery() > 0;
+                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Ma", dv.MaDichVu);
+                    cmd.Parameters.AddWithValue("@Ten", dv.TenDichVu);
+                    cmd.Parameters.AddWithValue("@Loai", dv.LoaiDichVu);
+                    cmd.Parameters.AddWithValue("@Gia", dv.DonGia);
+                    cmd.Parameters.AddWithValue("@DVT", dv.DonViTinh);
+                    cmd.Parameters.AddWithValue("@TrangThai", dv.TrangThai);
+                    conn.Open();
+                    return cmd.ExecuteNonQuery() > 0;
+                }
             }
+            catch { return false; }
         }
 
-        public bool Update(DichVu dv)
+        public bool Delete(string maDV)
         {
-            string sql = "UPDATE DichVu SET TenDichVu=@Ten, LoaiDichVu=@Loai, DonGia=@Gia, " +
-                         "DonViTinh=@DVT, TrangThai=@TrangThai WHERE MaDichVu=@Ma";
-            using (SqlConnection conn = DatabaseHelper.GetConnection())
-            using (SqlCommand cmd = new SqlCommand(sql, conn))
+            string sql = "DELETE FROM DichVu WHERE MaDichVu = @Ma";
+            try
             {
-                cmd.Parameters.AddWithValue("@Ma", dv.MaDichVu);
-                cmd.Parameters.AddWithValue("@Ten", dv.TenDichVu);
-                cmd.Parameters.AddWithValue("@Loai", dv.LoaiDichVu);
-                cmd.Parameters.AddWithValue("@Gia", dv.DonGia);
-                cmd.Parameters.AddWithValue("@DVT", dv.DonViTinh);
-                cmd.Parameters.AddWithValue("@TrangThai", dv.TrangThai);
-                conn.Open();
-                return cmd.ExecuteNonQuery() > 0;
+                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Ma", maDV);
+                    conn.Open();
+                    return cmd.ExecuteNonQuery() > 0;
+                }
             }
+            catch { return false; }
         }
     }
 }
