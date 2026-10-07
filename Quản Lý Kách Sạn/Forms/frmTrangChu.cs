@@ -16,11 +16,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void frmTrangChu_Load(object sender, EventArgs e)
         {
-            // Mặc định nạp màn hình Quản lý Dịch vụ khi khởi động
             MoFormCon(new frmDichVu(), btnDichVu, "QUẢN LÝ DỊCH VỤ PHÒNG");
         }
 
-        // Nhúng Form con trực tiếp vào panel giữa (pnlContent)
         private void MoFormCon(Form formCon, Button nutMenu, string tieuDe)
         {
             if (formHienTai != null)
@@ -29,7 +27,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 formHienTai.Dispose();
             }
 
-            // Đổi trạng thái highlight của nút menu
             DoiTrangThaiNutMenu(nutMenu);
 
             formHienTai = formCon;
@@ -49,14 +46,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             if (btn == null) return;
 
-            // Trả màu các nút cũ về nền tối của sidebar
             if (nutDangChon != null)
             {
                 nutDangChon.BackColor = Color.FromArgb(15, 37, 55);
                 nutDangChon.ForeColor = Color.FromArgb(226, 232, 240);
             }
 
-            // Đổi nút đang chọn sang màu cam chủ đạo
             nutDangChon = btn;
             nutDangChon.BackColor = Color.FromArgb(232, 119, 26);
             nutDangChon.ForeColor = Color.White;
@@ -64,7 +59,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void pnlHeader_Paint(object sender, PaintEventArgs e)
         {
-            // Kẻ viền xám mỏng dưới header
             ControlPaint.DrawBorder(e.Graphics, pnlHeader.ClientRectangle,
                 Color.Transparent, 0, ButtonBorderStyle.None,
                 Color.Transparent, 0, ButtonBorderStyle.None,
@@ -72,24 +66,22 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 Color.FromArgb(226, 232, 240), 1, ButtonBorderStyle.Solid);
         }
 
-        // ================= CÁC SỰ KIỆN CLICK MENU =================
-
         private void btnPhong_Click(object sender, EventArgs e)
         {
             try { MoFormCon(new frmDanhSachPhong(), btnPhong, "DANH SÁCH & TRẠNG THÁI PHÒNG"); }
-            catch { MessageBox.Show("Form Danh sách phòng đang được đồng bộ.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information); }
+            catch { MessageBox.Show("Form Danh sách phòng đang được đồng bộ.", "Thông báo"); }
         }
 
         private void btnDatPhong_Click(object sender, EventArgs e)
         {
             try { MoFormCon(new frmDatPhong(), btnDatPhong, "ĐẶT PHÒNG & CHECK-IN / CHECK-OUT"); }
-            catch { MessageBox.Show("Form Đặt phòng đang được đồng bộ.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information); }
+            catch { MessageBox.Show("Form Đặt phòng đang được đồng bộ.", "Thông báo"); }
         }
 
         private void btnKhachHang_Click(object sender, EventArgs e)
         {
             try { MoFormCon(new frmKhachHang(), btnKhachHang, "HỒ SƠ KHÁCH HÀNG"); }
-            catch { MessageBox.Show("Form Khách hàng đang được đồng bộ.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information); }
+            catch { MessageBox.Show("Form Khách hàng đang được đồng bộ.", "Thông báo"); }
         }
 
         private void btnDichVu_Click(object sender, EventArgs e)
@@ -109,6 +101,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void btnBaoCao_Click(object sender, EventArgs e)
         {
+            // Mở trực tiếp frmBaoCao sẵn có
             MoFormCon(new frmBaoCao(), btnBaoCao, "BÁO CÁO DOANH THU & THỐNG KÊ");
         }
 

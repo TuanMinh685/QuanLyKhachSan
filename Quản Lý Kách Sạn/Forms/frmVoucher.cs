@@ -22,100 +22,20 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void frmVoucher_Load(object sender, EventArgs e)
         {
-            ThietKeBangChuanFigma();
+            UITheme.StyleModernGrid(dgvVoucher);
             TaiDanhSach();
         }
 
-        #region Figma Modern Styling (Paint Handlers)
+        private void DrawFigmaCard(object sender, PaintEventArgs e) => UITheme.DrawCard(sender, e);
+        private void DrawFigmaInputBox(object sender, PaintEventArgs e) => UITheme.DrawInputBox(sender, e);
 
-        // Bo góc & viền mềm mại cho 2 Khối Card (Card Left & Card Right)
-        private void DrawFigmaCard(object sender, PaintEventArgs e)
-        {
-            if (sender is Panel pnl)
-            {
-                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                int radius = 10;
-                Rectangle rect = new Rectangle(0, 0, pnl.Width - 1, pnl.Height - 1);
-                using (GraphicsPath path = GetRoundedRectPath(rect, radius))
-                using (Pen pen = new Pen(ColorTranslator.FromHtml("#E2E8F0"), 1.2f))
-                {
-                    e.Graphics.DrawPath(pen, path);
-                }
-            }
-        }
-
-        // Vẽ viền thanh mảnh chuẩn Figma cho từng ô nhập liệu
-        private void DrawFigmaInputBox(object sender, PaintEventArgs e)
-        {
-            if (sender is Panel pnl)
-            {
-                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                int radius = 6;
-                Rectangle rect = new Rectangle(0, 0, pnl.Width - 1, pnl.Height - 1);
-                using (GraphicsPath path = GetRoundedRectPath(rect, radius))
-                using (Pen pen = new Pen(ColorTranslator.FromHtml("#CBD5E1"), 1f))
-                {
-                    e.Graphics.DrawPath(pen, path);
-                }
-            }
-        }
-
-        // Vẽ bo góc nhẹ cho nút hành động chính (btnLuu)
         private void DrawPillBorder(object sender, PaintEventArgs e)
         {
             if (sender is Button btn)
             {
-                btn.Region = new Region(GetRoundedRectPath(new Rectangle(0, 0, btn.Width, btn.Height), 6));
+                btn.Region = new Region(UITheme.GetRoundedRectPath(new Rectangle(0, 0, btn.Width, btn.Height), 6));
             }
         }
-
-        private GraphicsPath GetRoundedRectPath(Rectangle rect, int radius)
-        {
-            GraphicsPath path = new GraphicsPath();
-            float d = radius * 2F;
-            path.AddArc(rect.X, rect.Y, d, d, 180, 90);
-            path.AddArc(rect.Right - d, rect.Y, d, d, 270, 90);
-            path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
-            path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
-            path.CloseFigure();
-            return path;
-        }
-
-        private void ThietKeBangChuanFigma()
-        {
-            dgvVoucher.EnableHeadersVisualStyles = false;
-            dgvVoucher.BorderStyle = BorderStyle.None;
-            dgvVoucher.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            dgvVoucher.GridColor = ColorTranslator.FromHtml("#F1F5F9");
-            dgvVoucher.BackgroundColor = Color.White;
-            dgvVoucher.RowHeadersVisible = false;
-            dgvVoucher.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvVoucher.MultiSelect = false;
-            dgvVoucher.AllowUserToAddRows = false;
-            dgvVoucher.AllowUserToResizeRows = false;
-            dgvVoucher.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
-            // Header xám nhạt tối giản theo Figma
-            dgvVoucher.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#F8FAFC");
-            dgvVoucher.ColumnHeadersDefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#475569");
-            dgvVoucher.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.25f, FontStyle.Bold);
-            dgvVoucher.ColumnHeadersDefaultCellStyle.Padding = new Padding(12, 10, 12, 10);
-            dgvVoucher.ColumnHeadersHeight = 44;
-            dgvVoucher.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-
-            // Rows
-            dgvVoucher.RowTemplate.Height = 42;
-            dgvVoucher.DefaultCellStyle.BackColor = Color.White;
-            dgvVoucher.DefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#1E293B");
-            dgvVoucher.DefaultCellStyle.Font = new Font("Segoe UI", 9.25f);
-            dgvVoucher.DefaultCellStyle.SelectionBackColor = ColorTranslator.FromHtml("#EFF6FF");
-            dgvVoucher.DefaultCellStyle.SelectionForeColor = ColorTranslator.FromHtml("#1D4ED8");
-            dgvVoucher.DefaultCellStyle.Padding = new Padding(8, 0, 8, 0);
-        }
-
-        #endregion
-
-        #region Data & Operations
 
         private void TaiDanhSach()
         {
@@ -135,14 +55,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
             dgvVoucher.DataSource = null;
             dgvVoucher.DataSource = danhSach;
 
-            // Ẩn tất cả các cột dư thừa
             string[] cotAn = { "Id", "TenChuongTrinh", "GiaTriGiam", "LoaiGiamGia", "DonGiaToiThieu", "GiamToiDa", "PhanTramGiam", "NgayKetThuc", "ConHieuLuc" };
             foreach (var col in cotAn)
             {
                 if (dgvVoucher.Columns[col] != null) dgvVoucher.Columns[col].Visible = false;
             }
 
-            // Định dạng cột hiển thị đẹp mắt
             if (dgvVoucher.Columns["MaVoucher"] != null)
             {
                 dgvVoucher.Columns["MaVoucher"].HeaderText = "#";
@@ -154,7 +72,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 dgvVoucher.Columns["Code"].HeaderText = "MÃ VOUCHER";
                 dgvVoucher.Columns["Code"].FillWeight = 95;
                 dgvVoucher.Columns["Code"].DefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
-                dgvVoucher.Columns["Code"].DefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#0F2537");
+                dgvVoucher.Columns["Code"].DefaultCellStyle.ForeColor = UITheme.DarkNavy;
             }
             if (dgvVoucher.Columns["LoaiGiam"] != null)
             {
@@ -167,7 +85,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 dgvVoucher.Columns["GiaTri"].HeaderText = "MỨC GIẢM";
                 dgvVoucher.Columns["GiaTri"].DefaultCellStyle.Format = "N0";
                 dgvVoucher.Columns["GiaTri"].DefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
-                dgvVoucher.Columns["GiaTri"].DefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#EA580C");
+                dgvVoucher.Columns["GiaTri"].DefaultCellStyle.ForeColor = UITheme.PrimaryOrange;
                 dgvVoucher.Columns["GiaTri"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 dgvVoucher.Columns["GiaTri"].FillWeight = 85;
             }
@@ -326,7 +244,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             if (maVoucherDangChon == null)
             {
-                MessageBox.Show("Vui lòng chọn voucher cần xóa trên bảng.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Vui lòng chọn voucher cần xóa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             if (MessageBox.Show("Bạn có chắc chắn muốn xóa mã voucher này?", "Xác nhận",
@@ -357,7 +275,5 @@ namespace Quản_Lý_Khách_Sạn.Forms
             txtTimKiem.Clear();
             dgvVoucher.ClearSelection();
         }
-
-        #endregion
     }
 }

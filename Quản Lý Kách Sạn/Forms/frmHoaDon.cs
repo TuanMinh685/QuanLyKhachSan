@@ -22,7 +22,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private List<HoaDon> danhSachHoaDon = new List<HoaDon>();
         private List<DichVu> danhSachDichVu = new List<DichVu>();
         private DataTable dtChiTietTam = new DataTable();
-
         private int? maVoucherDaApDung = null;
 
         public frmHoaDon()
@@ -32,8 +31,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void frmHoaDon_Load(object sender, EventArgs e)
         {
-            ThietKeBangChuanFigma(dgvHoaDon);
-            ThietKeBangChuanFigma(dgvChiTietDV);
+            UITheme.StyleModernGrid(dgvHoaDon);
+            UITheme.StyleModernGrid(dgvChiTietDV);
             KhoiTaoBangChiTietTam();
 
             TaiDanhSachPhuongThucTT();
@@ -44,37 +43,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
             LamMoiForm();
         }
 
-        #region Styling & Format
-
-        private void DrawFigmaCard(object sender, PaintEventArgs e)
-        {
-            if (sender is Panel pnl)
-            {
-                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                int radius = 10;
-                Rectangle rect = new Rectangle(0, 0, pnl.Width - 1, pnl.Height - 1);
-                using (GraphicsPath path = GetRoundedRectPath(rect, radius))
-                using (Pen pen = new Pen(ColorTranslator.FromHtml("#E2E8F0"), 1.2f))
-                {
-                    e.Graphics.DrawPath(pen, path);
-                }
-            }
-        }
-
-        private void DrawFigmaInputBox(object sender, PaintEventArgs e)
-        {
-            if (sender is Panel pnl)
-            {
-                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                int radius = 6;
-                Rectangle rect = new Rectangle(0, 0, pnl.Width - 1, pnl.Height - 1);
-                using (GraphicsPath path = GetRoundedRectPath(rect, radius))
-                using (Pen pen = new Pen(ColorTranslator.FromHtml("#CBD5E1"), 1f))
-                {
-                    e.Graphics.DrawPath(pen, path);
-                }
-            }
-        }
+        private void DrawFigmaCard(object sender, PaintEventArgs e) => UITheme.DrawCard(sender, e);
+        private void DrawFigmaInputBox(object sender, PaintEventArgs e) => UITheme.DrawInputBox(sender, e);
 
         private void DrawOrangeAccentBox(object sender, PaintEventArgs e)
         {
@@ -83,7 +53,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 int radius = 8;
                 Rectangle rect = new Rectangle(0, 0, pnl.Width - 1, pnl.Height - 1);
-                using (GraphicsPath path = GetRoundedRectPath(rect, radius))
+                using (GraphicsPath path = UITheme.GetRoundedRectPath(rect, radius))
                 using (Pen pen = new Pen(ColorTranslator.FromHtml("#FDBA74"), 1.2f))
                 {
                     e.Graphics.DrawPath(pen, path);
@@ -95,53 +65,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             if (sender is Button btn)
             {
-                btn.Region = new Region(GetRoundedRectPath(new Rectangle(0, 0, btn.Width, btn.Height), 6));
+                btn.Region = new Region(UITheme.GetRoundedRectPath(new Rectangle(0, 0, btn.Width, btn.Height), 6));
             }
         }
-
-        private GraphicsPath GetRoundedRectPath(Rectangle rect, int radius)
-        {
-            GraphicsPath path = new GraphicsPath();
-            float d = radius * 2F;
-            path.AddArc(rect.X, rect.Y, d, d, 180, 90);
-            path.AddArc(rect.Right - d, rect.Y, d, d, 270, 90);
-            path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
-            path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
-            path.CloseFigure();
-            return path;
-        }
-
-        private void ThietKeBangChuanFigma(DataGridView dgv)
-        {
-            dgv.EnableHeadersVisualStyles = false;
-            dgv.BorderStyle = BorderStyle.None;
-            dgv.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            dgv.GridColor = ColorTranslator.FromHtml("#F1F5F9");
-            dgv.BackgroundColor = Color.White;
-            dgv.RowHeadersVisible = false;
-            dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgv.MultiSelect = false;
-            dgv.AllowUserToAddRows = false;
-            dgv.AllowUserToResizeRows = false;
-            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
-            dgv.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#F8FAFC");
-            dgv.ColumnHeadersDefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#475569");
-            dgv.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
-            dgv.ColumnHeadersDefaultCellStyle.Padding = new Padding(8, 6, 8, 6);
-            dgv.ColumnHeadersHeight = 36;
-
-            dgv.RowTemplate.Height = 34;
-            dgv.DefaultCellStyle.BackColor = Color.White;
-            dgv.DefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#1E293B");
-            dgv.DefaultCellStyle.Font = new Font("Segoe UI", 9f);
-            dgv.DefaultCellStyle.SelectionBackColor = ColorTranslator.FromHtml("#EFF6FF");
-            dgv.DefaultCellStyle.SelectionForeColor = ColorTranslator.FromHtml("#1D4ED8");
-        }
-
-        #endregion
-
-        #region Init & Load Data
 
         private void KhoiTaoBangChiTietTam()
         {
@@ -205,7 +131,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     dgvHoaDon.Columns["TongTien"].DefaultCellStyle.Format = "N0";
                     dgvHoaDon.Columns["TongTien"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                     dgvHoaDon.Columns["TongTien"].DefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
-                    dgvHoaDon.Columns["TongTien"].DefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#EA580C");
+                    dgvHoaDon.Columns["TongTien"].DefaultCellStyle.ForeColor = UITheme.PrimaryOrange;
                 }
                 if (dgvHoaDon.Columns["NgayThanhToan"] != null)
                 {
@@ -218,10 +144,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 MessageBox.Show("Lỗi tải hóa đơn: " + ex.Message);
             }
         }
-
-        #endregion
-
-        #region Business Logic & Voucher
 
         private void cboDatPhong_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -247,7 +169,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
             decimal donGia = dv.DonGia;
             decimal thanhTien = sl * donGia;
 
-            // Tìm xem món đã có trong bảng tạm chưa
             DataRow existing = null;
             foreach (DataRow r in dtChiTietTam.Rows)
             {
@@ -269,7 +190,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 dtChiTietTam.Rows.Add(dv.MaDichVu, dv.TenDichVu, sl, donGia, thanhTien);
             }
 
-            // Tính tổng tiền dịch vụ và hiển thị
             decimal tongDV = 0;
             foreach (DataRow r in dtChiTietTam.Rows)
             {
@@ -293,37 +213,28 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             if (v == null)
             {
-                MessageBox.Show("Mã Voucher không tồn tại trên hệ thống!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Mã Voucher không tồn tại!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             if (!v.TrangThai || DateTime.Now.Date < v.NgayBatDau.Date || DateTime.Now.Date > v.NgayHetHan.Date)
             {
-                MessageBox.Show("Mã Voucher này hiện không hoạt động hoặc đã hết hạn!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Mã Voucher đã hết hạn hoặc tạm khóa!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             decimal tienPhong = ParseMoney(txtTienPhong.Text);
             if (v.DonToiThieu > 0 && tienPhong < v.DonToiThieu)
             {
-                MessageBox.Show($"Đơn phòng chưa đạt mức tối thiểu ({v.DonToiThieu:N0} đ) để áp dụng voucher này!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"Tiền phòng chưa đạt đơn tối thiểu ({v.DonToiThieu:N0} đ)!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            decimal giamGia = 0;
-            if (v.LoaiGiam == "PhanTram")
-            {
-                giamGia = tienPhong * (v.GiaTri / 100);
-            }
-            else
-            {
-                giamGia = v.GiaTri;
-            }
-
+            decimal giamGia = (v.LoaiGiam == "PhanTram") ? (tienPhong * (v.GiaTri / 100)) : v.GiaTri;
             maVoucherDaApDung = v.MaVoucher;
             txtTienGiamGia.Text = giamGia.ToString("N0");
             TinhTongTienTuDong(null, null);
 
-            MessageBox.Show($"Áp dụng thành công Voucher [{v.Code}]! Đã giảm: {giamGia:N0} đ", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show($"Áp dụng thành công [{v.Code}]! Đã giảm: {giamGia:N0} đ", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void TinhTongTienTuDong(object sender, EventArgs e)
@@ -377,7 +288,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
             txtTienDatCoc.Text = h.TienDatCoc.ToString("N0");
             lblTongTienValue.Text = h.TongTien.ToString("N0") + " đ";
 
-            // Tải chi tiết dịch vụ đã gọi từ database
             DataTable dtChiTiet = chiTietDAL.LayChiTietTheoHoaDon(h.MaHoaDon);
             dtChiTietTam.Rows.Clear();
             foreach (DataRow r in dtChiTiet.Rows)
@@ -390,7 +300,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             if (string.IsNullOrWhiteSpace(txtMaHD.Text))
             {
-                MessageBox.Show("Vui lòng nhập mã hóa đơn thanh toán.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng nhập mã hóa đơn.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -411,7 +321,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             if (hoaDonDAL.Insert(hd))
             {
-                // Lưu từng dòng dịch vụ vào CSDL
                 foreach (DataRow r in dtChiTietTam.Rows)
                 {
                     string maDV = r["Mã DV"].ToString();
@@ -441,10 +350,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
             dgvHoaDon.ClearSelection();
         }
 
-        #endregion
-
-        #region Print Preview & In Bill Nhiệt 80mm
-
         private void btnInHoaDon_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(txtMaHD.Text))
@@ -455,9 +360,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             try
             {
-                printDoc.DefaultPageSettings.PaperSize = new PaperSize("Bill80mm", 315, 600); // Khổ giấy 80mm
+                printDoc.DefaultPageSettings.PaperSize = new PaperSize("Bill80mm", 315, 600);
                 printPreviewDlg.StartPosition = FormStartPosition.CenterScreen;
-                printPreviewDlg.WindowState = FormWindowState.Normal;
                 printPreviewDlg.Width = 480;
                 printPreviewDlg.Height = 700;
                 printPreviewDlg.ShowDialog();
@@ -480,9 +384,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
             Pen pDash = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash };
 
             int y = 20;
-            int w = 285; // Chiều rộng vùng in
+            int w = 285;
 
-            // 1. Tiêu đề khách sạn
             StringFormat sfCenter = new StringFormat { Alignment = StringAlignment.Center };
             g.DrawString("AN NHIÊN HOTEL", fHeader, b, new RectangleF(0, y, w, 24), sfCenter);
             y += 24;
@@ -496,17 +399,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
             g.DrawLine(pDash, 10, y, w - 10, y);
             y += 10;
 
-            // 2. Thông tin hóa đơn & phòng
-            g.DrawString($"Số HĐ: {txtMaHD.Text}", fRegular, b, 15, y);
-            y += 18;
-            g.DrawString($"Ngày lập: {DateTime.Now:dd/MM/yyyy HH:mm}", fRegular, b, 15, y);
-            y += 18;
-            g.DrawString($"Hồ sơ: {cboDatPhong.Text}", fRegular, b, 15, y);
-            y += 22;
+            g.DrawString($"Số HĐ: {txtMaHD.Text}", fRegular, b, 15, y); y += 18;
+            g.DrawString($"Ngày lập: {DateTime.Now:dd/MM/yyyy HH:mm}", fRegular, b, 15, y); y += 18;
+            g.DrawString($"Hồ sơ: {cboDatPhong.Text}", fRegular, b, 15, y); y += 22;
             g.DrawLine(pDash, 10, y, w - 10, y);
             y += 10;
 
-            // 3. Danh sách dịch vụ sử dụng
             if (dtChiTietTam.Rows.Count > 0)
             {
                 g.DrawString("DỊCH VỤ SỬ DỤNG:", fBold, b, 15, y);
@@ -514,7 +412,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 foreach (DataRow r in dtChiTietTam.Rows)
                 {
                     string ten = r["Tên Dịch Vụ"].ToString();
-                    string slGia = $"{r["SL"]} x {Convert.ToDecimal(r["Đơn Giá"]):N0}";
                     string tt = $"{Convert.ToDecimal(r["Thành Tiền"]):N0} đ";
 
                     g.DrawString(ten, fRegular, b, 15, y);
@@ -525,7 +422,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 y += 10;
             }
 
-            // 4. Chi tiết các khoản thanh toán
             DrawRowBill(g, fRegular, "Tiền phòng:", $"{ParseMoney(txtTienPhong.Text):N0} đ", y, w); y += 18;
             DrawRowBill(g, fRegular, "Tiền dịch vụ:", $"{ParseMoney(txtTienDV.Text):N0} đ", y, w); y += 18;
             DrawRowBill(g, fRegular, "Giảm giá (Voucher):", $"-{ParseMoney(txtTienGiamGia.Text):N0} đ", y, w); y += 18;
@@ -534,11 +430,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
             g.DrawLine(Pens.Black, 10, y, w - 10, y);
             y += 8;
 
-            // 5. Tổng cần thu
             DrawRowBill(g, fBold, "THỰC THU:", lblTongTienValue.Text, y, w);
             y += 28;
 
-            // 6. Lời cảm ơn
             g.DrawString("Cảm ơn Quý khách & Hẹn gặp lại!", fSmall, b, new RectangleF(0, y, w, 20), sfCenter);
         }
 
@@ -548,7 +442,5 @@ namespace Quản_Lý_Khách_Sạn.Forms
             int textW = (int)g.MeasureString(rightText, font).Width;
             g.DrawString(rightText, font, Brushes.Black, w - 15 - textW, y);
         }
-
-        #endregion
     }
 }

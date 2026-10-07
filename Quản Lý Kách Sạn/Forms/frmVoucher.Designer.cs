@@ -17,706 +17,700 @@
 
         private void InitializeComponent()
         {
-            this.tblMainLayout = new System.Windows.Forms.TableLayoutPanel();
-            this.cardLeft = new System.Windows.Forms.Panel();
-            this.pnlSearch = new System.Windows.Forms.Panel();
-            this.txtTimKiem = new System.Windows.Forms.TextBox();
-            this.lblIconSearch = new System.Windows.Forms.Label();
-            this.pnlGridWrapper = new System.Windows.Forms.Panel();
-            this.dgvVoucher = new System.Windows.Forms.DataGridView();
-            this.cardRight = new System.Windows.Forms.Panel();
-            this.lblCardTitle = new System.Windows.Forms.Label();
-            this.lblCardSubtitle = new System.Windows.Forms.Label();
-            this.pnlDivider = new System.Windows.Forms.Panel();
-            this.lblCode = new System.Windows.Forms.Label();
-            this.pnlCodeWrap = new System.Windows.Forms.Panel();
-            this.txtCode = new System.Windows.Forms.TextBox();
-            this.lblLoaiGiam = new System.Windows.Forms.Label();
-            this.pnlLoaiGiam = new System.Windows.Forms.Panel();
-            this.rdoPhanTram = new System.Windows.Forms.RadioButton();
-            this.rdoSoTien = new System.Windows.Forms.RadioButton();
-            this.lblGiaTri = new System.Windows.Forms.Label();
-            this.pnlGiaTriWrap = new System.Windows.Forms.Panel();
-            this.txtGiaTri = new System.Windows.Forms.TextBox();
-            this.tbl2ColInputs = new System.Windows.Forms.TableLayoutPanel();
-            this.pnlColDonToiThieu = new System.Windows.Forms.Panel();
-            this.lblDonToiThieu = new System.Windows.Forms.Label();
-            this.pnlDonToiThieuWrap = new System.Windows.Forms.Panel();
-            this.txtDonToiThieu = new System.Windows.Forms.TextBox();
-            this.pnlColSoLuong = new System.Windows.Forms.Panel();
-            this.lblSoLuong = new System.Windows.Forms.Label();
-            this.pnlSoLuongWrap = new System.Windows.Forms.Panel();
-            this.txtSoLuong = new System.Windows.Forms.TextBox();
-            this.tbl2ColDates = new System.Windows.Forms.TableLayoutPanel();
-            this.pnlColNgayBD = new System.Windows.Forms.Panel();
-            this.lblNgayBD = new System.Windows.Forms.Label();
-            this.pnlNgayBDWrap = new System.Windows.Forms.Panel();
-            this.dtpNgayBatDau = new System.Windows.Forms.DateTimePicker();
-            this.pnlColNgayKT = new System.Windows.Forms.Panel();
-            this.lblNgayKT = new System.Windows.Forms.Label();
-            this.pnlNgayKTWrap = new System.Windows.Forms.Panel();
-            this.dtpNgayHetHan = new System.Windows.Forms.DateTimePicker();
-            this.chkTrangThai = new System.Windows.Forms.CheckBox();
-            this.pnlBottomButtons = new System.Windows.Forms.Panel();
-            this.btnLuu = new System.Windows.Forms.Button();
-            this.btnLamMoi = new System.Windows.Forms.Button();
-            this.btnXoa = new System.Windows.Forms.Button();
-            this.tblMainLayout.SuspendLayout();
-            this.cardLeft.SuspendLayout();
-            this.pnlSearch.SuspendLayout();
-            this.pnlGridWrapper.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvVoucher)).BeginInit();
-            this.cardRight.SuspendLayout();
-            this.pnlCodeWrap.SuspendLayout();
-            this.pnlLoaiGiam.SuspendLayout();
-            this.pnlGiaTriWrap.SuspendLayout();
-            this.tbl2ColInputs.SuspendLayout();
-            this.pnlColDonToiThieu.SuspendLayout();
-            this.pnlDonToiThieuWrap.SuspendLayout();
-            this.pnlColSoLuong.SuspendLayout();
-            this.pnlSoLuongWrap.SuspendLayout();
-            this.tbl2ColDates.SuspendLayout();
-            this.pnlColNgayBD.SuspendLayout();
-            this.pnlNgayBDWrap.SuspendLayout();
-            this.pnlColNgayKT.SuspendLayout();
-            this.pnlNgayKTWrap.SuspendLayout();
-            this.pnlBottomButtons.SuspendLayout();
-            this.SuspendLayout();
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            tblMainLayout = new TableLayoutPanel();
+            cardLeft = new Panel();
+            pnlGridWrapper = new Panel();
+            dgvVoucher = new DataGridView();
+            pnlSearch = new Panel();
+            txtTimKiem = new TextBox();
+            lblIconSearch = new Label();
+            cardRight = new Panel();
+            lblCardTitle = new Label();
+            lblCardSubtitle = new Label();
+            pnlDivider = new Panel();
+            lblCode = new Label();
+            pnlCodeWrap = new Panel();
+            txtCode = new TextBox();
+            lblLoaiGiam = new Label();
+            pnlLoaiGiam = new Panel();
+            rdoPhanTram = new RadioButton();
+            rdoSoTien = new RadioButton();
+            lblGiaTri = new Label();
+            pnlGiaTriWrap = new Panel();
+            txtGiaTri = new TextBox();
+            tbl2ColInputs = new TableLayoutPanel();
+            pnlColDonToiThieu = new Panel();
+            lblDonToiThieu = new Label();
+            pnlDonToiThieuWrap = new Panel();
+            txtDonToiThieu = new TextBox();
+            pnlColSoLuong = new Panel();
+            lblSoLuong = new Label();
+            pnlSoLuongWrap = new Panel();
+            txtSoLuong = new TextBox();
+            tbl2ColDates = new TableLayoutPanel();
+            pnlColNgayBD = new Panel();
+            lblNgayBD = new Label();
+            pnlNgayBDWrap = new Panel();
+            dtpNgayBatDau = new DateTimePicker();
+            pnlColNgayKT = new Panel();
+            lblNgayKT = new Label();
+            pnlNgayKTWrap = new Panel();
+            dtpNgayHetHan = new DateTimePicker();
+            chkTrangThai = new CheckBox();
+            pnlBottomButtons = new Panel();
+            btnXoa = new Button();
+            btnLamMoi = new Button();
+            btnLuu = new Button();
+            tblMainLayout.SuspendLayout();
+            cardLeft.SuspendLayout();
+            pnlGridWrapper.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvVoucher).BeginInit();
+            pnlSearch.SuspendLayout();
+            cardRight.SuspendLayout();
+            pnlCodeWrap.SuspendLayout();
+            pnlLoaiGiam.SuspendLayout();
+            pnlGiaTriWrap.SuspendLayout();
+            tbl2ColInputs.SuspendLayout();
+            pnlColDonToiThieu.SuspendLayout();
+            pnlDonToiThieuWrap.SuspendLayout();
+            pnlColSoLuong.SuspendLayout();
+            pnlSoLuongWrap.SuspendLayout();
+            tbl2ColDates.SuspendLayout();
+            pnlColNgayBD.SuspendLayout();
+            pnlNgayBDWrap.SuspendLayout();
+            pnlColNgayKT.SuspendLayout();
+            pnlNgayKTWrap.SuspendLayout();
+            pnlBottomButtons.SuspendLayout();
+            SuspendLayout();
             // 
             // tblMainLayout
             // 
-            this.tblMainLayout.ColumnCount = 2;
-            this.tblMainLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 64F));
-            this.tblMainLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 36F));
-            this.tblMainLayout.Controls.Add(this.cardLeft, 0, 0);
-            this.tblMainLayout.Controls.Add(this.cardRight, 1, 0);
-            this.tblMainLayout.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tblMainLayout.Location = new System.Drawing.Point(20, 20);
-            this.tblMainLayout.Margin = new System.Windows.Forms.Padding(0);
-            this.tblMainLayout.Name = "tblMainLayout";
-            this.tblMainLayout.RowCount = 1;
-            this.tblMainLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tblMainLayout.Size = new System.Drawing.Size(1240, 720);
-            this.tblMainLayout.TabIndex = 0;
+            tblMainLayout.ColumnCount = 2;
+            tblMainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 64F));
+            tblMainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 36F));
+            tblMainLayout.Controls.Add(cardLeft, 0, 0);
+            tblMainLayout.Controls.Add(cardRight, 1, 0);
+            tblMainLayout.Dock = DockStyle.Fill;
+            tblMainLayout.Location = new Point(20, 20);
+            tblMainLayout.Margin = new Padding(0);
+            tblMainLayout.Name = "tblMainLayout";
+            tblMainLayout.RowCount = 1;
+            tblMainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblMainLayout.Size = new Size(1240, 720);
+            tblMainLayout.TabIndex = 0;
             // 
             // cardLeft
             // 
-            this.cardLeft.BackColor = System.Drawing.Color.White;
-            this.cardLeft.Controls.Add(this.pnlGridWrapper);
-            this.cardLeft.Controls.Add(this.pnlSearch);
-            this.cardLeft.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.cardLeft.Location = new System.Drawing.Point(0, 0);
-            this.cardLeft.Margin = new System.Windows.Forms.Padding(0, 0, 16, 0);
-            this.cardLeft.Name = "cardLeft";
-            this.cardLeft.Padding = new System.Windows.Forms.Padding(20);
-            this.cardLeft.Size = new System.Drawing.Size(777, 720);
-            this.cardLeft.TabIndex = 0;
-            this.cardLeft.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawFigmaCard);
-            // 
-            // pnlSearch
-            // 
-            this.pnlSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlSearch.BackColor = System.Drawing.Color.White;
-            this.pnlSearch.Controls.Add(this.txtTimKiem);
-            this.pnlSearch.Controls.Add(this.lblIconSearch);
-            this.pnlSearch.Location = new System.Drawing.Point(20, 20);
-            this.pnlSearch.Name = "pnlSearch";
-            this.pnlSearch.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.pnlSearch.Size = new System.Drawing.Size(737, 38);
-            this.pnlSearch.TabIndex = 0;
-            this.pnlSearch.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawFigmaInputBox);
-            // 
-            // lblIconSearch
-            // 
-            this.lblIconSearch.Dock = System.Windows.Forms.DockStyle.Left;
-            this.lblIconSearch.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.lblIconSearch.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(148)))), ((int)(((byte)(163)))), ((int)(((byte)(184)))));
-            this.lblIconSearch.Location = new System.Drawing.Point(12, 0);
-            this.lblIconSearch.Name = "lblIconSearch";
-            this.lblIconSearch.Size = new System.Drawing.Size(26, 38);
-            this.lblIconSearch.TabIndex = 0;
-            this.lblIconSearch.Text = "🔍";
-            this.lblIconSearch.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // txtTimKiem
-            // 
-            this.txtTimKiem.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtTimKiem.BackColor = System.Drawing.Color.White;
-            this.txtTimKiem.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtTimKiem.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.txtTimKiem.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(41)))), ((int)(((byte)(59)))));
-            this.txtTimKiem.Location = new System.Drawing.Point(44, 9);
-            this.txtTimKiem.Name = "txtTimKiem";
-            this.txtTimKiem.PlaceholderText = "Tìm kiếm theo mã code voucher, tên chương trình...";
-            this.txtTimKiem.Size = new System.Drawing.Size(681, 22);
-            this.txtTimKiem.TabIndex = 1;
-            this.txtTimKiem.TextChanged += new System.EventHandler(this.txtTimKiem_TextChanged);
+            cardLeft.BackColor = Color.White;
+            cardLeft.Controls.Add(pnlGridWrapper);
+            cardLeft.Controls.Add(pnlSearch);
+            cardLeft.Dock = DockStyle.Fill;
+            cardLeft.Location = new Point(0, 0);
+            cardLeft.Margin = new Padding(0, 0, 16, 0);
+            cardLeft.Name = "cardLeft";
+            cardLeft.Padding = new Padding(20);
+            cardLeft.Size = new Size(777, 720);
+            cardLeft.TabIndex = 0;
+            cardLeft.Paint += DrawFigmaCard;
             // 
             // pnlGridWrapper
             // 
-            this.pnlGridWrapper.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlGridWrapper.Controls.Add(this.dgvVoucher);
-            this.pnlGridWrapper.Location = new System.Drawing.Point(20, 72);
-            this.pnlGridWrapper.Name = "pnlGridWrapper";
-            this.pnlGridWrapper.Size = new System.Drawing.Size(737, 628);
-            this.pnlGridWrapper.TabIndex = 1;
+            pnlGridWrapper.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            pnlGridWrapper.Controls.Add(dgvVoucher);
+            pnlGridWrapper.Location = new Point(20, 72);
+            pnlGridWrapper.Name = "pnlGridWrapper";
+            pnlGridWrapper.Size = new Size(737, 628);
+            pnlGridWrapper.TabIndex = 1;
             // 
             // dgvVoucher
             // 
-            this.dgvVoucher.BackgroundColor = System.Drawing.Color.White;
-            this.dgvVoucher.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.dgvVoucher.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvVoucher.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvVoucher.Location = new System.Drawing.Point(0, 0);
-            this.dgvVoucher.Name = "dgvVoucher";
-            this.dgvVoucher.RowHeadersWidth = 51;
-            this.dgvVoucher.Size = new System.Drawing.Size(737, 628);
-            this.dgvVoucher.TabIndex = 0;
-            this.dgvVoucher.SelectionChanged += new System.EventHandler(this.dgvVoucher_SelectionChanged);
+            dgvVoucher.BackgroundColor = Color.White;
+            dgvVoucher.BorderStyle = BorderStyle.None;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = SystemColors.Control;
+            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
+            dgvVoucher.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dgvVoucher.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = SystemColors.Window;
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
+            dgvVoucher.DefaultCellStyle = dataGridViewCellStyle2;
+            dgvVoucher.Dock = DockStyle.Fill;
+            dgvVoucher.Location = new Point(0, 0);
+            dgvVoucher.Name = "dgvVoucher";
+            dgvVoucher.RowHeadersWidth = 51;
+            dgvVoucher.Size = new Size(737, 628);
+            dgvVoucher.TabIndex = 0;
+            dgvVoucher.SelectionChanged += dgvVoucher_SelectionChanged;
+            // 
+            // pnlSearch
+            // 
+            pnlSearch.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            pnlSearch.BackColor = Color.White;
+            pnlSearch.Controls.Add(txtTimKiem);
+            pnlSearch.Controls.Add(lblIconSearch);
+            pnlSearch.Location = new Point(20, 20);
+            pnlSearch.Name = "pnlSearch";
+            pnlSearch.Padding = new Padding(12, 0, 12, 0);
+            pnlSearch.Size = new Size(737, 38);
+            pnlSearch.TabIndex = 0;
+            pnlSearch.Paint += DrawFigmaInputBox;
+            // 
+            // txtTimKiem
+            // 
+            txtTimKiem.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            txtTimKiem.BackColor = Color.White;
+            txtTimKiem.BorderStyle = BorderStyle.None;
+            txtTimKiem.Font = new Font("Segoe UI", 9.5F);
+            txtTimKiem.ForeColor = Color.FromArgb(30, 41, 59);
+            txtTimKiem.Location = new Point(44, 9);
+            txtTimKiem.Name = "txtTimKiem";
+            txtTimKiem.PlaceholderText = "Tìm kiếm theo mã code voucher, tên chương trình...";
+            txtTimKiem.Size = new Size(681, 22);
+            txtTimKiem.TabIndex = 1;
+            txtTimKiem.TextChanged += txtTimKiem_TextChanged;
+            // 
+            // lblIconSearch
+            // 
+            lblIconSearch.Dock = DockStyle.Left;
+            lblIconSearch.Font = new Font("Segoe UI", 10F);
+            lblIconSearch.ForeColor = Color.FromArgb(148, 163, 184);
+            lblIconSearch.Location = new Point(12, 0);
+            lblIconSearch.Name = "lblIconSearch";
+            lblIconSearch.Size = new Size(26, 38);
+            lblIconSearch.TabIndex = 0;
+            lblIconSearch.Text = "🔍";
+            lblIconSearch.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // cardRight
             // 
-            this.cardRight.AutoScroll = true;
-            this.cardRight.BackColor = System.Drawing.Color.White;
-            this.cardRight.Controls.Add(this.lblCardTitle);
-            this.cardRight.Controls.Add(this.lblCardSubtitle);
-            this.cardRight.Controls.Add(this.pnlDivider);
-            this.cardRight.Controls.Add(this.lblCode);
-            this.cardRight.Controls.Add(this.pnlCodeWrap);
-            this.cardRight.Controls.Add(this.lblLoaiGiam);
-            this.cardRight.Controls.Add(this.pnlLoaiGiam);
-            this.cardRight.Controls.Add(this.lblGiaTri);
-            this.cardRight.Controls.Add(this.pnlGiaTriWrap);
-            this.cardRight.Controls.Add(this.tbl2ColInputs);
-            this.cardRight.Controls.Add(this.tbl2ColDates);
-            this.cardRight.Controls.Add(this.chkTrangThai);
-            this.cardRight.Controls.Add(this.pnlBottomButtons);
-            this.cardRight.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.cardRight.Location = new System.Drawing.Point(793, 0);
-            this.cardRight.Margin = new System.Windows.Forms.Padding(0);
-            this.cardRight.Name = "cardRight";
-            this.cardRight.Padding = new System.Windows.Forms.Padding(24);
-            this.cardRight.Size = new System.Drawing.Size(447, 720);
-            this.cardRight.TabIndex = 1;
-            this.cardRight.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawFigmaCard);
+            cardRight.AutoScroll = true;
+            cardRight.BackColor = Color.White;
+            cardRight.Controls.Add(lblCardTitle);
+            cardRight.Controls.Add(lblCardSubtitle);
+            cardRight.Controls.Add(pnlDivider);
+            cardRight.Controls.Add(lblCode);
+            cardRight.Controls.Add(pnlCodeWrap);
+            cardRight.Controls.Add(lblLoaiGiam);
+            cardRight.Controls.Add(pnlLoaiGiam);
+            cardRight.Controls.Add(lblGiaTri);
+            cardRight.Controls.Add(pnlGiaTriWrap);
+            cardRight.Controls.Add(tbl2ColInputs);
+            cardRight.Controls.Add(tbl2ColDates);
+            cardRight.Controls.Add(chkTrangThai);
+            cardRight.Controls.Add(pnlBottomButtons);
+            cardRight.Dock = DockStyle.Fill;
+            cardRight.Location = new Point(793, 0);
+            cardRight.Margin = new Padding(0);
+            cardRight.Name = "cardRight";
+            cardRight.Padding = new Padding(24);
+            cardRight.Size = new Size(447, 720);
+            cardRight.TabIndex = 1;
+            cardRight.Paint += DrawFigmaCard;
             // 
             // lblCardTitle
             // 
-            this.lblCardTitle.AutoSize = true;
-            this.lblCardTitle.Font = new System.Drawing.Font("Segoe UI", 12.5F, System.Drawing.FontStyle.Bold);
-            this.lblCardTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(23)))), ((int)(((byte)(42)))));
-            this.lblCardTitle.Location = new System.Drawing.Point(22, 20);
-            this.lblCardTitle.Name = "lblCardTitle";
-            this.lblCardTitle.Size = new System.Drawing.Size(193, 30);
-            this.lblCardTitle.TabIndex = 0;
-            this.lblCardTitle.Text = "Thông tin voucher";
+            lblCardTitle.AutoSize = true;
+            lblCardTitle.Font = new Font("Segoe UI", 12.5F, FontStyle.Bold);
+            lblCardTitle.ForeColor = Color.FromArgb(15, 23, 42);
+            lblCardTitle.Location = new Point(22, 20);
+            lblCardTitle.Name = "lblCardTitle";
+            lblCardTitle.Size = new Size(195, 30);
+            lblCardTitle.TabIndex = 0;
+            lblCardTitle.Text = "Thông tin voucher";
             // 
             // lblCardSubtitle
             // 
-            this.lblCardSubtitle.AutoSize = true;
-            this.lblCardSubtitle.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.lblCardSubtitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(116)))), ((int)(((byte)(139)))));
-            this.lblCardSubtitle.Location = new System.Drawing.Point(24, 50);
-            this.lblCardSubtitle.Name = "lblCardSubtitle";
-            this.lblCardSubtitle.Size = new System.Drawing.Size(252, 20);
-            this.lblCardSubtitle.TabIndex = 1;
-            this.lblCardSubtitle.Text = "Cấu hình chiết khấu cho khách lưu trú";
+            lblCardSubtitle.AutoSize = true;
+            lblCardSubtitle.Font = new Font("Segoe UI", 9F);
+            lblCardSubtitle.ForeColor = Color.FromArgb(100, 116, 139);
+            lblCardSubtitle.Location = new Point(24, 50);
+            lblCardSubtitle.Name = "lblCardSubtitle";
+            lblCardSubtitle.Size = new Size(254, 20);
+            lblCardSubtitle.TabIndex = 1;
+            lblCardSubtitle.Text = "Cấu hình chiết khấu cho khách lưu trú";
             // 
             // pnlDivider
             // 
-            this.pnlDivider.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlDivider.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(241)))), ((int)(((byte)(245)))), ((int)(((byte)(249)))));
-            this.pnlDivider.Location = new System.Drawing.Point(24, 80);
-            this.pnlDivider.Name = "pnlDivider";
-            this.pnlDivider.Size = new System.Drawing.Size(399, 1);
-            this.pnlDivider.TabIndex = 2;
+            pnlDivider.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            pnlDivider.BackColor = Color.FromArgb(241, 245, 249);
+            pnlDivider.Location = new Point(24, 80);
+            pnlDivider.Name = "pnlDivider";
+            pnlDivider.Size = new Size(399, 1);
+            pnlDivider.TabIndex = 2;
             // 
             // lblCode
             // 
-            this.lblCode.AutoSize = true;
-            this.lblCode.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular);
-            this.lblCode.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-            this.lblCode.Location = new System.Drawing.Point(22, 95);
-            this.lblCode.Name = "lblCode";
-            this.lblCode.Size = new System.Drawing.Size(117, 20);
-            this.lblCode.TabIndex = 3;
-            this.lblCode.Text = "Mã voucher (Code) *";
+            lblCode.AutoSize = true;
+            lblCode.Font = new Font("Segoe UI", 9F);
+            lblCode.ForeColor = Color.FromArgb(51, 65, 85);
+            lblCode.Location = new Point(22, 95);
+            lblCode.Name = "lblCode";
+            lblCode.Size = new Size(145, 20);
+            lblCode.TabIndex = 3;
+            lblCode.Text = "Mã voucher (Code) *";
             // 
             // pnlCodeWrap
             // 
-            this.pnlCodeWrap.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlCodeWrap.BackColor = System.Drawing.Color.White;
-            this.pnlCodeWrap.Controls.Add(this.txtCode);
-            this.pnlCodeWrap.Location = new System.Drawing.Point(24, 120);
-            this.pnlCodeWrap.Name = "pnlCodeWrap";
-            this.pnlCodeWrap.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.pnlCodeWrap.Size = new System.Drawing.Size(399, 38);
-            this.pnlCodeWrap.TabIndex = 4;
-            this.pnlCodeWrap.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawFigmaInputBox);
+            pnlCodeWrap.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            pnlCodeWrap.BackColor = Color.White;
+            pnlCodeWrap.Controls.Add(txtCode);
+            pnlCodeWrap.Location = new Point(24, 120);
+            pnlCodeWrap.Name = "pnlCodeWrap";
+            pnlCodeWrap.Padding = new Padding(12, 0, 12, 0);
+            pnlCodeWrap.Size = new Size(399, 38);
+            pnlCodeWrap.TabIndex = 4;
+            pnlCodeWrap.Paint += DrawFigmaInputBox;
             // 
             // txtCode
             // 
-            this.txtCode.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtCode.BackColor = System.Drawing.Color.White;
-            this.txtCode.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtCode.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
-            this.txtCode.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            this.txtCode.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(23)))), ((int)(((byte)(42)))));
-            this.txtCode.Location = new System.Drawing.Point(12, 8);
-            this.txtCode.Name = "txtCode";
-            this.txtCode.PlaceholderText = "VÍ DỤ: CHAOHET2026";
-            this.txtCode.Size = new System.Drawing.Size(375, 22);
-            this.txtCode.TabIndex = 0;
+            txtCode.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            txtCode.BackColor = Color.White;
+            txtCode.BorderStyle = BorderStyle.None;
+            txtCode.CharacterCasing = CharacterCasing.Upper;
+            txtCode.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            txtCode.ForeColor = Color.FromArgb(15, 23, 42);
+            txtCode.Location = new Point(12, 8);
+            txtCode.Name = "txtCode";
+            txtCode.PlaceholderText = "VÍ DỤ: CHAOHET2026";
+            txtCode.Size = new Size(375, 22);
+            txtCode.TabIndex = 0;
             // 
             // lblLoaiGiam
             // 
-            this.lblLoaiGiam.AutoSize = true;
-            this.lblLoaiGiam.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular);
-            this.lblLoaiGiam.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-            this.lblLoaiGiam.Location = new System.Drawing.Point(22, 172);
-            this.lblLoaiGiam.Name = "lblLoaiGiam";
-            this.lblLoaiGiam.Size = new System.Drawing.Size(126, 20);
-            this.lblLoaiGiam.TabIndex = 5;
-            this.lblLoaiGiam.Text = "Hình thức áp dụng *";
+            lblLoaiGiam.AutoSize = true;
+            lblLoaiGiam.Font = new Font("Segoe UI", 9F);
+            lblLoaiGiam.ForeColor = Color.FromArgb(51, 65, 85);
+            lblLoaiGiam.Location = new Point(22, 172);
+            lblLoaiGiam.Name = "lblLoaiGiam";
+            lblLoaiGiam.Size = new Size(142, 20);
+            lblLoaiGiam.TabIndex = 5;
+            lblLoaiGiam.Text = "Hình thức áp dụng *";
             // 
             // pnlLoaiGiam
             // 
-            this.pnlLoaiGiam.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlLoaiGiam.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(250)))), ((int)(((byte)(252)))));
-            this.pnlLoaiGiam.Controls.Add(this.rdoPhanTram);
-            this.pnlLoaiGiam.Controls.Add(this.rdoSoTien);
-            this.pnlLoaiGiam.Location = new System.Drawing.Point(24, 196);
-            this.pnlLoaiGiam.Name = "pnlLoaiGiam";
-            this.pnlLoaiGiam.Size = new System.Drawing.Size(399, 40);
-            this.pnlLoaiGiam.TabIndex = 6;
-            this.pnlLoaiGiam.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawFigmaInputBox);
+            pnlLoaiGiam.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            pnlLoaiGiam.BackColor = Color.FromArgb(248, 250, 252);
+            pnlLoaiGiam.Controls.Add(rdoPhanTram);
+            pnlLoaiGiam.Controls.Add(rdoSoTien);
+            pnlLoaiGiam.Location = new Point(24, 196);
+            pnlLoaiGiam.Name = "pnlLoaiGiam";
+            pnlLoaiGiam.Size = new Size(399, 40);
+            pnlLoaiGiam.TabIndex = 6;
+            pnlLoaiGiam.Paint += DrawFigmaInputBox;
             // 
             // rdoPhanTram
             // 
-            this.rdoPhanTram.AutoSize = true;
-            this.rdoPhanTram.Checked = true;
-            this.rdoPhanTram.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.rdoPhanTram.Font = new System.Drawing.Font("Segoe UI", 9.25F, System.Drawing.FontStyle.Regular);
-            this.rdoPhanTram.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(23)))), ((int)(((byte)(42)))));
-            this.rdoPhanTram.Location = new System.Drawing.Point(16, 9);
-            this.rdoPhanTram.Name = "rdoPhanTram";
-            this.rdoPhanTram.Size = new System.Drawing.Size(124, 25);
-            this.rdoPhanTram.TabIndex = 0;
-            this.rdoPhanTram.TabStop = true;
-            this.rdoPhanTram.Text = "Phần trăm (%)";
-            this.rdoPhanTram.UseVisualStyleBackColor = true;
+            rdoPhanTram.AutoSize = true;
+            rdoPhanTram.Checked = true;
+            rdoPhanTram.Cursor = Cursors.Hand;
+            rdoPhanTram.Font = new Font("Segoe UI", 9.25F);
+            rdoPhanTram.ForeColor = Color.FromArgb(15, 23, 42);
+            rdoPhanTram.Location = new Point(16, 9);
+            rdoPhanTram.Name = "rdoPhanTram";
+            rdoPhanTram.Size = new Size(130, 25);
+            rdoPhanTram.TabIndex = 0;
+            rdoPhanTram.TabStop = true;
+            rdoPhanTram.Text = "Phần trăm (%)";
+            rdoPhanTram.UseVisualStyleBackColor = true;
             // 
             // rdoSoTien
             // 
-            this.rdoSoTien.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.rdoSoTien.AutoSize = true;
-            this.rdoSoTien.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.rdoSoTien.Font = new System.Drawing.Font("Segoe UI", 9.25F, System.Drawing.FontStyle.Regular);
-            this.rdoSoTien.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(23)))), ((int)(((byte)(42)))));
-            this.rdoSoTien.Location = new System.Drawing.Point(232, 9);
-            this.rdoSoTien.Name = "rdoSoTien";
-            this.rdoSoTien.Size = new System.Drawing.Size(155, 25);
-            this.rdoSoTien.TabIndex = 1;
-            this.rdoSoTien.Text = "Số tiền cố định (đ)";
-            this.rdoSoTien.UseVisualStyleBackColor = true;
+            rdoSoTien.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            rdoSoTien.AutoSize = true;
+            rdoSoTien.Cursor = Cursors.Hand;
+            rdoSoTien.Font = new Font("Segoe UI", 9.25F);
+            rdoSoTien.ForeColor = Color.FromArgb(15, 23, 42);
+            rdoSoTien.Location = new Point(230, 9);
+            rdoSoTien.Name = "rdoSoTien";
+            rdoSoTien.Size = new Size(157, 25);
+            rdoSoTien.TabIndex = 1;
+            rdoSoTien.Text = "Số tiền cố định (đ)";
+            rdoSoTien.UseVisualStyleBackColor = true;
             // 
             // lblGiaTri
             // 
-            this.lblGiaTri.AutoSize = true;
-            this.lblGiaTri.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular);
-            this.lblGiaTri.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-            this.lblGiaTri.Location = new System.Drawing.Point(22, 248);
-            this.lblGiaTri.Name = "lblGiaTri";
-            this.lblGiaTri.Size = new System.Drawing.Size(85, 20);
-            this.lblGiaTri.TabIndex = 7;
-            this.lblGiaTri.Text = "Mức giảm *";
+            lblGiaTri.AutoSize = true;
+            lblGiaTri.Font = new Font("Segoe UI", 9F);
+            lblGiaTri.ForeColor = Color.FromArgb(51, 65, 85);
+            lblGiaTri.Location = new Point(22, 248);
+            lblGiaTri.Name = "lblGiaTri";
+            lblGiaTri.Size = new Size(86, 20);
+            lblGiaTri.TabIndex = 7;
+            lblGiaTri.Text = "Mức giảm *";
             // 
             // pnlGiaTriWrap
             // 
-            this.pnlGiaTriWrap.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlGiaTriWrap.BackColor = System.Drawing.Color.White;
-            this.pnlGiaTriWrap.Controls.Add(this.txtGiaTri);
-            this.pnlGiaTriWrap.Location = new System.Drawing.Point(24, 272);
-            this.pnlGiaTriWrap.Name = "pnlGiaTriWrap";
-            this.pnlGiaTriWrap.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.pnlGiaTriWrap.Size = new System.Drawing.Size(399, 38);
-            this.pnlGiaTriWrap.TabIndex = 8;
-            this.pnlGiaTriWrap.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawFigmaInputBox);
+            pnlGiaTriWrap.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            pnlGiaTriWrap.BackColor = Color.White;
+            pnlGiaTriWrap.Controls.Add(txtGiaTri);
+            pnlGiaTriWrap.Location = new Point(24, 272);
+            pnlGiaTriWrap.Name = "pnlGiaTriWrap";
+            pnlGiaTriWrap.Padding = new Padding(12, 0, 12, 0);
+            pnlGiaTriWrap.Size = new Size(399, 38);
+            pnlGiaTriWrap.TabIndex = 8;
+            pnlGiaTriWrap.Paint += DrawFigmaInputBox;
             // 
             // txtGiaTri
             // 
-            this.txtGiaTri.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtGiaTri.BackColor = System.Drawing.Color.White;
-            this.txtGiaTri.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtGiaTri.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            this.txtGiaTri.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(234)))), ((int)(((byte)(88)))), ((int)(((byte)(12)))));
-            this.txtGiaTri.Location = new System.Drawing.Point(12, 8);
-            this.txtGiaTri.Name = "txtGiaTri";
-            this.txtGiaTri.PlaceholderText = "Nhập mức giảm...";
-            this.txtGiaTri.Size = new System.Drawing.Size(375, 22);
-            this.txtGiaTri.TabIndex = 0;
+            txtGiaTri.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            txtGiaTri.BackColor = Color.White;
+            txtGiaTri.BorderStyle = BorderStyle.None;
+            txtGiaTri.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            txtGiaTri.ForeColor = Color.FromArgb(234, 88, 12);
+            txtGiaTri.Location = new Point(12, 8);
+            txtGiaTri.Name = "txtGiaTri";
+            txtGiaTri.PlaceholderText = "Nhập mức giảm...";
+            txtGiaTri.Size = new Size(375, 22);
+            txtGiaTri.TabIndex = 0;
             // 
             // tbl2ColInputs
             // 
-            this.tbl2ColInputs.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbl2ColInputs.ColumnCount = 2;
-            this.tbl2ColInputs.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tbl2ColInputs.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tbl2ColInputs.Controls.Add(this.pnlColDonToiThieu, 0, 0);
-            this.tbl2ColInputs.Controls.Add(this.pnlColSoLuong, 1, 0);
-            this.tbl2ColInputs.Location = new System.Drawing.Point(21, 320);
-            this.tbl2ColInputs.Name = "tbl2ColInputs";
-            this.tbl2ColInputs.RowCount = 1;
-            this.tbl2ColInputs.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tbl2ColInputs.Size = new System.Drawing.Size(405, 68);
-            this.tbl2ColInputs.TabIndex = 9;
+            tbl2ColInputs.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            tbl2ColInputs.ColumnCount = 2;
+            tbl2ColInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tbl2ColInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tbl2ColInputs.Controls.Add(pnlColDonToiThieu, 0, 0);
+            tbl2ColInputs.Controls.Add(pnlColSoLuong, 1, 0);
+            tbl2ColInputs.Location = new Point(21, 320);
+            tbl2ColInputs.Name = "tbl2ColInputs";
+            tbl2ColInputs.RowCount = 1;
+            tbl2ColInputs.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tbl2ColInputs.Size = new Size(405, 68);
+            tbl2ColInputs.TabIndex = 9;
             // 
             // pnlColDonToiThieu
             // 
-            this.pnlColDonToiThieu.Controls.Add(this.lblDonToiThieu);
-            this.pnlColDonToiThieu.Controls.Add(this.pnlDonToiThieuWrap);
-            this.pnlColDonToiThieu.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlColDonToiThieu.Location = new System.Drawing.Point(0, 0);
-            this.pnlColDonToiThieu.Margin = new System.Windows.Forms.Padding(0, 0, 8, 0);
-            this.pnlColDonToiThieu.Name = "pnlColDonToiThieu";
-            this.pnlColDonToiThieu.Size = new System.Drawing.Size(194, 68);
-            this.pnlColDonToiThieu.TabIndex = 0;
+            pnlColDonToiThieu.Controls.Add(lblDonToiThieu);
+            pnlColDonToiThieu.Controls.Add(pnlDonToiThieuWrap);
+            pnlColDonToiThieu.Dock = DockStyle.Fill;
+            pnlColDonToiThieu.Location = new Point(0, 0);
+            pnlColDonToiThieu.Margin = new Padding(0, 0, 8, 0);
+            pnlColDonToiThieu.Name = "pnlColDonToiThieu";
+            pnlColDonToiThieu.Size = new Size(194, 68);
+            pnlColDonToiThieu.TabIndex = 0;
             // 
             // lblDonToiThieu
             // 
-            this.lblDonToiThieu.AutoSize = true;
-            this.lblDonToiThieu.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular);
-            this.lblDonToiThieu.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-            this.lblDonToiThieu.Location = new System.Drawing.Point(0, 0);
-            this.lblDonToiThieu.Name = "lblDonToiThieu";
-            this.lblDonToiThieu.Size = new System.Drawing.Size(97, 20);
-            this.lblDonToiThieu.TabIndex = 0;
-            this.lblDonToiThieu.Text = "Đơn tối thiểu";
+            lblDonToiThieu.AutoSize = true;
+            lblDonToiThieu.Font = new Font("Segoe UI", 9F);
+            lblDonToiThieu.ForeColor = Color.FromArgb(51, 65, 85);
+            lblDonToiThieu.Location = new Point(0, 0);
+            lblDonToiThieu.Name = "lblDonToiThieu";
+            lblDonToiThieu.Size = new Size(96, 20);
+            lblDonToiThieu.TabIndex = 0;
+            lblDonToiThieu.Text = "Đơn tối thiểu";
             // 
             // pnlDonToiThieuWrap
             // 
-            this.pnlDonToiThieuWrap.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlDonToiThieuWrap.BackColor = System.Drawing.Color.White;
-            this.pnlDonToiThieuWrap.Controls.Add(this.txtDonToiThieu);
-            this.pnlDonToiThieuWrap.Location = new System.Drawing.Point(0, 24);
-            this.pnlDonToiThieuWrap.Name = "pnlDonToiThieuWrap";
-            this.pnlDonToiThieuWrap.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.pnlDonToiThieuWrap.Size = new System.Drawing.Size(194, 38);
-            this.pnlDonToiThieuWrap.TabIndex = 1;
-            this.pnlDonToiThieuWrap.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawFigmaInputBox);
+            pnlDonToiThieuWrap.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            pnlDonToiThieuWrap.BackColor = Color.White;
+            pnlDonToiThieuWrap.Controls.Add(txtDonToiThieu);
+            pnlDonToiThieuWrap.Location = new Point(0, 24);
+            pnlDonToiThieuWrap.Name = "pnlDonToiThieuWrap";
+            pnlDonToiThieuWrap.Padding = new Padding(12, 0, 12, 0);
+            pnlDonToiThieuWrap.Size = new Size(194, 38);
+            pnlDonToiThieuWrap.TabIndex = 1;
+            pnlDonToiThieuWrap.Paint += DrawFigmaInputBox;
             // 
             // txtDonToiThieu
             // 
-            this.txtDonToiThieu.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtDonToiThieu.BackColor = System.Drawing.Color.White;
-            this.txtDonToiThieu.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtDonToiThieu.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.txtDonToiThieu.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(23)))), ((int)(((byte)(42)))));
-            this.txtDonToiThieu.Location = new System.Drawing.Point(10, 8);
-            this.txtDonToiThieu.Name = "txtDonToiThieu";
-            this.txtDonToiThieu.PlaceholderText = "0 đ";
-            this.txtDonToiThieu.Size = new System.Drawing.Size(174, 22);
-            this.txtDonToiThieu.TabIndex = 0;
+            txtDonToiThieu.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            txtDonToiThieu.BackColor = Color.White;
+            txtDonToiThieu.BorderStyle = BorderStyle.None;
+            txtDonToiThieu.Font = new Font("Segoe UI", 9.5F);
+            txtDonToiThieu.ForeColor = Color.FromArgb(15, 23, 42);
+            txtDonToiThieu.Location = new Point(10, 8);
+            txtDonToiThieu.Name = "txtDonToiThieu";
+            txtDonToiThieu.PlaceholderText = "0 đ";
+            txtDonToiThieu.Size = new Size(156, 22);
+            txtDonToiThieu.TabIndex = 0;
             // 
             // pnlColSoLuong
             // 
-            this.pnlColSoLuong.Controls.Add(this.lblSoLuong);
-            this.pnlColSoLuong.Controls.Add(this.pnlSoLuongWrap);
-            this.pnlColSoLuong.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlColSoLuong.Location = new System.Drawing.Point(202, 0);
-            this.pnlColSoLuong.Margin = new System.Windows.Forms.Padding(0);
-            this.pnlColSoLuong.Name = "pnlColSoLuong";
-            this.pnlColSoLuong.Size = new System.Drawing.Size(203, 68);
-            this.pnlColSoLuong.TabIndex = 1;
+            pnlColSoLuong.Controls.Add(lblSoLuong);
+            pnlColSoLuong.Controls.Add(pnlSoLuongWrap);
+            pnlColSoLuong.Dock = DockStyle.Fill;
+            pnlColSoLuong.Location = new Point(202, 0);
+            pnlColSoLuong.Margin = new Padding(0);
+            pnlColSoLuong.Name = "pnlColSoLuong";
+            pnlColSoLuong.Size = new Size(203, 68);
+            pnlColSoLuong.TabIndex = 1;
             // 
             // lblSoLuong
             // 
-            this.lblSoLuong.AutoSize = true;
-            this.lblSoLuong.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular);
-            this.lblSoLuong.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-            this.lblSoLuong.Location = new System.Drawing.Point(8, 0);
-            this.lblSoLuong.Name = "lblSoLuong";
-            this.lblSoLuong.Size = new System.Drawing.Size(69, 20);
-            this.lblSoLuong.TabIndex = 0;
-            this.lblSoLuong.Text = "Số lượng";
+            lblSoLuong.AutoSize = true;
+            lblSoLuong.Font = new Font("Segoe UI", 9F);
+            lblSoLuong.ForeColor = Color.FromArgb(51, 65, 85);
+            lblSoLuong.Location = new Point(8, 0);
+            lblSoLuong.Name = "lblSoLuong";
+            lblSoLuong.Size = new Size(69, 20);
+            lblSoLuong.TabIndex = 0;
+            lblSoLuong.Text = "Số lượng";
             // 
             // pnlSoLuongWrap
             // 
-            this.pnlSoLuongWrap.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlSoLuongWrap.BackColor = System.Drawing.Color.White;
-            this.pnlSoLuongWrap.Controls.Add(this.txtSoLuong);
-            this.pnlSoLuongWrap.Location = new System.Drawing.Point(8, 24);
-            this.pnlSoLuongWrap.Name = "pnlSoLuongWrap";
-            this.pnlSoLuongWrap.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
-            this.pnlSoLuongWrap.Size = new System.Drawing.Size(195, 38);
-            this.pnlSoLuongWrap.TabIndex = 1;
-            this.pnlSoLuongWrap.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawFigmaInputBox);
+            pnlSoLuongWrap.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            pnlSoLuongWrap.BackColor = Color.White;
+            pnlSoLuongWrap.Controls.Add(txtSoLuong);
+            pnlSoLuongWrap.Location = new Point(8, 24);
+            pnlSoLuongWrap.Name = "pnlSoLuongWrap";
+            pnlSoLuongWrap.Padding = new Padding(12, 0, 12, 0);
+            pnlSoLuongWrap.Size = new Size(195, 38);
+            pnlSoLuongWrap.TabIndex = 1;
+            pnlSoLuongWrap.Paint += DrawFigmaInputBox;
             // 
             // txtSoLuong
             // 
-            this.txtSoLuong.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtSoLuong.BackColor = System.Drawing.Color.White;
-            this.txtSoLuong.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtSoLuong.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.txtSoLuong.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(23)))), ((int)(((byte)(42)))));
-            this.txtSoLuong.Location = new System.Drawing.Point(10, 8);
-            this.txtSoLuong.Name = "txtSoLuong";
-            this.txtSoLuong.PlaceholderText = "100";
-            this.txtSoLuong.Size = new System.Drawing.Size(175, 22);
-            this.txtSoLuong.TabIndex = 0;
+            txtSoLuong.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            txtSoLuong.BackColor = Color.White;
+            txtSoLuong.BorderStyle = BorderStyle.None;
+            txtSoLuong.Font = new Font("Segoe UI", 9.5F);
+            txtSoLuong.ForeColor = Color.FromArgb(15, 23, 42);
+            txtSoLuong.Location = new Point(10, 8);
+            txtSoLuong.Name = "txtSoLuong";
+            txtSoLuong.PlaceholderText = "100";
+            txtSoLuong.Size = new Size(158, 22);
+            txtSoLuong.TabIndex = 0;
             // 
             // tbl2ColDates
             // 
-            this.tbl2ColDates.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbl2ColDates.ColumnCount = 2;
-            this.tbl2ColDates.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tbl2ColDates.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tbl2ColDates.Controls.Add(this.pnlColNgayBD, 0, 0);
-            this.tbl2ColDates.Controls.Add(this.pnlColNgayKT, 1, 0);
-            this.tbl2ColDates.Location = new System.Drawing.Point(21, 396);
-            this.tbl2ColDates.Name = "tbl2ColDates";
-            this.tbl2ColDates.RowCount = 1;
-            this.tbl2ColDates.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tbl2ColDates.Size = new System.Drawing.Size(405, 68);
-            this.tbl2ColDates.TabIndex = 10;
+            tbl2ColDates.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            tbl2ColDates.ColumnCount = 2;
+            tbl2ColDates.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tbl2ColDates.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tbl2ColDates.Controls.Add(pnlColNgayBD, 0, 0);
+            tbl2ColDates.Controls.Add(pnlColNgayKT, 1, 0);
+            tbl2ColDates.Location = new Point(21, 396);
+            tbl2ColDates.Name = "tbl2ColDates";
+            tbl2ColDates.RowCount = 1;
+            tbl2ColDates.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tbl2ColDates.Size = new Size(405, 68);
+            tbl2ColDates.TabIndex = 10;
             // 
             // pnlColNgayBD
             // 
-            this.pnlColNgayBD.Controls.Add(this.lblNgayBD);
-            this.pnlColNgayBD.Controls.Add(this.pnlNgayBDWrap);
-            this.pnlColNgayBD.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlColNgayBD.Location = new System.Drawing.Point(0, 0);
-            this.pnlColNgayBD.Margin = new System.Windows.Forms.Padding(0, 0, 8, 0);
-            this.pnlColNgayBD.Name = "pnlColNgayBD";
-            this.pnlColNgayBD.Size = new System.Drawing.Size(194, 68);
-            this.pnlColNgayBD.TabIndex = 0;
+            pnlColNgayBD.Controls.Add(lblNgayBD);
+            pnlColNgayBD.Controls.Add(pnlNgayBDWrap);
+            pnlColNgayBD.Dock = DockStyle.Fill;
+            pnlColNgayBD.Location = new Point(0, 0);
+            pnlColNgayBD.Margin = new Padding(0, 0, 8, 0);
+            pnlColNgayBD.Name = "pnlColNgayBD";
+            pnlColNgayBD.Size = new Size(194, 68);
+            pnlColNgayBD.TabIndex = 0;
             // 
             // lblNgayBD
             // 
-            this.lblNgayBD.AutoSize = true;
-            this.lblNgayBD.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular);
-            this.lblNgayBD.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-            this.lblNgayBD.Location = new System.Drawing.Point(0, 0);
-            this.lblNgayBD.Name = "lblNgayBD";
-            this.lblNgayBD.Size = new System.Drawing.Size(99, 20);
-            this.lblNgayBD.TabIndex = 0;
-            this.lblNgayBD.Text = "Ngày bắt đầu";
+            lblNgayBD.AutoSize = true;
+            lblNgayBD.Font = new Font("Segoe UI", 9F);
+            lblNgayBD.ForeColor = Color.FromArgb(51, 65, 85);
+            lblNgayBD.Location = new Point(0, 0);
+            lblNgayBD.Name = "lblNgayBD";
+            lblNgayBD.Size = new Size(99, 20);
+            lblNgayBD.TabIndex = 0;
+            lblNgayBD.Text = "Ngày bắt đầu";
             // 
             // pnlNgayBDWrap
             // 
-            this.pnlNgayBDWrap.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlNgayBDWrap.BackColor = System.Drawing.Color.White;
-            this.pnlNgayBDWrap.Controls.Add(this.dtpNgayBatDau);
-            this.pnlNgayBDWrap.Location = new System.Drawing.Point(0, 24);
-            this.pnlNgayBDWrap.Name = "pnlNgayBDWrap";
-            this.pnlNgayBDWrap.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.pnlNgayBDWrap.Size = new System.Drawing.Size(194, 38);
-            this.pnlNgayBDWrap.TabIndex = 1;
-            this.pnlNgayBDWrap.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawFigmaInputBox);
+            pnlNgayBDWrap.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            pnlNgayBDWrap.BackColor = Color.White;
+            pnlNgayBDWrap.Controls.Add(dtpNgayBatDau);
+            pnlNgayBDWrap.Location = new Point(0, 24);
+            pnlNgayBDWrap.Name = "pnlNgayBDWrap";
+            pnlNgayBDWrap.Padding = new Padding(4, 3, 4, 3);
+            pnlNgayBDWrap.Size = new Size(194, 38);
+            pnlNgayBDWrap.TabIndex = 1;
+            pnlNgayBDWrap.Paint += DrawFigmaInputBox;
             // 
             // dtpNgayBatDau
             // 
-            this.dtpNgayBatDau.CalendarFont = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.dtpNgayBatDau.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dtpNgayBatDau.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.dtpNgayBatDau.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtpNgayBatDau.Location = new System.Drawing.Point(4, 3);
-            this.dtpNgayBatDau.Name = "dtpNgayBatDau";
-            this.dtpNgayBatDau.Size = new System.Drawing.Size(186, 29);
-            this.dtpNgayBatDau.TabIndex = 0;
+            dtpNgayBatDau.CalendarFont = new Font("Segoe UI", 9.5F);
+            dtpNgayBatDau.Dock = DockStyle.Fill;
+            dtpNgayBatDau.Font = new Font("Segoe UI", 9.5F);
+            dtpNgayBatDau.Format = DateTimePickerFormat.Short;
+            dtpNgayBatDau.Location = new Point(4, 3);
+            dtpNgayBatDau.Name = "dtpNgayBatDau";
+            dtpNgayBatDau.Size = new Size(186, 29);
+            dtpNgayBatDau.TabIndex = 0;
             // 
             // pnlColNgayKT
             // 
-            this.pnlColNgayKT.Controls.Add(this.lblNgayKT);
-            this.pnlColNgayKT.Controls.Add(this.pnlNgayKTWrap);
-            this.pnlColNgayKT.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlColNgayKT.Location = new System.Drawing.Point(202, 0);
-            this.pnlColNgayKT.Margin = new System.Windows.Forms.Padding(0);
-            this.pnlColNgayKT.Name = "pnlColNgayKT";
-            this.pnlColNgayKT.Size = new System.Drawing.Size(203, 68);
-            this.pnlColNgayKT.TabIndex = 1;
+            pnlColNgayKT.Controls.Add(lblNgayKT);
+            pnlColNgayKT.Controls.Add(pnlNgayKTWrap);
+            pnlColNgayKT.Dock = DockStyle.Fill;
+            pnlColNgayKT.Location = new Point(202, 0);
+            pnlColNgayKT.Margin = new Padding(0);
+            pnlColNgayKT.Name = "pnlColNgayKT";
+            pnlColNgayKT.Size = new Size(203, 68);
+            pnlColNgayKT.TabIndex = 1;
             // 
             // lblNgayKT
             // 
-            this.lblNgayKT.AutoSize = true;
-            this.lblNgayKT.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular);
-            this.lblNgayKT.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-            this.lblNgayKT.Location = new System.Drawing.Point(8, 0);
-            this.lblNgayKT.Name = "lblNgayKT";
-            this.lblNgayKT.Size = new System.Drawing.Size(100, 20);
-            this.lblNgayKT.TabIndex = 0;
-            this.lblNgayKT.Text = "Ngày kết thúc";
+            lblNgayKT.AutoSize = true;
+            lblNgayKT.Font = new Font("Segoe UI", 9F);
+            lblNgayKT.ForeColor = Color.FromArgb(51, 65, 85);
+            lblNgayKT.Location = new Point(8, 0);
+            lblNgayKT.Name = "lblNgayKT";
+            lblNgayKT.Size = new Size(100, 20);
+            lblNgayKT.TabIndex = 0;
+            lblNgayKT.Text = "Ngày kết thúc";
             // 
             // pnlNgayKTWrap
             // 
-            this.pnlNgayKTWrap.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlNgayKTWrap.BackColor = System.Drawing.Color.White;
-            this.pnlNgayKTWrap.Controls.Add(this.dtpNgayHetHan);
-            this.pnlNgayKTWrap.Location = new System.Drawing.Point(8, 24);
-            this.pnlNgayKTWrap.Name = "pnlNgayKTWrap";
-            this.pnlNgayKTWrap.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.pnlNgayKTWrap.Size = new System.Drawing.Size(195, 38);
-            this.pnlNgayKTWrap.TabIndex = 1;
-            this.pnlNgayKTWrap.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawFigmaInputBox);
+            pnlNgayKTWrap.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            pnlNgayKTWrap.BackColor = Color.White;
+            pnlNgayKTWrap.Controls.Add(dtpNgayHetHan);
+            pnlNgayKTWrap.Location = new Point(8, 24);
+            pnlNgayKTWrap.Name = "pnlNgayKTWrap";
+            pnlNgayKTWrap.Padding = new Padding(4, 3, 4, 3);
+            pnlNgayKTWrap.Size = new Size(195, 38);
+            pnlNgayKTWrap.TabIndex = 1;
+            pnlNgayKTWrap.Paint += DrawFigmaInputBox;
             // 
             // dtpNgayHetHan
             // 
-            this.dtpNgayHetHan.CalendarFont = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.dtpNgayHetHan.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dtpNgayHetHan.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.dtpNgayHetHan.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtpNgayHetHan.Location = new System.Drawing.Point(4, 3);
-            this.dtpNgayHetHan.Name = "dtpNgayHetHan";
-            this.dtpNgayHetHan.Size = new System.Drawing.Size(187, 29);
-            this.dtpNgayHetHan.TabIndex = 0;
+            dtpNgayHetHan.CalendarFont = new Font("Segoe UI", 9.5F);
+            dtpNgayHetHan.Dock = DockStyle.Fill;
+            dtpNgayHetHan.Font = new Font("Segoe UI", 9.5F);
+            dtpNgayHetHan.Format = DateTimePickerFormat.Short;
+            dtpNgayHetHan.Location = new Point(4, 3);
+            dtpNgayHetHan.Name = "dtpNgayHetHan";
+            dtpNgayHetHan.Size = new Size(187, 29);
+            dtpNgayHetHan.TabIndex = 0;
             // 
             // chkTrangThai
             // 
-            this.chkTrangThai.AutoSize = true;
-            this.chkTrangThai.Checked = true;
-            this.chkTrangThai.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkTrangThai.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.chkTrangThai.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.chkTrangThai.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(41)))), ((int)(((byte)(59)))));
-            this.chkTrangThai.Location = new System.Drawing.Point(24, 480);
-            this.chkTrangThai.Name = "chkTrangThai";
-            this.chkTrangThai.Size = new System.Drawing.Size(248, 25);
-            this.chkTrangThai.TabIndex = 11;
-            this.chkTrangThai.Text = "Kích hoạt hiệu lực của voucher";
-            this.chkTrangThai.UseVisualStyleBackColor = true;
+            chkTrangThai.AutoSize = true;
+            chkTrangThai.Checked = true;
+            chkTrangThai.CheckState = CheckState.Checked;
+            chkTrangThai.Cursor = Cursors.Hand;
+            chkTrangThai.Font = new Font("Segoe UI", 9.5F);
+            chkTrangThai.ForeColor = Color.FromArgb(30, 41, 59);
+            chkTrangThai.Location = new Point(24, 480);
+            chkTrangThai.Name = "chkTrangThai";
+            chkTrangThai.Size = new Size(242, 25);
+            chkTrangThai.TabIndex = 11;
+            chkTrangThai.Text = "Kích hoạt hiệu lực của voucher";
+            chkTrangThai.UseVisualStyleBackColor = true;
             // 
             // pnlBottomButtons
             // 
-            this.pnlBottomButtons.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlBottomButtons.Controls.Add(this.btnXoa);
-            this.pnlBottomButtons.Controls.Add(this.btnLamMoi);
-            this.pnlBottomButtons.Controls.Add(this.btnLuu);
-            this.pnlBottomButtons.Location = new System.Drawing.Point(24, 524);
-            this.pnlBottomButtons.Name = "pnlBottomButtons";
-            this.pnlBottomButtons.Size = new System.Drawing.Size(399, 44);
-            this.pnlBottomButtons.TabIndex = 12;
-            // 
-            // btnLuu
-            // 
-            this.btnLuu.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnLuu.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(234)))), ((int)(((byte)(88)))), ((int)(((byte)(12)))));
-            this.btnLuu.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnLuu.FlatAppearance.BorderSize = 0;
-            this.btnLuu.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnLuu.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            this.btnLuu.ForeColor = System.Drawing.Color.White;
-            this.btnLuu.Location = new System.Drawing.Point(267, 0);
-            this.btnLuu.Name = "btnLuu";
-            this.btnLuu.Size = new System.Drawing.Size(132, 40);
-            this.btnLuu.TabIndex = 2;
-            this.btnLuu.Text = "Lưu Voucher";
-            this.btnLuu.UseVisualStyleBackColor = false;
-            this.btnLuu.Click += new System.EventHandler(this.btnLuu_Click);
-            this.btnLuu.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawPillBorder);
-            // 
-            // btnLamMoi
-            // 
-            this.btnLamMoi.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnLamMoi.BackColor = System.Drawing.Color.White;
-            this.btnLamMoi.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnLamMoi.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(226)))), ((int)(((byte)(232)))), ((int)(((byte)(240)))));
-            this.btnLamMoi.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnLamMoi.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.btnLamMoi.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(85)))), ((int)(((byte)(105)))));
-            this.btnLamMoi.Location = new System.Drawing.Point(167, 0);
-            this.btnLamMoi.Name = "btnLamMoi";
-            this.btnLamMoi.Size = new System.Drawing.Size(92, 40);
-            this.btnLamMoi.TabIndex = 1;
-            this.btnLamMoi.Text = "Làm mới";
-            this.btnLamMoi.UseVisualStyleBackColor = false;
-            this.btnLamMoi.Click += new System.EventHandler(this.btnLamMoi_Click);
+            pnlBottomButtons.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            pnlBottomButtons.Controls.Add(btnXoa);
+            pnlBottomButtons.Controls.Add(btnLamMoi);
+            pnlBottomButtons.Controls.Add(btnLuu);
+            pnlBottomButtons.Location = new Point(24, 524);
+            pnlBottomButtons.Name = "pnlBottomButtons";
+            pnlBottomButtons.Size = new Size(399, 44);
+            pnlBottomButtons.TabIndex = 12;
             // 
             // btnXoa
             // 
-            this.btnXoa.BackColor = System.Drawing.Color.White;
-            this.btnXoa.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnXoa.FlatAppearance.BorderSize = 0;
-            this.btnXoa.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnXoa.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.btnXoa.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(38)))), ((int)(((byte)(38)))));
-            this.btnXoa.Location = new System.Drawing.Point(0, 0);
-            this.btnXoa.Name = "btnXoa";
-            this.btnXoa.Size = new System.Drawing.Size(90, 40);
-            this.btnXoa.TabIndex = 0;
-            this.btnXoa.Text = "Xóa mã";
-            this.btnXoa.UseVisualStyleBackColor = false;
-            this.btnXoa.Click += new System.EventHandler(this.btnXoa_Click);
+            btnXoa.BackColor = Color.White;
+            btnXoa.Cursor = Cursors.Hand;
+            btnXoa.FlatAppearance.BorderSize = 0;
+            btnXoa.FlatStyle = FlatStyle.Flat;
+            btnXoa.Font = new Font("Segoe UI", 9.5F);
+            btnXoa.ForeColor = Color.FromArgb(220, 38, 38);
+            btnXoa.Location = new Point(0, 0);
+            btnXoa.Name = "btnXoa";
+            btnXoa.Size = new Size(90, 40);
+            btnXoa.TabIndex = 0;
+            btnXoa.Text = "Xóa mã";
+            btnXoa.UseVisualStyleBackColor = false;
+            btnXoa.Click += btnXoa_Click;
+            // 
+            // btnLamMoi
+            // 
+            btnLamMoi.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnLamMoi.BackColor = Color.White;
+            btnLamMoi.Cursor = Cursors.Hand;
+            btnLamMoi.FlatAppearance.BorderColor = Color.FromArgb(226, 232, 240);
+            btnLamMoi.FlatStyle = FlatStyle.Flat;
+            btnLamMoi.Font = new Font("Segoe UI", 9.5F);
+            btnLamMoi.ForeColor = Color.FromArgb(71, 85, 105);
+            btnLamMoi.Location = new Point(167, 0);
+            btnLamMoi.Name = "btnLamMoi";
+            btnLamMoi.Size = new Size(92, 40);
+            btnLamMoi.TabIndex = 1;
+            btnLamMoi.Text = "Làm mới";
+            btnLamMoi.UseVisualStyleBackColor = false;
+            btnLamMoi.Click += btnLamMoi_Click;
+            // 
+            // btnLuu
+            // 
+            btnLuu.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnLuu.BackColor = Color.FromArgb(234, 88, 12);
+            btnLuu.Cursor = Cursors.Hand;
+            btnLuu.FlatAppearance.BorderSize = 0;
+            btnLuu.FlatStyle = FlatStyle.Flat;
+            btnLuu.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnLuu.ForeColor = Color.White;
+            btnLuu.Location = new Point(267, 0);
+            btnLuu.Name = "btnLuu";
+            btnLuu.Size = new Size(132, 40);
+            btnLuu.TabIndex = 2;
+            btnLuu.Text = "Lưu Voucher";
+            btnLuu.UseVisualStyleBackColor = false;
+            btnLuu.Click += btnLuu_Click;
+            btnLuu.Paint += DrawPillBorder;
             // 
             // frmVoucher
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(241)))), ((int)(((byte)(245)))), ((int)(((byte)(249)))));
-            this.ClientSize = new System.Drawing.Size(1280, 760);
-            this.Controls.Add(this.tblMainLayout);
-            this.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Name = "frmVoucher";
-            this.Padding = new System.Windows.Forms.Padding(20);
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Quản Lý Voucher";
-            this.Load += new System.EventHandler(this.frmVoucher_Load);
-            this.tblMainLayout.ResumeLayout(false);
-            this.cardLeft.ResumeLayout(false);
-            this.pnlSearch.ResumeLayout(false);
-            this.pnlSearch.PerformLayout();
-            this.pnlGridWrapper.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvVoucher)).EndInit();
-            this.cardRight.ResumeLayout(false);
-            this.cardRight.PerformLayout();
-            this.pnlCodeWrap.ResumeLayout(false);
-            this.pnlCodeWrap.PerformLayout();
-            this.pnlLoaiGiam.ResumeLayout(false);
-            this.pnlLoaiGiam.PerformLayout();
-            this.pnlGiaTriWrap.ResumeLayout(false);
-            this.pnlGiaTriWrap.PerformLayout();
-            this.tbl2ColInputs.ResumeLayout(false);
-            this.pnlColDonToiThieu.ResumeLayout(false);
-            this.pnlColDonToiThieu.PerformLayout();
-            this.pnlDonToiThieuWrap.ResumeLayout(false);
-            this.pnlDonToiThieuWrap.PerformLayout();
-            this.pnlColSoLuong.ResumeLayout(false);
-            this.pnlColSoLuong.PerformLayout();
-            this.pnlSoLuongWrap.ResumeLayout(false);
-            this.pnlSoLuongWrap.PerformLayout();
-            this.tbl2ColDates.ResumeLayout(false);
-            this.pnlColNgayBD.ResumeLayout(false);
-            this.pnlColNgayBD.PerformLayout();
-            this.pnlNgayBDWrap.ResumeLayout(false);
-            this.pnlColNgayKT.ResumeLayout(false);
-            this.pnlColNgayKT.PerformLayout();
-            this.pnlNgayKTWrap.ResumeLayout(false);
-            this.pnlBottomButtons.ResumeLayout(false);
-            this.ResumeLayout(false);
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(241, 245, 249);
+            ClientSize = new Size(1280, 760);
+            Controls.Add(tblMainLayout);
+            Font = new Font("Segoe UI", 9F);
+            FormBorderStyle = FormBorderStyle.None;
+            Name = "frmVoucher";
+            Padding = new Padding(20);
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "Quản Lý Voucher";
+            Load += frmVoucher_Load;
+            tblMainLayout.ResumeLayout(false);
+            cardLeft.ResumeLayout(false);
+            pnlGridWrapper.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvVoucher).EndInit();
+            pnlSearch.ResumeLayout(false);
+            pnlSearch.PerformLayout();
+            cardRight.ResumeLayout(false);
+            cardRight.PerformLayout();
+            pnlCodeWrap.ResumeLayout(false);
+            pnlCodeWrap.PerformLayout();
+            pnlLoaiGiam.ResumeLayout(false);
+            pnlLoaiGiam.PerformLayout();
+            pnlGiaTriWrap.ResumeLayout(false);
+            pnlGiaTriWrap.PerformLayout();
+            tbl2ColInputs.ResumeLayout(false);
+            pnlColDonToiThieu.ResumeLayout(false);
+            pnlColDonToiThieu.PerformLayout();
+            pnlDonToiThieuWrap.ResumeLayout(false);
+            pnlDonToiThieuWrap.PerformLayout();
+            pnlColSoLuong.ResumeLayout(false);
+            pnlColSoLuong.PerformLayout();
+            pnlSoLuongWrap.ResumeLayout(false);
+            pnlSoLuongWrap.PerformLayout();
+            tbl2ColDates.ResumeLayout(false);
+            pnlColNgayBD.ResumeLayout(false);
+            pnlColNgayBD.PerformLayout();
+            pnlNgayBDWrap.ResumeLayout(false);
+            pnlColNgayKT.ResumeLayout(false);
+            pnlColNgayKT.PerformLayout();
+            pnlNgayKTWrap.ResumeLayout(false);
+            pnlBottomButtons.ResumeLayout(false);
+            ResumeLayout(false);
 
         }
 
