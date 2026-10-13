@@ -58,6 +58,7 @@
             lblVND = new Label();
             txtTienCoc = new TextBox();
             lblCocToiThieu = new Label();
+
             lblCocTen = new Label();
             lblTongCongTien = new Label();
             lblTongCongTen = new Label();
