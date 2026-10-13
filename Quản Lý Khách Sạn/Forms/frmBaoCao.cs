@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Data;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
@@ -46,6 +45,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 DateTime tu = dtpTuNgay.Value.Date;
                 DateTime den = dtpDenNgay.Value.Date;
 
+                // 1. KPI Doanh Thu Thực Tế
                 DataTable dtKpi = baoCaoDAL.LayTongQuanDoanhThu(tu, den);
                 if (dtKpi.Rows.Count > 0)
                 {
@@ -61,6 +61,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     lblKpi4Value.Text = soHD.ToString();
                 }
 
+                // 2. Danh sách Hóa đơn
                 DataTable dtHD = baoCaoDAL.LayDanhSachHoaDonTheoNgay(tu, den);
                 dgvDoanhThu.DataSource = dtHD;
                 if (dgvDoanhThu.Columns["Thực Thu"] != null)
@@ -71,6 +72,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     dgvDoanhThu.Columns["Thực Thu"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 }
 
+                // 3. Top Dịch vụ Doanh thu cao
                 DataTable dtTop = baoCaoDAL.LayTopDichVuSuDungNhieu(tu, den);
                 dgvTopDichVu.DataSource = dtTop;
                 if (dgvTopDichVu.Columns["Doanh Thu"] != null)
