@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using Microsoft.Data.SqlClient;
@@ -27,7 +27,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
             // COLLATE Vietnamese_CI_AI: không phân biệt hoa/thường và dấu => gõ "hung" vẫn ra "Hùng"
             const string sql = @"
                 SELECT TOP (@Top) *
-                FROM dbo.vw_KhachHangTongQuan
+                FROM dbo.vw_LeTanKhachHangTongQuan
                 WHERE ( @TuKhoa = N''
                         OR HoTen COLLATE Vietnamese_CI_AI LIKE @Like ESCAPE '\'
                         OR DienThoai LIKE @LikeSo ESCAPE '\'
@@ -46,7 +46,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
             };
 
             var list = new List<KhachHang>();
-            using (DataTable dt = DatabaseHelper.ExecuteQuery(sql, p))
+            using (DataTable dt = LeTanDatPhongDAL.LayBang(sql, p))
             {
                 foreach (DataRow r in dt.Rows) list.Add(MapRow(r));
             }
@@ -58,7 +58,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
         // ------------------------------------------------------------------
         public int DemHoSo()
         {
-            using (DataTable dt = DatabaseHelper.ExecuteQuery("SELECT COUNT(*) FROM dbo.KhachHang"))
+            using (DataTable dt = LeTanDatPhongDAL.LayBang("SELECT COUNT(*) FROM dbo.KhachHang"))
             {
                 return Convert.ToInt32(dt.Rows[0][0]);
             }
@@ -69,8 +69,8 @@ namespace Quản_Lý_Khách_Sạn.DAL
         // ------------------------------------------------------------------
         public KhachHang LayTheoMa(int maKhachHang)
         {
-            const string sql = "SELECT * FROM dbo.vw_KhachHangTongQuan WHERE MaKhachHang = @Ma";
-            using (DataTable dt = DatabaseHelper.ExecuteQuery(sql, new[] { new SqlParameter("@Ma", SqlDbType.Int) { Value = maKhachHang } }))
+            const string sql = "SELECT * FROM dbo.vw_LeTanKhachHangTongQuan WHERE MaKhachHang = @Ma";
+            using (DataTable dt = LeTanDatPhongDAL.LayBang(sql, new[] { new SqlParameter("@Ma", SqlDbType.Int) { Value = maKhachHang } }))
             {
                 return dt.Rows.Count == 0 ? null : MapRow(dt.Rows[0]);
             }
@@ -85,13 +85,13 @@ namespace Quản_Lý_Khách_Sạn.DAL
             if (string.IsNullOrEmpty(soGiayTo)) return false;
 
             const string sql = @"SELECT COUNT(1) FROM dbo.KhachHang
-                                 WHERE SoGiayTo = @So AND (@MaTru IS NULL OR MaKhachHang <> @MaTru)";
+                                 WHERE CCCD = @So AND (@MaTru IS NULL OR MaKH <> @MaTru)";
             SqlParameter[] p =
             {
                 new SqlParameter("@So", SqlDbType.VarChar, 30) { Value = soGiayTo },
                 new SqlParameter("@MaTru", SqlDbType.Int) { Value = (object)maLoaiTru ?? DBNull.Value }
             };
-            using (DataTable dt = DatabaseHelper.ExecuteQuery(sql, p))
+            using (DataTable dt = LeTanDatPhongDAL.LayBang(sql, p))
             {
                 return Convert.ToInt32(dt.Rows[0][0]) > 0;
             }
@@ -99,19 +99,19 @@ namespace Quản_Lý_Khách_Sạn.DAL
 
         // ------------------------------------------------------------------
         // 5. THÊM MỚI – trả về MaKhachHang vừa sinh
-        //    OUTPUT INSERTED.MaKhachHang: lấy khóa tự tăng ngay trong 1 câu lệnh,
+        //    OUTPUT INSERTED.MaKH: lấy khóa tự tăng ngay trong 1 câu lệnh,
         //    an toàn hơn SELECT MAX(...) (không bị lẫn khi 2 lễ tân thêm cùng lúc).
         // ------------------------------------------------------------------
         public int Them(KhachHang kh)
         {
             const string sql = @"
                 INSERT INTO dbo.KhachHang
-                    (HoTen, DienThoai, GioiTinh, NgaySinh, QuocTich, Email, DiaChi, SoGiayTo, GhiChu, DongYNhanUuDai)
-                OUTPUT INSERTED.MaKhachHang
+                    (HoTen, SoDienThoai, GioiTinh, NgaySinh, QuocTich, Email, DiaChi, CCCD, GhiChu, DongYNhanUuDai)
+                OUTPUT INSERTED.MaKH
                 VALUES
                     (@HoTen, @DienThoai, @GioiTinh, @NgaySinh, @QuocTich, @Email, @DiaChi, @SoGiayTo, @GhiChu, @DongY)";
 
-            using (DataTable dt = DatabaseHelper.ExecuteQuery(sql, ThamSoGhi(kh)))
+            using (DataTable dt = LeTanDatPhongDAL.LayBang(sql, ThamSoGhi(kh)))
             {
                 return Convert.ToInt32(dt.Rows[0][0]);
             }
@@ -124,16 +124,16 @@ namespace Quản_Lý_Khách_Sạn.DAL
         {
             const string sql = @"
                 UPDATE dbo.KhachHang
-                SET HoTen = @HoTen, DienThoai = @DienThoai, GioiTinh = @GioiTinh, NgaySinh = @NgaySinh,
-                    QuocTich = @QuocTich, Email = @Email, DiaChi = @DiaChi, SoGiayTo = @SoGiayTo,
+                SET HoTen = @HoTen, SoDienThoai = @DienThoai, GioiTinh = @GioiTinh, NgaySinh = @NgaySinh,
+                    QuocTich = @QuocTich, Email = @Email, DiaChi = @DiaChi, CCCD = @SoGiayTo,
                     GhiChu = @GhiChu, DongYNhanUuDai = @DongY, NgayCapNhat = GETDATE()
-                WHERE MaKhachHang = @Ma";
+                WHERE MaKH = @Ma";
 
             var p = new List<SqlParameter>(ThamSoGhi(kh))
             {
                 new SqlParameter("@Ma", SqlDbType.Int) { Value = kh.MaKhachHang }
             };
-            return DatabaseHelper.ExecuteNonQuery(sql, p.ToArray()) > 0;
+            return ChayCapNhat(sql, p.ToArray()) > 0;
         }
 
         // ------------------------------------------------------------------
@@ -143,20 +143,20 @@ namespace Quản_Lý_Khách_Sạn.DAL
         public List<LichSuLuuTru> LayLichSuLuuTru(int maKhachHang)
         {
             const string sql = @"
-                SELECT  dp.MaDatPhong, p.SoPhong, lp.TenLoaiPhong,
-                        dp.NgayNhanDuKien, dp.NgayTraDuKien,
-                        DATEDIFF(DAY, dp.NgayNhanDuKien, dp.NgayTraDuKien) AS SoDem,
-                        dp.TrangThai,
-                        dp.GiaPhongDem * DATEDIFF(DAY, dp.NgayNhanDuKien, dp.NgayTraDuKien) AS TongTien
+                SELECT dp.MaDatPhong, p.SoPhong, lp.TenLoai AS TenLoaiPhong,
+                       dp.NgayNhan AS NgayNhanDuKien, dp.NgayTra AS NgayTraDuKien,
+                       dp.SoDem,
+                       CASE WHEN dp.TrangThai = N'Đang ở' THEN N'Đang lưu trú'
+                            ELSE N'Đã trả phòng' END AS TrangThai,
+                       dp.TongTien
                 FROM dbo.DatPhong dp
-                JOIN dbo.Phong p      ON p.MaPhong = dp.MaPhong
-                JOIN dbo.LoaiPhong lp ON lp.MaLoaiPhong = p.MaLoaiPhong
-                WHERE dp.MaKhachHang = @Ma
-                  AND dp.TrangThai IN (N'Đã nhận phòng', N'Đã trả phòng')
-                ORDER BY dp.NgayNhanDuKien DESC";
+                JOIN dbo.Phong p ON p.MaPhong = dp.MaPhong
+                JOIN dbo.LoaiPhong lp ON lp.MaLoai = p.MaLoai
+                WHERE dp.MaKH = @Ma AND dp.TrangThai IN (N'Đang ở', N'Đã trả')
+                ORDER BY dp.NgayNhan DESC, dp.MaDatPhong DESC";
 
             var list = new List<LichSuLuuTru>();
-            using (DataTable dt = DatabaseHelper.ExecuteQuery(sql, new[] { new SqlParameter("@Ma", SqlDbType.Int) { Value = maKhachHang } }))
+            using (DataTable dt = LeTanDatPhongDAL.LayBang(sql, new[] { new SqlParameter("@Ma", SqlDbType.Int) { Value = maKhachHang } }))
             {
                 foreach (DataRow r in dt.Rows)
                 {
@@ -224,6 +224,17 @@ namespace Quản_Lý_Khách_Sạn.DAL
         }
 
         /// <summary>Vô hiệu hóa ký tự đặc biệt của LIKE (% _ [) để người dùng gõ gì tìm đúng cái đó.</summary>
+        private static int ChayCapNhat(string sql, SqlParameter[] parameters)
+        {
+            using (var conn = LeTanDatPhongDAL.TaoKetNoi())
+            using (var cmd = new SqlCommand(sql, conn))
+            {
+                cmd.Parameters.AddRange(parameters);
+                conn.Open();
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
         private static string EscapeLike(string s)
         {
             return s.Replace(@"\", @"\\").Replace("%", @"\%").Replace("_", @"\_").Replace("[", @"\[");

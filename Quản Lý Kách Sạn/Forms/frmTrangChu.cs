@@ -6,7 +6,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
 {
     public partial class frmTrangChu : Form
     {
-        private Form formHienTai = null;
+        private Control manHinhHienTai;
+        private ucDatPhong manHinhDatPhong;
+        private frmKhachHang manHinhKhachHang;
         private Button nutDangChon = null;
 
         public frmTrangChu()
@@ -16,30 +18,94 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void frmTrangChu_Load(object sender, EventArgs e)
         {
-            MoFormCon(new frmDichVu(), btnDichVu, "QUẢN LÝ DỊCH VỤ PHÒNG");
+            MoDatPhong();
         }
 
+        private void MoDatPhong()
+        {
+            if (manHinhDatPhong == null || manHinhDatPhong.IsDisposed)
+                manHinhDatPhong = new ucDatPhong();
+
+            HienThiManHinh(manHinhDatPhong, btnDatPhong, "ĐẶT PHÒNG & LƯU TRÚ");
+        }
+
+        private void MoKhachHang()
+        {
+            if (manHinhKhachHang == null || manHinhKhachHang.IsDisposed)
+                manHinhKhachHang = new frmKhachHang();
+
+            HienThiManHinh(manHinhKhachHang, btnKhachHang, "HỒ SƠ KHÁCH HÀNG");
+        }
+
+        // Các form khác vẫn gọi qua hàm cũ của trang chủ.
         private void MoFormCon(Form formCon, Button nutMenu, string tieuDe)
         {
-            if (formHienTai != null)
+            HienThiManHinh(formCon, nutMenu, tieuDe);
+        }
+
+        private void HienThiManHinh(Control manHinh, Button nutMenu, string tieuDe)
+        {
+            if (ReferenceEquals(manHinhHienTai, manHinh))
+                return;
+
+            Control manHinhCu = manHinhHienTai;
+            try
             {
-                formHienTai.Close();
-                formHienTai.Dispose();
+                if (manHinh.Parent != pnlContent)
+                {
+                    if (manHinh is Form formCon)
+                    {
+                        formCon.TopLevel = false;
+                        formCon.FormBorderStyle = FormBorderStyle.None;
+                        formCon.ShowInTaskbar = false;
+                        formCon.WindowState = FormWindowState.Normal;
+                    }
+
+                    manHinh.Dock = DockStyle.Fill;
+                    manHinh.Visible = false;
+                    pnlContent.Controls.Add(manHinh);
+                }
+
+                manHinh.Show();
+                manHinh.BringToFront();
+
+                if (manHinhCu != null && !manHinhCu.IsDisposed)
+                {
+                    // Giữ dữ liệu chưa lưu của hai chức năng được phân công.
+                    if (ReferenceEquals(manHinhCu, manHinhDatPhong)
+                        || ReferenceEquals(manHinhCu, manHinhKhachHang))
+                    {
+                        manHinhCu.Hide();
+                    }
+                    else
+                    {
+                        if (manHinhCu is Form formCu) formCu.Close();
+                        manHinhCu.Dispose();
+                    }
+                }
+
+                manHinhHienTai = manHinh;
+                pnlContent.Tag = manHinh;
+                lblTitleSection.Text = tieuDe;
+                DoiTrangThaiNutMenu(nutMenu);
+                manHinh.Select();
             }
+            catch (Exception ex)
+            {
+                pnlContent.Controls.Remove(manHinh);
+                manHinh.Dispose();
 
-            DoiTrangThaiNutMenu(nutMenu);
+                if (manHinhCu != null && !manHinhCu.IsDisposed)
+                {
+                    manHinhCu.Show();
+                    manHinhCu.BringToFront();
+                }
 
-            formHienTai = formCon;
-            lblTitleSection.Text = tieuDe;
-
-            formCon.TopLevel = false;
-            formCon.FormBorderStyle = FormBorderStyle.None;
-            formCon.Dock = DockStyle.Fill;
-            pnlContent.Controls.Clear();
-            pnlContent.Controls.Add(formCon);
-            pnlContent.Tag = formCon;
-            formCon.BringToFront();
-            formCon.Show();
+                MessageBox.Show(this,
+                    "Không mở được màn hình: " + tieuDe
+                    + Environment.NewLine + ex.Message,
+                    "Lỗi điều hướng", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void DoiTrangThaiNutMenu(Button btn)
@@ -74,14 +140,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void btnDatPhong_Click(object sender, EventArgs e)
         {
-            try { MoFormCon(new frmDatPhong(), btnDatPhong, "ĐẶT PHÒNG & CHECK-IN / CHECK-OUT"); }
-            catch { MessageBox.Show("Form Đặt phòng đang được đồng bộ.", "Thông báo"); }
+            MoDatPhong();
         }
 
         private void btnKhachHang_Click(object sender, EventArgs e)
         {
-            try { MoFormCon(new frmKhachHang(), btnKhachHang, "HỒ SƠ KHÁCH HÀNG"); }
-            catch { MessageBox.Show("Form Khách hàng đang được đồng bộ.", "Thông báo"); }
+            MoKhachHang();
         }
 
         private void btnDichVu_Click(object sender, EventArgs e)
