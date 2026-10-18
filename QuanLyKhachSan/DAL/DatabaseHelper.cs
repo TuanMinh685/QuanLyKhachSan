@@ -6,12 +6,11 @@ namespace Quản_Lý_Khách_Sạn.DAL
 {
     public static class DatabaseHelper
     {
-        // CHUỖI KẾT NỐI DUY NHẤT của cả dự án. Máy nào khác (LocalDB, tên instance khác...)
-        // thì đặt biến môi trường QLKS_CONNECTION thay vì sửa code rồi commit.
+        // Sử dụng Integrated Security=True để đăng nhập trực tiếp qua quyền Windows
         private static readonly string connectionString =
             Environment.GetEnvironmentVariable("QLKS_CONNECTION")
-            ?? @"Server=.;Database=QuanLyKhachSan;User Id=sa;Password=12345;TrustServerCertificate=True;";
-        // Thêm lại hàm GetConnection bị thiếu tên ở code cũ
+            ?? @"Server=.\SQLEXPRESS;Database=QuanLyKhachSan;Integrated Security=True;TrustServerCertificate=True;";
+
         public static SqlConnection GetConnection()
         {
             return new SqlConnection(connectionString);
