@@ -38,7 +38,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnPhuongThucTT = new Button
             {
                 Name = "btnPhuongThucTT",
-                Text = "💳 Phương thức thanh toán",
+                Text = "💳 Phương thức TT",
                 Dock = DockStyle.Top,
                 Height = 52,
                 Cursor = Cursors.Hand,

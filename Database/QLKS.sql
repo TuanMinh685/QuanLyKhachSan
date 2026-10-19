@@ -16,6 +16,9 @@ CREATE DATABASE QuanLyKhachSan;
 GO
 USE QuanLyKhachSan;
 GO
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
+GO
 
 /* ---------- 1. Loại phòng ---------- */
 CREATE TABLE LoaiPhong (
@@ -194,7 +197,12 @@ INSERT INTO Phong (SoPhong, Tang, MaLoai, MoTaGiuong, DienTich) VALUES
  (N'P101', 1, 1, N'1 giường đôi', 22), (N'P102', 1, 1, N'2 giường đơn', 22),
  (N'P201', 2, 2, N'1 giường king', 30), (N'P202', 2, 2, N'2 giường đôi', 32),
  (N'P301', 3, 3, N'1 giường king + sofa', 45);
-INSERT INTO NhanVien (HoTen, ChucVu) VALUES (N'Quản trị hệ thống', N'Quản lý');
+INSERT INTO NhanVien (HoTen, ChucVu, SoDienThoai) VALUES
+ (N'Quản trị hệ thống', N'Quản lý', '0901234567'),
+ (N'Trần Thị Lễ Tân', N'Lễ tân', '0907654321');
+INSERT INTO TaiKhoan (TenDangNhap, MatKhau, VaiTro, MaNhanVien) VALUES
+ (N'admin', N'123456', N'Admin', 1),
+ (N'letan01', N'123456', N'LeTan', 2);
 INSERT INTO DichVu (MaDichVu, TenDichVu, LoaiDichVu, DonGia, DonViTinh) VALUES
  (N'DV001', N'Ăn sáng buffet', N'Ăn uống', 120000, N'Suất'),
  (N'DV002', N'Giặt ủi', N'Tiện ích', 50000, N'Kg'),
