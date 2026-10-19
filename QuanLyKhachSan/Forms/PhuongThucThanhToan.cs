@@ -1,5 +1,7 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using Quản_Lý_Khách_Sạn.DAL;
 
@@ -8,6 +10,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
     public partial class PhuongThucThanhToan : Form
     {
         private PhuongThucThanhToanDAL dal = new PhuongThucThanhToanDAL();
+        private List<PhuongThucThanhToanModel> danhSachGoc = new List<PhuongThucThanhToanModel>();
         private int? maDangChon = null;
 
         public PhuongThucThanhToan()
@@ -24,6 +27,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         }
 
         private void DrawFigmaCard(object sender, PaintEventArgs e) => UITheme.DrawCard(sender, e);
+        private void DrawFigmaInputBox(object sender, PaintEventArgs e) => UITheme.DrawInputBox(sender, e);
 
         private void DrawPillBorder(object sender, PaintEventArgs e)
         {
@@ -37,34 +41,58 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             try
             {
-                dgvPTTT.DataSource = null;
-                dgvPTTT.DataSource = dal.GetAll();
-
-                if (dgvPTTT.Columns["MaPhuongThuc"] != null)
-                {
-                    dgvPTTT.Columns["MaPhuongThuc"].HeaderText = "MÃ";
-                    dgvPTTT.Columns["MaPhuongThuc"].FillWeight = 40;
-                }
-                if (dgvPTTT.Columns["TenPhuongThuc"] != null)
-                {
-                    dgvPTTT.Columns["TenPhuongThuc"].HeaderText = "TÊN PHƯƠNG THỨC";
-                    dgvPTTT.Columns["TenPhuongThuc"].FillWeight = 140;
-                    dgvPTTT.Columns["TenPhuongThuc"].DefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
-                }
-                if (dgvPTTT.Columns["MoTa"] != null)
-                {
-                    dgvPTTT.Columns["MoTa"].HeaderText = "GHI CHÚ / MÔ TẢ";
-                    dgvPTTT.Columns["MoTa"].FillWeight = 160;
-                }
-                if (dgvPTTT.Columns["KichHoat"] != null)
-                {
-                    dgvPTTT.Columns["KichHoat"].HeaderText = "KÍCH HOẠT";
-                    dgvPTTT.Columns["KichHoat"].FillWeight = 60;
-                }
+                danhSachGoc = dal.GetAll();
+                HienThiLenBang(danhSachGoc);
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Lỗi tải phương thức thanh toán: " + ex.Message);
+            }
+        }
+
+        private void HienThiLenBang(List<PhuongThucThanhToanModel> ds)
+        {
+            dgvPTTT.DataSource = null;
+            dgvPTTT.DataSource = ds;
+
+            if (dgvPTTT.Columns["MaPhuongThuc"] != null)
+            {
+                dgvPTTT.Columns["MaPhuongThuc"].HeaderText = "MÃ";
+                dgvPTTT.Columns["MaPhuongThuc"].FillWeight = 45;
+                dgvPTTT.Columns["MaPhuongThuc"].DefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
+                dgvPTTT.Columns["MaPhuongThuc"].DefaultCellStyle.ForeColor = UITheme.DarkNavy;
+            }
+            if (dgvPTTT.Columns["TenPhuongThuc"] != null)
+            {
+                dgvPTTT.Columns["TenPhuongThuc"].HeaderText = "TÊN PHƯƠNG THỨC";
+                dgvPTTT.Columns["TenPhuongThuc"].FillWeight = 140;
+                dgvPTTT.Columns["TenPhuongThuc"].DefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
+            }
+            if (dgvPTTT.Columns["MoTa"] != null)
+            {
+                dgvPTTT.Columns["MoTa"].HeaderText = "GHI CHÚ / MÔ TẢ";
+                dgvPTTT.Columns["MoTa"].FillWeight = 180;
+            }
+            if (dgvPTTT.Columns["KichHoat"] != null)
+            {
+                dgvPTTT.Columns["KichHoat"].HeaderText = "KÍCH HOẠT";
+                dgvPTTT.Columns["KichHoat"].FillWeight = 65;
+            }
+        }
+
+        private void txtTimKiem_TextChanged(object sender, EventArgs e)
+        {
+            string k = txtTimKiem.Text.Trim().ToLower();
+            if (string.IsNullOrEmpty(k))
+            {
+                HienThiLenBang(danhSachGoc);
+            }
+            else
+            {
+                var loc = danhSachGoc.Where(x =>
+                    (x.TenPhuongThuc != null && x.TenPhuongThuc.ToLower().Contains(k)) ||
+                    (x.MoTa != null && x.MoTa.ToLower().Contains(k))).ToList();
+                HienThiLenBang(loc);
             }
         }
 
@@ -140,7 +168,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
             txtTenPTTT.Clear();
             txtMoTa.Clear();
             chkKichHoat.Checked = true;
-            btnLuu.Text = "Lưu mới";
+            btnLuu.Text = "Lưu phương thức";
+            txtTimKiem.Clear();
             dgvPTTT.ClearSelection();
         }
     }

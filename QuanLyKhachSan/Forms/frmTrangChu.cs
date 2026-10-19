@@ -19,7 +19,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnTaiKhoan = new Button
             {
                 Name = "btnTaiKhoan",
-                Text = "👤 Tài khoản & phân quyền",
+                Text = "👤 Tài khoản & Phân quyền",
                 Dock = DockStyle.Top,
                 Height = 52,
                 Cursor = Cursors.Hand,
@@ -28,7 +28,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 ForeColor = Color.FromArgb(226, 232, 240),
                 BackColor = Color.FromArgb(15, 37, 55),
                 TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(20, 0, 0, 0)
+                Padding = new Padding(24, 0, 0, 0),
+                UseMnemonic = false
             };
             btnTaiKhoan.FlatAppearance.BorderSize = 0;
             btnTaiKhoan.Click += (_, __) => { if (YeuCauAdmin()) MoFormCon(new frmTaiKhoan(), btnTaiKhoan, "QUẢN LÝ TÀI KHOẢN & PHÂN QUYỀN"); };
@@ -47,12 +48,24 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 ForeColor = Color.FromArgb(226, 232, 240),
                 BackColor = Color.FromArgb(15, 37, 55),
                 TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(20, 0, 0, 0)
+                Padding = new Padding(24, 0, 0, 0),
+                UseMnemonic = false
             };
             btnPhuongThucTT.FlatAppearance.BorderSize = 0;
             btnPhuongThucTT.Click += (_, __) => MoFormCon(new PhuongThucThanhToan(), btnPhuongThucTT, "QUẢN LÝ PHƯƠNG THỨC THANH TOÁN");
             pnlSidebar.Controls.Add(btnPhuongThucTT);
             pnlSidebar.Controls.SetChildIndex(btnPhuongThucTT, 2);
+
+            // Đồng bộ chiều cao, lề trái và hiển thị dấu '&' cho toàn bộ nút menu bên trái
+            foreach (Control ctrl in pnlSidebar.Controls)
+            {
+                if (ctrl is Button btn && btn != btnDangXuat)
+                {
+                    btn.UseMnemonic = false;
+                    btn.Height = 52;
+                    btn.Padding = new Padding(24, 0, 0, 0);
+                }
+            }
 
             ApDungPhanQuyen();
         }
