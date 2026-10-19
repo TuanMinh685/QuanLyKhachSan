@@ -15,6 +15,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         public frmBaoCao()
         {
             InitializeComponent();
+            UITheme.ApplyTheme(this);
         }
 
         private void frmBaoCao_Load(object sender, EventArgs e)

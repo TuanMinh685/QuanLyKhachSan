@@ -13,6 +13,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         public PhuongThucThanhToan()
         {
             InitializeComponent();
+            UITheme.ApplyTheme(this);
         }
 
         private void PhuongThucThanhToan_Load(object sender, EventArgs e)

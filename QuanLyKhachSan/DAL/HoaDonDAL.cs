@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
 using Quản_Lý_Khách_Sạn.Models;
@@ -55,8 +55,8 @@ namespace Quản_Lý_Khách_Sạn.DAL
 
         public bool Insert(HoaDon hd)
         {
-            string sql = @"INSERT INTO HoaDon (MaHoaDon, MaDatPhong, NgayLap, NgayThanhToan, TienPhong, TienDichVu, TienGiamGia, TienDatCoc, TongTien, MaPTTT, TrangThai)
-                           VALUES (@MaHD, @MaDP, @NgayLap, @NgayTT, @TienPhong, @TienDV, @GiamGia, @DatCoc, @TongTien, @PTTT, @TrangThai)";
+            string sql = @"INSERT INTO HoaDon (MaHoaDon, MaDatPhong, NgayLap, NgayThanhToan, TienPhong, TienDichVu, TienGiamGia, TienDatCoc, TongTien, MaPTTT, MaVoucher, TrangThai)
+                           VALUES (@MaHD, @MaDP, @NgayLap, @NgayTT, @TienPhong, @TienDV, @GiamGia, @DatCoc, @TongTien, @PTTT, @MaVoucher, @TrangThai)";
             try
             {
                 using (SqlConnection conn = DatabaseHelper.GetConnection())
@@ -72,6 +72,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
                     cmd.Parameters.AddWithValue("@DatCoc", hd.TienDatCoc);
                     cmd.Parameters.AddWithValue("@TongTien", hd.TongTien);
                     cmd.Parameters.AddWithValue("@PTTT", hd.MaPTTT ?? "TM");
+                    cmd.Parameters.AddWithValue("@MaVoucher", hd.MaVoucher.HasValue ? (object)hd.MaVoucher.Value : DBNull.Value);
                     cmd.Parameters.AddWithValue("@TrangThai", hd.TrangThai ?? "Đã thanh toán");
 
                     conn.Open();
@@ -82,6 +83,61 @@ namespace Quản_Lý_Khách_Sạn.DAL
             {
                 System.Windows.Forms.MessageBox.Show("Lỗi lưu Hóa Đơn: " + ex.Message, "SQL Error");
                 return false;
+            }
+        }
+
+        // --- HÀM NÂNG CẤP ĐÃ ĐƯỢC THÊM VÀO ĐÂY ---
+        public bool LuuHoaDonVaCheckOut(HoaDon hd, string maDatPhong)
+        {
+            using (SqlConnection conn = DatabaseHelper.GetConnection())
+            {
+                conn.Open();
+                SqlTransaction trans = conn.BeginTransaction();
+                try
+                {
+                    // 1. Thêm mới Hóa Đơn
+                    string sqlHoaDon = @"INSERT INTO HoaDon (MaHoaDon, MaDatPhong, NgayLap, NgayThanhToan, TienPhong, TienDichVu, TienGiamGia, TienDatCoc, TongTien, MaPTTT, MaVoucher, TrangThai)
+                                         VALUES (@MaHD, @MaDP, @NgayLap, @NgayTT, @TienPhong, @TienDV, @GiamGia, @DatCoc, @TongTien, @PTTT, @MaVoucher, @TrangThai)";
+                    using (SqlCommand cmd = new SqlCommand(sqlHoaDon, conn, trans))
+                    {
+                        cmd.Parameters.AddWithValue("@MaHD", hd.MaHoaDon);
+                        cmd.Parameters.AddWithValue("@MaDP", hd.MaDatPhong ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@NgayLap", hd.NgayLap);
+                        cmd.Parameters.AddWithValue("@NgayTT", hd.NgayThanhToan);
+                        cmd.Parameters.AddWithValue("@TienPhong", hd.TienPhong);
+                        cmd.Parameters.AddWithValue("@TienDV", hd.TienDichVu);
+                        cmd.Parameters.AddWithValue("@GiamGia", hd.TienGiamGia);
+                        cmd.Parameters.AddWithValue("@DatCoc", hd.TienDatCoc);
+                        cmd.Parameters.AddWithValue("@TongTien", hd.TongTien);
+                        cmd.Parameters.AddWithValue("@PTTT", hd.MaPTTT ?? "TM");
+                        cmd.Parameters.AddWithValue("@MaVoucher", hd.MaVoucher.HasValue ? (object)hd.MaVoucher.Value : DBNull.Value);
+                        cmd.Parameters.AddWithValue("@TrangThai", hd.TrangThai ?? "Đã thanh toán");
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    // 2. Cập nhật trạng thái đơn Đặt phòng thành 'Đã trả' theo đúng cấu trúc bảng DatPhong trong QLKS.sql
+                    if (!string.IsNullOrWhiteSpace(maDatPhong))
+                    {
+                        string sqlDatPhong = @"UPDATE DatPhong
+                                               SET TrangThai = N'Đã trả',
+                                                   GioTraThucTe = ISNULL(GioTraThucTe, GETDATE())
+                                               WHERE CAST(MaDatPhong AS NVARCHAR(30)) = @MaDP OR MaDat = @MaDP";
+                        using (SqlCommand cmdDP = new SqlCommand(sqlDatPhong, conn, trans))
+                        {
+                            cmdDP.Parameters.AddWithValue("@MaDP", maDatPhong);
+                            cmdDP.ExecuteNonQuery();
+                        }
+                    }
+
+                    trans.Commit();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    trans.Rollback();
+                    System.Windows.Forms.MessageBox.Show("Lỗi thanh toán: " + ex.Message, "SQL Error");
+                    return false;
+                }
             }
         }
     }

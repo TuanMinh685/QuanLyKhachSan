@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -11,6 +11,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private frmKhachHang manHinhKhachHang;
         private Button nutDangChon = null;
         private Button btnTaiKhoan;
+        private Button btnPhuongThucTT;
 
         public frmTrangChu()
         {
@@ -33,6 +34,26 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnTaiKhoan.Click += (_, __) => { if (YeuCauAdmin()) MoFormCon(new frmTaiKhoan(), btnTaiKhoan, "QUẢN LÝ TÀI KHOẢN & PHÂN QUYỀN"); };
             pnlSidebar.Controls.Add(btnTaiKhoan);
             pnlSidebar.Controls.SetChildIndex(btnTaiKhoan, 1);
+
+            btnPhuongThucTT = new Button
+            {
+                Name = "btnPhuongThucTT",
+                Text = "💳 Phương thức thanh toán",
+                Dock = DockStyle.Top,
+                Height = 52,
+                Cursor = Cursors.Hand,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                ForeColor = Color.FromArgb(226, 232, 240),
+                BackColor = Color.FromArgb(15, 37, 55),
+                TextAlign = ContentAlignment.MiddleLeft,
+                Padding = new Padding(20, 0, 0, 0)
+            };
+            btnPhuongThucTT.FlatAppearance.BorderSize = 0;
+            btnPhuongThucTT.Click += (_, __) => MoFormCon(new PhuongThucThanhToan(), btnPhuongThucTT, "QUẢN LÝ PHƯƠNG THỨC THANH TOÁN");
+            pnlSidebar.Controls.Add(btnPhuongThucTT);
+            pnlSidebar.Controls.SetChildIndex(btnPhuongThucTT, 2);
+
             ApDungPhanQuyen();
         }
 

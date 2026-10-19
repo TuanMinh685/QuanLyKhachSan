@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
-using Quản_Lý_Khách_Sạn.DAL;
+using Quản_Lý_Khách_Sạn.BLL;
 using Quản_Lý_Khách_Sạn.Models;
 
 namespace Quản_Lý_Khách_Sạn.Forms
@@ -12,12 +12,13 @@ namespace Quản_Lý_Khách_Sạn.Forms
     public partial class frmVoucher : Form
     {
         private int? maVoucherDangChon = null;
-        private VoucherDAL voucherDAL = new VoucherDAL();
+        private VoucherBLL voucherBLL = new VoucherBLL();
         private List<Voucher> danhSachGoc = new List<Voucher>();
 
         public frmVoucher()
         {
             InitializeComponent();
+            UITheme.ApplyTheme(this);
         }
 
         private void frmVoucher_Load(object sender, EventArgs e)
@@ -41,7 +42,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             try
             {
-                danhSachGoc = voucherDAL.GetAll();
+                danhSachGoc = voucherBLL.LayDanhSachVoucher();
                 HienThiLenBang(danhSachGoc);
             }
             catch (Exception ex)
@@ -222,7 +223,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             if (maVoucherDangChon.HasValue)
             {
                 v.MaVoucher = maVoucherDangChon.Value;
-                if (voucherDAL.Update(v))
+                if (voucherBLL.CapNhatVoucher(v))
                 {
                     MessageBox.Show("Cập nhật thông tin voucher thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     TaiDanhSach();
@@ -231,7 +232,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             }
             else
             {
-                if (voucherDAL.Insert(v))
+                if (voucherBLL.ThemVoucher(v))
                 {
                     MessageBox.Show("Tạo voucher mới thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     TaiDanhSach();
@@ -250,7 +251,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             if (MessageBox.Show("Bạn có chắc chắn muốn xóa mã voucher này?", "Xác nhận",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
 
-            if (voucherDAL.Delete(maVoucherDangChon.Value))
+            if (voucherBLL.XoaVoucher(maVoucherDangChon.Value))
             {
                 MessageBox.Show("Đã xóa voucher thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 TaiDanhSach();

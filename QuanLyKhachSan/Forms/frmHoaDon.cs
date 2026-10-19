@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
@@ -6,6 +6,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Printing;
 using System.Linq;
 using System.Windows.Forms;
+using Quản_Lý_Khách_Sạn.BLL;
 using Quản_Lý_Khách_Sạn.DAL;
 using Quản_Lý_Khách_Sạn.Models;
 
@@ -14,10 +15,11 @@ namespace Quản_Lý_Khách_Sạn.Forms
     public partial class frmHoaDon : Form
     {
         private string maHDDangChon = null;
-        private HoaDonDAL hoaDonDAL = new HoaDonDAL();
+        private HoaDonBLL hoaDonBLL = new HoaDonBLL();
         private DichVuDAL dichVuDAL = new DichVuDAL();
-        private VoucherDAL voucherDAL = new VoucherDAL();
+        private VoucherBLL voucherBLL = new VoucherBLL();
         private ChiTietHoaDonDAL chiTietDAL = new ChiTietHoaDonDAL();
+        private PhuongThucThanhToanDAL ptttDAL = new PhuongThucThanhToanDAL();
 
         private List<HoaDon> danhSachHoaDon = new List<HoaDon>();
         private List<DichVu> danhSachDichVu = new List<DichVu>();
@@ -82,7 +84,22 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void TaiDanhSachPhuongThucTT()
         {
+            cboPTTT.DataSource = null;
             cboPTTT.Items.Clear();
+            try
+            {
+                var dsPTTT = ptttDAL.GetAll().Where(x => x.KichHoat).ToList();
+                if (dsPTTT.Count > 0)
+                {
+                    cboPTTT.DisplayMember = "TenPhuongThuc";
+                    cboPTTT.ValueMember = "TenPhuongThuc";
+                    cboPTTT.DataSource = dsPTTT;
+                    cboPTTT.SelectedIndex = 0;
+                    return;
+                }
+            }
+            catch { }
+
             cboPTTT.Items.Add(new { Text = "Tiền mặt (VND)", Value = "TM" });
             cboPTTT.Items.Add(new { Text = "Chuyển khoản VietQR", Value = "CK" });
             cboPTTT.Items.Add(new { Text = "Thẻ POS / Tín dụng", Value = "POS" });
@@ -106,8 +123,21 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private void TaiDanhSachDatPhong()
         {
             cboDatPhong.Items.Clear();
-            cboDatPhong.Items.Add("DP01 - Phòng P206 (Đỗ Thu Trang)");
-            cboDatPhong.Items.Add("DP02 - Phòng P301 (Nguyễn Văn Hùng)");
+            try
+            {
+                var dsChuaTT = ThanhToanDAL.GetDanhSachChuaThanhToan();
+                foreach (var item in dsChuaTT)
+                {
+                    cboDatPhong.Items.Add(item);
+                }
+            }
+            catch { }
+
+            if (cboDatPhong.Items.Count == 0)
+            {
+                cboDatPhong.Items.Add("DP01 - Phòng P206 (Đỗ Thu Trang)");
+                cboDatPhong.Items.Add("DP02 - Phòng P301 (Nguyễn Văn Hùng)");
+            }
             if (cboDatPhong.Items.Count > 0) cboDatPhong.SelectedIndex = 0;
         }
 
@@ -115,7 +145,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             try
             {
-                danhSachHoaDon = hoaDonDAL.GetAll();
+                danhSachHoaDon = hoaDonBLL.LayDanhSachHoaDon();
                 dgvHoaDon.DataSource = null;
                 dgvHoaDon.DataSource = danhSachHoaDon;
 
@@ -147,7 +177,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void cboDatPhong_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (cboDatPhong.SelectedIndex == 0)
+            if (cboDatPhong.SelectedItem is ThongTinDatPhongThanhToan dp)
+            {
+                txtTienPhong.Text = dp.TienPhong.ToString("N0");
+                txtTienDatCoc.Text = dp.TienCoc.ToString("N0");
+            }
+            else if (cboDatPhong.SelectedIndex == 0)
             {
                 txtTienPhong.Text = "2,900,000";
                 txtTienDatCoc.Text = "1,000,000";
@@ -208,8 +243,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 return;
             }
 
-            var dsVoucher = voucherDAL.GetAll();
-            var v = dsVoucher.FirstOrDefault(x => x.Code != null && x.Code.ToUpper() == code);
+            var v = voucherBLL.TimVoucherTheoCode(code);
 
             if (v == null)
             {
@@ -229,7 +263,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 return;
             }
 
-            decimal giamGia = (v.LoaiGiam == "PhanTram") ? (tienPhong * (v.GiaTri / 100)) : v.GiaTri;
+            decimal giamGia = hoaDonBLL.TinhGiamGiaVoucher(v, tienPhong);
             maVoucherDaApDung = v.MaVoucher;
             txtTienGiamGia.Text = giamGia.ToString("N0");
             TinhTongTienTuDong(null, null);
@@ -244,8 +278,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             decimal gg = ParseMoney(txtTienGiamGia.Text);
             decimal coc = ParseMoney(txtTienDatCoc.Text);
 
-            decimal canThu = (tp + dv) - gg - coc;
-            if (canThu < 0) canThu = 0;
+            decimal canThu = hoaDonBLL.TinhTongThanhToan(tp, dv, gg, coc);
 
             lblTongTienValue.Text = canThu.ToString("N0") + " đ";
         }
@@ -296,6 +329,19 @@ namespace Quản_Lý_Khách_Sạn.Forms
             }
         }
 
+        private string LayMaPTTT()
+        {
+            if (cboPTTT.SelectedItem is PhuongThucThanhToanModel m)
+            {
+                string ten = (m.TenPhuongThuc ?? "").ToLower();
+                if (ten.Contains("chuyển khoản") || ten.Contains("qr")) return "CK";
+                if (ten.Contains("thẻ") || ten.Contains("pos")) return "POS";
+                if (ten.Contains("tiền mặt")) return "TM";
+                return m.TenPhuongThuc.Length <= 10 ? m.TenPhuongThuc : m.TenPhuongThuc.Substring(0, 10);
+            }
+            return cboPTTT.SelectedValue?.ToString() ?? "TM";
+        }
+
         private void btnThanhToan_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtMaHD.Text))
@@ -304,22 +350,27 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 return;
             }
 
+            string maDP = (cboDatPhong.SelectedItem is ThongTinDatPhongThanhToan dpItem)
+                ? dpItem.MaHienThi
+                : cboDatPhong.Text.Split(' ')[0];
+
             decimal canThu = ParseMoney(lblTongTienValue.Text.Replace(" đ", ""));
             var hd = new HoaDon
             {
                 MaHoaDon = txtMaHD.Text.Trim().ToUpper(),
-                MaDatPhong = cboDatPhong.Text.Split(' ')[0],
+                MaDatPhong = maDP,
                 TienPhong = ParseMoney(txtTienPhong.Text),
                 TienDichVu = ParseMoney(txtTienDV.Text),
                 TienGiamGia = ParseMoney(txtTienGiamGia.Text),
                 TienDatCoc = ParseMoney(txtTienDatCoc.Text),
                 TongTien = canThu,
                 NgayThanhToan = DateTime.Now,
+                MaPTTT = LayMaPTTT(),
                 MaVoucher = maVoucherDaApDung,
                 TrangThai = "Đã thanh toán"
             };
 
-            if (hoaDonDAL.Insert(hd))
+            if (hoaDonBLL.ThanhToanVaTraPhong(hd, maDP))
             {
                 foreach (DataRow r in dtChiTietTam.Rows)
                 {
@@ -330,6 +381,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 }
 
                 MessageBox.Show($"Thanh toán hóa đơn [{hd.MaHoaDon}] thành công! Thực thu: {canThu:N0} đ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                TaiDanhSachDatPhong();
                 TaiDanhSachHoaDon();
             }
         }

@@ -27,6 +27,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
         public bool LuuChiTiet(string maHoaDon, string maDichVu, int soLuong, decimal donGia)
         {
             decimal thanhTien = soLuong * donGia;
+
             string sql = @"
                 INSERT INTO ChiTietHoaDon (MaHoaDon, MaDichVu, SoLuong, DonGia, ThanhTien)
                 VALUES (@MaHD, @MaDV, @SL, @DonGia, @ThanhTien)";

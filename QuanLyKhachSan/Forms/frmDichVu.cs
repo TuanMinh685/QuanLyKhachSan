@@ -18,6 +18,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         public frmDichVu()
         {
             InitializeComponent();
+            UITheme.ApplyTheme(this);
         }
 
         private void frmDichVu_Load(object sender, EventArgs e)
