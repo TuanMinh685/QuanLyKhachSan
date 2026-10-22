@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 // using Microsoft.Data.SqlClient; // migrated to Supabase Npgsql
@@ -19,7 +19,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
         public List<PhuongThucThanhToanModel> GetAll()
         {
             List<PhuongThucThanhToanModel> list = new List<PhuongThucThanhToanModel>();
-            string sql = "SELECT MaPhuongThuc, TenPhuongThuc, ISNULL(MoTa, '') AS MoTa, ISNULL(KichHoat, 1) AS KichHoat FROM PhuongThucThanhToan";
+            string sql = "SELECT MaPhuongThuc, TenPhuongThuc, COALESCE(MoTa, '') AS MoTa, COALESCE(KichHoat, true) AS KichHoat FROM PhuongThucThanhToan ORDER BY MaPhuongThuc";
             DataTable dt = DatabaseHelper.ExecuteQuery(sql);
 
             foreach (DataRow r in dt.Rows)
