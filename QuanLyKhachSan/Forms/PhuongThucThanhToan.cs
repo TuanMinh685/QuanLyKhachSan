@@ -226,7 +226,21 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 dgvPTTT.Columns["MoTa"].HeaderText = "GHI CHÚ / MÔ TẢ";
                 dgvPTTT.Columns["MoTa"].FillWeight = 180;
             }
-            if (dgvPTTT.Columns["KichHoat"] != null)
+            if (dgvPTTT.Columns["KichHoat"] is DataGridViewCheckBoxColumn)
+            {
+                int idx = dgvPTTT.Columns["KichHoat"].Index;
+                dgvPTTT.Columns.Remove("KichHoat");
+                var col = new DataGridViewTextBoxColumn
+                {
+                    Name = "KichHoat",
+                    DataPropertyName = "KichHoat",
+                    HeaderText = "TRẠNG THÁI",
+                    FillWeight = 75
+                };
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                dgvPTTT.Columns.Insert(idx, col);
+            }
+            else if (dgvPTTT.Columns["KichHoat"] != null)
             {
                 dgvPTTT.Columns["KichHoat"].HeaderText = "TRẠNG THÁI";
                 dgvPTTT.Columns["KichHoat"].FillWeight = 75;

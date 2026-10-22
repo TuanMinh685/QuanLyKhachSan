@@ -267,7 +267,21 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 dgvDichVu.Columns["DonViTinh"].FillWeight = 55;
                 dgvDichVu.Columns["DonViTinh"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             }
-            if (dgvDichVu.Columns["TrangThai"] != null)
+            if (dgvDichVu.Columns["TrangThai"] is DataGridViewCheckBoxColumn)
+            {
+                int idx = dgvDichVu.Columns["TrangThai"].Index;
+                dgvDichVu.Columns.Remove("TrangThai");
+                var col = new DataGridViewTextBoxColumn
+                {
+                    Name = "TrangThai",
+                    DataPropertyName = "TrangThai",
+                    HeaderText = "TRẠNG THÁI",
+                    FillWeight = 85
+                };
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                dgvDichVu.Columns.Insert(idx, col);
+            }
+            else if (dgvDichVu.Columns["TrangThai"] != null)
             {
                 dgvDichVu.Columns["TrangThai"].HeaderText = "TRẠNG THÁI";
                 dgvDichVu.Columns["TrangThai"].FillWeight = 85;

@@ -109,6 +109,15 @@ namespace Quản_Lý_Khách_Sạn
             dgv.AlternatingRowsDefaultCellStyle.ForeColor = TextMain;
             dgv.AlternatingRowsDefaultCellStyle.SelectionBackColor = ColorTranslator.FromHtml("#FFF7ED");
             dgv.AlternatingRowsDefaultCellStyle.SelectionForeColor = ColorTranslator.FromHtml("#9A3412");
+
+            // Ngăn chặn triệt để hộp thoại lỗi mặc định DataGridView Default Error Dialog
+            dgv.DataError -= Dgv_DataError;
+            dgv.DataError += Dgv_DataError;
+        }
+
+        private static void Dgv_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+            e.ThrowException = false;
         }
 
         // --- 4. VẼ KHUNG CARD & Ô INPUT BO GÓC MƯỢT ---

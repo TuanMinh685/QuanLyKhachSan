@@ -254,20 +254,15 @@ namespace Quản_Lý_Khách_Sạn.Forms
             dgvVoucher.DataSource = null;
             dgvVoucher.DataSource = danhSach;
 
-            string[] cotAn = { "Id", "TenChuongTrinh", "GiaTriGiam", "LoaiGiamGia", "PhanTramGiam", "ConHieuLuc" };
-            foreach (var col in cotAn)
+            // Ẩn tất cả các cột phụ dư thừa
+            foreach (DataGridViewColumn col in dgvVoucher.Columns)
             {
-                if (dgvVoucher.Columns[col] != null) dgvVoucher.Columns[col].Visible = false;
+                col.Visible = false;
             }
 
-            if (dgvVoucher.Columns["MaVoucher"] != null)
-            {
-                dgvVoucher.Columns["MaVoucher"].HeaderText = "#";
-                dgvVoucher.Columns["MaVoucher"].FillWeight = 30;
-                dgvVoucher.Columns["MaVoucher"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            }
             if (dgvVoucher.Columns["Code"] != null)
             {
+                dgvVoucher.Columns["Code"].Visible = true;
                 dgvVoucher.Columns["Code"].HeaderText = "MÃ VOUCHER";
                 dgvVoucher.Columns["Code"].FillWeight = 95;
                 dgvVoucher.Columns["Code"].DefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
@@ -275,46 +270,60 @@ namespace Quản_Lý_Khách_Sạn.Forms
             }
             if (dgvVoucher.Columns["LoaiGiam"] != null)
             {
+                dgvVoucher.Columns["LoaiGiam"].Visible = true;
                 dgvVoucher.Columns["LoaiGiam"].HeaderText = "HÌNH THỨC";
                 dgvVoucher.Columns["LoaiGiam"].FillWeight = 80;
                 dgvVoucher.Columns["LoaiGiam"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             }
             if (dgvVoucher.Columns["GiaTri"] != null)
             {
+                dgvVoucher.Columns["GiaTri"].Visible = true;
                 dgvVoucher.Columns["GiaTri"].HeaderText = "MỨC GIẢM";
                 dgvVoucher.Columns["GiaTri"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 dgvVoucher.Columns["GiaTri"].FillWeight = 85;
             }
             if (dgvVoucher.Columns["DonToiThieu"] != null)
             {
+                dgvVoucher.Columns["DonToiThieu"].Visible = true;
                 dgvVoucher.Columns["DonToiThieu"].HeaderText = "ĐƠN TỐI THIỂU";
                 dgvVoucher.Columns["DonToiThieu"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 dgvVoucher.Columns["DonToiThieu"].FillWeight = 90;
             }
             if (dgvVoucher.Columns["SoLuong"] != null)
             {
+                dgvVoucher.Columns["SoLuong"].Visible = true;
                 dgvVoucher.Columns["SoLuong"].HeaderText = "SL";
                 dgvVoucher.Columns["SoLuong"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 dgvVoucher.Columns["SoLuong"].FillWeight = 40;
             }
-            if (dgvVoucher.Columns["NgayBatDau"] != null)
-            {
-                dgvVoucher.Columns["NgayBatDau"].HeaderText = "BẮT ĐẦU";
-                dgvVoucher.Columns["NgayBatDau"].DefaultCellStyle.Format = "dd/MM/yyyy";
-                dgvVoucher.Columns["NgayBatDau"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                dgvVoucher.Columns["NgayBatDau"].FillWeight = 75;
-            }
             if (dgvVoucher.Columns["NgayHetHan"] != null)
             {
+                dgvVoucher.Columns["NgayHetHan"].Visible = true;
                 dgvVoucher.Columns["NgayHetHan"].HeaderText = "HẾT HẠN";
                 dgvVoucher.Columns["NgayHetHan"].DefaultCellStyle.Format = "dd/MM/yyyy";
                 dgvVoucher.Columns["NgayHetHan"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 dgvVoucher.Columns["NgayHetHan"].FillWeight = 75;
             }
-            if (dgvVoucher.Columns["TrangThai"] != null)
+            if (dgvVoucher.Columns["TrangThai"] is DataGridViewCheckBoxColumn)
             {
+                int idx = dgvVoucher.Columns["TrangThai"].Index;
+                dgvVoucher.Columns.Remove("TrangThai");
+                var col = new DataGridViewTextBoxColumn
+                {
+                    Name = "TrangThai",
+                    DataPropertyName = "TrangThai",
+                    HeaderText = "TRẠNG THÁI",
+                    FillWeight = 80,
+                    Visible = true
+                };
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                dgvVoucher.Columns.Insert(idx, col);
+            }
+            else if (dgvVoucher.Columns["TrangThai"] != null)
+            {
+                dgvVoucher.Columns["TrangThai"].Visible = true;
                 dgvVoucher.Columns["TrangThai"].HeaderText = "TRẠNG THÁI";
-                dgvVoucher.Columns["TrangThai"].FillWeight = 75;
+                dgvVoucher.Columns["TrangThai"].FillWeight = 80;
                 dgvVoucher.Columns["TrangThai"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             }
         }
