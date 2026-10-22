@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -37,6 +37,14 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private void frmKhachHang_Load(object sender, EventArgs e)
         {
             if (DesignMode) return;
+
+            VisibleChanged += (s, ev) =>
+            {
+                if (Visible && !DesignMode)
+                {
+                    TaiDanhSach();
+                }
+            };
 
             // Bảo đảm vùng thông tin khách hàng có thanh cuộn dọc trên màn hình DPI cao
             // hoặc khi form được nhúng vào vùng làm việc có chiều cao hạn chế.

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
@@ -21,6 +21,33 @@ namespace Quản_Lý_Khách_Sạn.Forms
             AcceptButton = btnTimKhach;
             CancelButton = btnDong;
             dgvKhach.CellDoubleClick += dgvKhach_CellDoubleClick;
+
+            Button btnThemKhach = new Button
+            {
+                Text = "➕ Thêm khách mới",
+                Location = new Point(12, 364),
+                Size = new Size(160, 30),
+                BackColor = UITheme.PrimaryOrange,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnThemKhach.FlatAppearance.BorderSize = 0;
+            btnThemKhach.Click += (_, __) =>
+            {
+                using var f = new frmThemKhachNhanhModal();
+                if (f.ShowDialog(this) == DialogResult.OK)
+                {
+                    MaKH = f.MaKH;
+                    HoTen = f.HoTen;
+                    SoDienThoai = f.SoDienThoai;
+                    MaKHHienThi = f.MaKHHienThi;
+                    DialogResult = DialogResult.OK;
+                    Close();
+                }
+            };
+            Controls.Add(btnThemKhach);
         }
 
         private void frmChonKhach_Load(object sender, EventArgs e)
