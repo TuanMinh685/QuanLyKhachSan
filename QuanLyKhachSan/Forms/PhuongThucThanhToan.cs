@@ -140,21 +140,15 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void DgvPTTT_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (dgvPTTT.Columns[e.ColumnIndex].Name == "KichHoat" && e.Value != null)
+            if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+            var column = dgvPTTT.Columns[e.ColumnIndex];
+
+            if (column.Name == "KichHoat" && !(column is DataGridViewCheckBoxColumn) && e.Value != null)
             {
                 bool active = Convert.ToBoolean(e.Value);
-                if (active)
-                {
-                    e.Value = "● Đang hoạt động";
-                    e.CellStyle.ForeColor = Color.FromArgb(22, 163, 74);
-                    e.CellStyle.Font = new Font("Segoe UI", 9.25f, FontStyle.Bold);
-                }
-                else
-                {
-                    e.Value = "● Tạm ngưng";
-                    e.CellStyle.ForeColor = Color.FromArgb(220, 38, 38);
-                    e.CellStyle.Font = new Font("Segoe UI", 9.25f, FontStyle.Regular);
-                }
+                e.Value = active ? "● Đang hoạt động" : "● Tạm ngưng";
+                e.CellStyle.ForeColor = active ? Color.FromArgb(22, 163, 74) : Color.FromArgb(220, 38, 38);
+                e.CellStyle.Font = new Font("Segoe UI", 9.25f, active ? FontStyle.Bold : FontStyle.Regular);
                 e.FormattingApplied = true;
             }
         }

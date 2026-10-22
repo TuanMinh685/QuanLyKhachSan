@@ -159,24 +159,16 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void DgvVoucher_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.RowIndex < 0) return;
-            string col = dgvVoucher.Columns[e.ColumnIndex].Name;
+            if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+            var column = dgvVoucher.Columns[e.ColumnIndex];
+            string col = column.Name;
 
-            if (col == "TrangThai" && e.Value != null)
+            if (col == "TrangThai" && !(column is DataGridViewCheckBoxColumn) && e.Value != null)
             {
                 bool active = Convert.ToBoolean(e.Value);
-                if (active)
-                {
-                    e.Value = "● Đang kích hoạt";
-                    e.CellStyle.ForeColor = Color.FromArgb(22, 163, 74);
-                    e.CellStyle.Font = new Font("Segoe UI", 9.25f, FontStyle.Bold);
-                }
-                else
-                {
-                    e.Value = "● Tạm ngưng";
-                    e.CellStyle.ForeColor = Color.FromArgb(220, 38, 38);
-                    e.CellStyle.Font = new Font("Segoe UI", 9.25f, FontStyle.Regular);
-                }
+                e.Value = active ? "● Đang kích hoạt" : "● Tạm ngưng";
+                e.CellStyle.ForeColor = active ? Color.FromArgb(22, 163, 74) : Color.FromArgb(220, 38, 38);
+                e.CellStyle.Font = new Font("Segoe UI", 9.25f, active ? FontStyle.Bold : FontStyle.Regular);
                 e.FormattingApplied = true;
             }
             else if (col == "LoaiGiam" && e.Value != null)

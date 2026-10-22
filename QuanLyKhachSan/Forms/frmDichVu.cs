@@ -159,24 +159,18 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void DgvDichVu_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (dgvDichVu.Columns[e.ColumnIndex].Name == "TrangThai" && e.Value != null)
+            if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+            var col = dgvDichVu.Columns[e.ColumnIndex];
+
+            if (col.Name == "TrangThai" && !(col is DataGridViewCheckBoxColumn) && e.Value != null)
             {
                 bool active = Convert.ToBoolean(e.Value);
-                if (active)
-                {
-                    e.Value = "● Đang phục vụ";
-                    e.CellStyle.ForeColor = Color.FromArgb(22, 163, 74);
-                    e.CellStyle.Font = new Font("Segoe UI", 9.25f, FontStyle.Bold);
-                }
-                else
-                {
-                    e.Value = "● Tạm ngưng";
-                    e.CellStyle.ForeColor = Color.FromArgb(220, 38, 38);
-                    e.CellStyle.Font = new Font("Segoe UI", 9.25f, FontStyle.Regular);
-                }
+                e.Value = active ? "● Đang phục vụ" : "● Tạm ngưng";
+                e.CellStyle.ForeColor = active ? Color.FromArgb(22, 163, 74) : Color.FromArgb(220, 38, 38);
+                e.CellStyle.Font = new Font("Segoe UI", 9.25f, active ? FontStyle.Bold : FontStyle.Regular);
                 e.FormattingApplied = true;
             }
-            else if (dgvDichVu.Columns[e.ColumnIndex].Name == "DonGia" && e.Value != null)
+            else if (col.Name == "DonGia" && e.Value != null)
             {
                 if (decimal.TryParse(e.Value.ToString(), out decimal gia))
                 {
