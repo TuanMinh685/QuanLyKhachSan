@@ -40,10 +40,24 @@ namespace Quản_Lý_Khách_Sạn.Forms
         public frmDanhSachPhong()
         {
             InitializeComponent();
-            UITheme.ApplyTheme(this);
             KhoiTaoGiaoDien();
+            UITheme.ApplyTheme(this);
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
             LoadLoaiPhongFilter();
             LoadPhong();
+        }
+
+        protected override void OnVisibleChanged(EventArgs e)
+        {
+            base.OnVisibleChanged(e);
+            if (Visible && !DesignMode && IsHandleCreated && dtPhong != null)
+            {
+                LoadPhong();
+            }
         }
 
         private void KhoiTaoGiaoDien()
@@ -243,7 +257,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             pnlGridContainer.Controls.Add(grid);
 
-            // Gắn vào Form
+            // Gắn các control vào Form theo thứ tự phân lớp
             Controls.Add(pnlGridContainer);
             Controls.Add(pnlToolbar);
             Controls.Add(pnlHeader);
@@ -344,74 +358,97 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void DinhDangCotGrid()
         {
-            if (grid.Columns.Contains("MaPhong")) grid.Columns["MaPhong"].Visible = false;
-            if (grid.Columns.Contains("HinhAnh")) grid.Columns["HinhAnh"].Visible = false;
-            if (grid.Columns.Contains("MaLoai")) grid.Columns["MaLoai"].Visible = false;
-            if (grid.Columns.Contains("GhiChu")) grid.Columns["GhiChu"].Visible = false;
+            if (grid.Columns == null || grid.Columns.Count == 0) return;
 
-            if (grid.Columns.Contains("Số phòng"))
+            // Ẩn các cột kỹ thuật
+            if (grid.Columns["MaPhong"] != null) grid.Columns["MaPhong"].Visible = false;
+            if (grid.Columns["HinhAnh"] != null) grid.Columns["HinhAnh"].Visible = false;
+            if (grid.Columns["MaLoai"] != null) grid.Columns["MaLoai"].Visible = false;
+            if (grid.Columns["GhiChu"] != null) grid.Columns["GhiChu"].Visible = false;
+
+            // Định dạng các cột hiển thị bằng FillWeight (chuẩn DataGridView Fill Mode an toàn 100%)
+            if (grid.Columns["Số phòng"] != null)
             {
-                grid.Columns["Số phòng"].Width = 100;
-                grid.Columns["Số phòng"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                grid.Columns["Số phòng"].DefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-                grid.Columns["Số phòng"].DefaultCellStyle.ForeColor = UITheme.DarkNavy;
+                var col = grid.Columns["Số phòng"];
+                col.HeaderText = "SỐ PHÒNG";
+                col.FillWeight = 85;
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                col.DefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+                col.DefaultCellStyle.ForeColor = UITheme.DarkNavy;
             }
 
-            if (grid.Columns.Contains("Tầng"))
+            if (grid.Columns["Tầng"] != null)
             {
-                grid.Columns["Tầng"].Width = 70;
-                grid.Columns["Tầng"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                var col = grid.Columns["Tầng"];
+                col.HeaderText = "TẦNG";
+                col.FillWeight = 55;
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             }
 
-            if (grid.Columns.Contains("Loại phòng"))
+            if (grid.Columns["Loại phòng"] != null)
             {
-                grid.Columns["Loại phòng"].Width = 150;
-                grid.Columns["Loại phòng"].DefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+                var col = grid.Columns["Loại phòng"];
+                col.HeaderText = "LOẠI PHÒNG";
+                col.FillWeight = 120;
+                col.DefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             }
 
-            if (grid.Columns.Contains("Giá/đêm"))
+            if (grid.Columns["Giá/đêm"] != null)
             {
-                grid.Columns["Giá/đêm"].Width = 130;
-                grid.Columns["Giá/đêm"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                grid.Columns["Giá/đêm"].DefaultCellStyle.Format = "#,##0 đ";
-                grid.Columns["Giá/đêm"].DefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-                grid.Columns["Giá/đêm"].DefaultCellStyle.ForeColor = UITheme.PrimaryOrange;
+                var col = grid.Columns["Giá/đêm"];
+                col.HeaderText = "GIÁ / ĐÊM";
+                col.FillWeight = 100;
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                col.DefaultCellStyle.Format = "#,##0 đ";
+                col.DefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+                col.DefaultCellStyle.ForeColor = UITheme.PrimaryOrange;
             }
 
-            if (grid.Columns.Contains("Sức chứa"))
+            if (grid.Columns["Sức chứa"] != null)
             {
-                grid.Columns["Sức chứa"].Width = 95;
-                grid.Columns["Sức chứa"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                var col = grid.Columns["Sức chứa"];
+                col.HeaderText = "SỨC CHỨA";
+                col.FillWeight = 75;
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             }
 
-            if (grid.Columns.Contains("Diện tích"))
+            if (grid.Columns["Diện tích"] != null)
             {
-                grid.Columns["Diện tích"].Width = 95;
-                grid.Columns["Diện tích"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                grid.Columns["Diện tích"].DefaultCellStyle.Format = "0.## m²";
+                var col = grid.Columns["Diện tích"];
+                col.HeaderText = "DIỆN TÍCH";
+                col.FillWeight = 80;
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                col.DefaultCellStyle.Format = "0.## m²";
             }
 
-            if (grid.Columns.Contains("Trạng thái"))
+            if (grid.Columns["Trạng thái"] != null)
             {
-                grid.Columns["Trạng thái"].Width = 120;
-                grid.Columns["Trạng thái"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                grid.Columns["Trạng thái"].DefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+                var col = grid.Columns["Trạng thái"];
+                col.HeaderText = "TRẠNG THÁI";
+                col.FillWeight = 95;
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                col.DefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             }
 
-            if (grid.Columns.Contains("Quy cách giường"))
+            if (grid.Columns["Quy cách giường"] != null)
             {
-                grid.Columns["Quy cách giường"].Width = 160;
+                var col = grid.Columns["Quy cách giường"];
+                col.HeaderText = "QUY CÁCH GIƯỜNG";
+                col.FillWeight = 130;
             }
 
-            if (grid.Columns.Contains("Tiện nghi"))
+            if (grid.Columns["Tiện nghi"] != null)
             {
-                grid.Columns["Tiện nghi"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                var col = grid.Columns["Tiện nghi"];
+                col.HeaderText = "TIỆN NGHI BUỒNG PHÒNG";
+                col.FillWeight = 200;
             }
         }
 
         private void Grid_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             if (e.RowIndex < 0 || e.RowIndex >= grid.Rows.Count) return;
+            if (e.ColumnIndex < 0 || e.ColumnIndex >= grid.Columns.Count) return;
 
             string colName = grid.Columns[e.ColumnIndex].Name;
 
