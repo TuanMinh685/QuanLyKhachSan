@@ -52,7 +52,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 UseMnemonic = false
             };
             btnPhuongThucTT.FlatAppearance.BorderSize = 0;
-            btnPhuongThucTT.Click += (_, __) => MoFormCon(new PhuongThucThanhToan(), btnPhuongThucTT, "QUẢN LÝ PHƯƠNG THỨC THANH TOÁN");
+            btnPhuongThucTT.Click += (_, __) => { if (YeuCauAdmin()) MoFormCon(new PhuongThucThanhToan(), btnPhuongThucTT, "QUẢN LÝ PHƯƠNG THỨC THANH TOÁN"); };
             pnlSidebar.Controls.Add(btnPhuongThucTT);
             pnlSidebar.Controls.SetChildIndex(btnPhuongThucTT, 2);
 
@@ -74,6 +74,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             bool admin = Quản_Lý_Khách_Sạn.Session.LaAdmin;
             btnTaiKhoan.Visible = admin;
+            btnPhuongThucTT.Visible = admin;
             btnVoucher.Visible = admin;
             btnBaoCao.Visible = admin;
             lblUserGreeting.Text = "Chào mừng, " +
