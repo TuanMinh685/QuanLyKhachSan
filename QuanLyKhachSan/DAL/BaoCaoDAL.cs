@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using Microsoft.Data.SqlClient;
 
@@ -79,13 +79,12 @@ namespace Quản_Lý_Khách_Sạn.DAL
             string sql = @"
                 SELECT 
                     lp.TenLoai AS [Loại Phòng],
-                    COUNT(p.MaPhong) AS [Tổng Số Phòng],
-                    SUM(CASE WHEN EXISTS (SELECT 1 FROM DatPhong d
-                                          WHERE d.MaPhong = p.MaPhong AND d.TrangThai = N'Đang ở') THEN 1 ELSE 0 END) AS [Đang Ở],
-                    CAST(ROUND(CAST(SUM(CASE WHEN EXISTS (SELECT 1 FROM DatPhong d
-                                          WHERE d.MaPhong = p.MaPhong AND d.TrangThai = N'Đang ở') THEN 1 ELSE 0 END) AS FLOAT) * 100.0 / NULLIF(COUNT(p.MaPhong), 0), 1) AS NVARCHAR(20)) + ' %' AS [Công Suất]
+                    COUNT(DISTINCT p.MaPhong) AS [Tổng Số Phòng],
+                    COUNT(DISTINCT dp.MaPhong) AS [Đang Ở],
+                    CAST(ROUND(CAST(COUNT(DISTINCT dp.MaPhong) AS FLOAT) * 100.0 / NULLIF(COUNT(DISTINCT p.MaPhong), 0), 1) AS NVARCHAR(20)) + ' %' AS [Công Suất]
                 FROM Phong p
                 INNER JOIN LoaiPhong lp ON p.MaLoai = lp.MaLoai
+                LEFT JOIN DatPhong dp ON p.MaPhong = dp.MaPhong AND dp.TrangThai = N'Đang ở'
                 GROUP BY lp.TenLoai";
 
             return DatabaseHelper.ExecuteQuery(sql);

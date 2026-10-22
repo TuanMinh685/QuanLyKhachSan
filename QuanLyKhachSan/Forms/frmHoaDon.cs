@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
@@ -342,6 +342,44 @@ namespace Quản_Lý_Khách_Sạn.Forms
             return cboPTTT.SelectedValue?.ToString() ?? "TM";
         }
 
+        private void btnVietQR_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtMaHD.Text))
+            {
+                txtMaHD.Text = "HD" + DateTime.Now.ToString("yyMMddHHmm");
+            }
+
+            decimal canThu = ParseMoney(lblTongTienValue.Text.Replace(" Ä‘", ""));
+            if (canThu <= 0)
+            {
+                MessageBox.Show("Sá»‘ tiá»n thanh toÃ¡n pháº£i lá»›n hÆ¡n 0 Ä‘á»ƒ táº¡o mÃ£ VietQR.", "ThÃ´ng bÃ¡o", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            string noiDung = $"THANH TOAN {txtMaHD.Text.Trim().ToUpper()}";
+            using (var qrForm = new frmVietQR(txtMaHD.Text.Trim().ToUpper(), canThu, noiDung))
+            {
+                if (qrForm.ShowDialog(this) == DialogResult.OK)
+                {
+                    for (int i = 0; i < cboPTTT.Items.Count; i++)
+                    {
+                        string itemStr = cboPTTT.GetItemText(cboPTTT.Items[i]);
+                        if (itemStr.IndexOf("chuyá»ƒn khoáº£n", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                            itemStr.IndexOf("qr", StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            cboPTTT.SelectedIndex = i;
+                            break;
+                        }
+                    }
+
+                    var hoi = MessageBox.Show($"KhÃ¡ch Ä‘Ã£ quÃ©t VietQR thÃ nh cÃ´ng ({canThu:N0} Ä‘).\nBáº¡n cÃ³ muá»‘n xÃ¡c nháº­n hoÃ n táº¥t thanh toÃ¡n hÃ³a Ä‘Æ¡n ngay bÃ¢y giá»?", "XÃ¡c nháº­n thu", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (hoi == DialogResult.Yes)
+                    {
+                        btnThanhToan_Click(sender, e);
+                    }
+                }
+            }
+        }
         private void btnThanhToan_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtMaHD.Text))
@@ -369,6 +407,17 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 MaVoucher = maVoucherDaApDung,
                 TrangThai = "Đã thanh toán"
             };
+
+            if (LayMaPTTT() == "CK")
+            {
+                using (var qr = new frmVietQR(hd.MaHoaDon, canThu, $"THANH TOAN {hd.MaHoaDon}"))
+                {
+                    if (qr.ShowDialog(this) != DialogResult.OK)
+                    {
+                        return;
+                    }
+                }
+            }
 
             if (hoaDonBLL.ThanhToanVaTraPhong(hd, maDP))
             {

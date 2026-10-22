@@ -70,6 +70,7 @@
             this.lblTongTienValue = new System.Windows.Forms.Label();
             this.pnlBottomButtons = new System.Windows.Forms.Panel();
             this.btnThanhToan = new System.Windows.Forms.Button();
+            this.btnVietQR = new System.Windows.Forms.Button();
             this.btnLamMoi = new System.Windows.Forms.Button();
             this.btnInHoaDon = new System.Windows.Forms.Button();
             this.printDoc = new System.Drawing.Printing.PrintDocument();
@@ -790,10 +791,28 @@
             this.pnlBottomButtons.Controls.Add(this.btnInHoaDon);
             this.pnlBottomButtons.Controls.Add(this.btnLamMoi);
             this.pnlBottomButtons.Controls.Add(this.btnThanhToan);
+            this.pnlBottomButtons.Controls.Add(this.btnVietQR);
             this.pnlBottomButtons.Location = new System.Drawing.Point(20, 690);
             this.pnlBottomButtons.Name = "pnlBottomButtons";
             this.pnlBottomButtons.Size = new System.Drawing.Size(515, 42);
             this.pnlBottomButtons.TabIndex = 17;
+                        // 
+            // btnVietQR
+            // 
+            this.btnVietQR.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(2)))), ((int)(((byte)(132)))), ((int)(((byte)(199)))));
+            this.btnVietQR.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnVietQR.FlatAppearance.BorderSize = 0;
+            this.btnVietQR.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnVietQR.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnVietQR.ForeColor = System.Drawing.Color.White;
+            this.btnVietQR.Location = new System.Drawing.Point(108, 0);
+            this.btnVietQR.Name = "btnVietQR";
+            this.btnVietQR.Size = new System.Drawing.Size(115, 40);
+            this.btnVietQR.TabIndex = 3;
+            this.btnVietQR.Text = "ðŸ“± MÃ£ VietQR";
+            this.btnVietQR.UseVisualStyleBackColor = false;
+            this.btnVietQR.Click += new System.EventHandler(this.btnVietQR_Click);
+            this.btnVietQR.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawPillBorder);
             // 
             // btnThanhToan
             // 
@@ -804,9 +823,9 @@
             this.btnThanhToan.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnThanhToan.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
             this.btnThanhToan.ForeColor = System.Drawing.Color.White;
-            this.btnThanhToan.Location = new System.Drawing.Point(375, 0);
+            this.btnThanhToan.Location = new System.Drawing.Point(336, 0);
             this.btnThanhToan.Name = "btnThanhToan";
-            this.btnThanhToan.Size = new System.Drawing.Size(140, 40);
+            this.btnThanhToan.Size = new System.Drawing.Size(179, 40);
             this.btnThanhToan.TabIndex = 2;
             this.btnThanhToan.Text = "Xác nhận thu";
             this.btnThanhToan.UseVisualStyleBackColor = false;
@@ -822,9 +841,9 @@
             this.btnLamMoi.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnLamMoi.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.btnLamMoi.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(85)))), ((int)(((byte)(105)))));
-            this.btnLamMoi.Location = new System.Drawing.Point(275, 0);
+            this.btnLamMoi.Location = new System.Drawing.Point(230, 0);
             this.btnLamMoi.Name = "btnLamMoi";
-            this.btnLamMoi.Size = new System.Drawing.Size(92, 40);
+            this.btnLamMoi.Size = new System.Drawing.Size(98, 40);
             this.btnLamMoi.TabIndex = 1;
             this.btnLamMoi.Text = "Làm mới";
             this.btnLamMoi.UseVisualStyleBackColor = false;
@@ -971,6 +990,7 @@
         private System.Windows.Forms.Label lblTongTienValue;
         private System.Windows.Forms.Panel pnlBottomButtons;
         private System.Windows.Forms.Button btnThanhToan;
+        private System.Windows.Forms.Button btnVietQR;
         private System.Windows.Forms.Button btnLamMoi;
         private System.Windows.Forms.Button btnInHoaDon;
         private System.Drawing.Printing.PrintDocument printDoc;
