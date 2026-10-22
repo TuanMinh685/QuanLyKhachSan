@@ -164,8 +164,8 @@ namespace Quản_Lý_Khách_Sạn.DAL
                         MaDatPhong = Convert.ToInt32(r["MaDatPhong"]),
                         SoPhong = Convert.ToString(r["SoPhong"]),
                         TenLoaiPhong = Convert.ToString(r["TenLoaiPhong"]),
-                        NgayNhan = Convert.ToDateTime(r["NgayNhanDuKien"]),
-                        NgayTra = Convert.ToDateTime(r["NgayTraDuKien"]),
+                        NgayNhan = ToDateTime(r["NgayNhanDuKien"]),
+                        NgayTra = ToDateTime(r["NgayTraDuKien"]),
                         SoDem = Convert.ToInt32(r["SoDem"]),
                         TrangThai = Convert.ToString(r["TrangThai"]),
                         TongTien = Convert.ToDecimal(r["TongTien"])
@@ -207,17 +207,17 @@ namespace Quản_Lý_Khách_Sạn.DAL
                 HoTen = Convert.ToString(r["HoTen"]),
                 DienThoai = Convert.ToString(r["DienThoai"]),
                 GioiTinh = r["GioiTinh"] as string,
-                NgaySinh = r["NgaySinh"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["NgaySinh"]),
+                NgaySinh = ToDateTimeNullable(r["NgaySinh"]),
                 QuocTich = Convert.ToString(r["QuocTich"]),
                 Email = r["Email"] as string,
                 DiaChi = r["DiaChi"] as string,
                 SoGiayTo = r["SoGiayTo"] as string,
                 GhiChu = r["GhiChu"] as string,
                 DongYNhanUuDai = Convert.ToBoolean(r["DongYNhanUuDai"]),
-                NgayTao = Convert.ToDateTime(r["NgayTao"]),
-                NgayCapNhat = r["NgayCapNhat"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["NgayCapNhat"]),
+                NgayTao = ToDateTime(r["NgayTao"]),
+                NgayCapNhat = ToDateTimeNullable(r["NgayCapNhat"]),
                 SoLanLuuTru = Convert.ToInt32(r["SoLanLuuTru"]),
-                LanLuuTruGanNhat = r["LanLuuTruGanNhat"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["LanLuuTruGanNhat"]),
+                LanLuuTruGanNhat = ToDateTimeNullable(r["LanLuuTruGanNhat"]),
                 NhomKhach = Convert.ToString(r["NhomKhach"])
             };
         }

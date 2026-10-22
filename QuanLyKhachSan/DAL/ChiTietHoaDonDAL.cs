@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 // using Microsoft.Data.SqlClient; // migrated to Supabase Npgsql
@@ -11,11 +11,11 @@ namespace Quản_Lý_Khách_Sạn.DAL
         {
             string sql = @"
                 SELECT 
-                    ct.MaDichVu AS [Mã DV],
-                    dv.TenDichVu AS [Tên Dịch Vụ],
-                    ct.SoLuong AS [SL],
-                    ct.DonGia AS [Đơn Giá],
-                    ct.ThanhTien AS [Thành Tiền]
+                    ct.MaDichVu AS ""Mã DV"",
+                    dv.TenDichVu AS ""Tên Dịch Vụ"",
+                    ct.SoLuong AS ""SL"",
+                    ct.DonGia AS ""Đơn Giá"",
+                    ct.ThanhTien AS ""Thành Tiền""
                 FROM ChiTietHoaDon ct
                 INNER JOIN DichVu dv ON ct.MaDichVu = dv.MaDichVu
                 WHERE ct.MaHoaDon = @MaHD";

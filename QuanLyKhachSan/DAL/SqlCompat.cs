@@ -5,6 +5,25 @@ using NpgsqlTypes;
 
 namespace Quản_Lý_Khách_Sạn.DAL
 {
+    public static class DbSafeConvert
+    {
+        public static DateTime? ToDateTimeNullable(object val)
+        {
+            if (val == null || val == DBNull.Value) return null;
+            if (val is DateOnly d) return d.ToDateTime(TimeOnly.MinValue);
+            if (val is DateTime dt) return dt;
+            return Convert.ToDateTime(val);
+        }
+
+        public static DateTime ToDateTime(object val)
+        {
+            if (val == null || val == DBNull.Value) return DateTime.MinValue;
+            if (val is DateOnly d) return d.ToDateTime(TimeOnly.MinValue);
+            if (val is DateTime dt) return dt;
+            return Convert.ToDateTime(val);
+        }
+    }
+
     public static class NpgsqlExtensions
     {
         public static NpgsqlParameter Add(this NpgsqlParameterCollection collection, string parameterName, SqlDbType sqlDbType)
