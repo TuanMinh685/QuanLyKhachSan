@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Printing;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Quản_Lý_Khách_Sạn.BLL;
 using Quản_Lý_Khách_Sạn.DAL;
@@ -14,12 +15,13 @@ namespace Quản_Lý_Khách_Sạn.Forms
 {
     public partial class frmHoaDon : Form
     {
-        private string maHDDangChon = null;
         private HoaDonBLL hoaDonBLL = new HoaDonBLL();
-        private DichVuDAL dichVuDAL = new DichVuDAL();
-        private VoucherBLL voucherBLL = new VoucherBLL();
         private ChiTietHoaDonDAL chiTietDAL = new ChiTietHoaDonDAL();
+        private DichVuDAL dichVuDAL = new DichVuDAL();
         private PhuongThucThanhToanDAL ptttDAL = new PhuongThucThanhToanDAL();
+        private VoucherBLL voucherBLL = new VoucherBLL();
+
+        private string maHDDangChon = null;
 
         private List<HoaDon> danhSachHoaDon = new List<HoaDon>();
         private List<DichVu> danhSachDichVu = new List<DichVu>();
@@ -37,11 +39,11 @@ namespace Quản_Lý_Khách_Sạn.Forms
             UITheme.StyleModernGrid(dgvChiTietDV);
             KhoiTaoBangChiTietTam();
 
-            btnVietQR.Text = "M\u00E3 VietQR";
+            btnVietQR.Text = "Mã VietQR";
             btnInHoaDon.Text = "In bill";
-            btnGoiYVoucher.Text = "G\u1EE3i \u00FD";
-            btnApDungVoucher.Text = "\u00C1p d\u1EE5ng";
-            btnThemDV.Text = "Th\u00EAm DV";
+            btnGoiYVoucher.Text = "Gợi ý";
+            btnApDungVoucher.Text = "Áp dụng";
+            btnThemDV.Text = "Thêm DV";
 
             TaiDanhSachPhuongThucTT();
             TaiDanhSachDichVu();
@@ -87,24 +89,24 @@ namespace Quản_Lý_Khách_Sạn.Forms
             dtChiTietTam.Columns.Add("Thành Tiền", typeof(decimal));
             dgvChiTietDV.DataSource = dtChiTietTam;
 
-            if (dgvChiTietDV.Columns["MÃ£ DV"] != null) dgvChiTietDV.Columns["MÃ£ DV"].FillWeight = 16;
-            if (dgvChiTietDV.Columns["TÃªn Dá»‹ch Vá»¥"] != null) dgvChiTietDV.Columns["TÃªn Dá»‹ch Vá»¥"].FillWeight = 36;
+            if (dgvChiTietDV.Columns["Mã DV"] != null) dgvChiTietDV.Columns["Mã DV"].FillWeight = 16;
+            if (dgvChiTietDV.Columns["Tên Dịch Vụ"] != null) dgvChiTietDV.Columns["Tên Dịch Vụ"].FillWeight = 36;
             if (dgvChiTietDV.Columns["SL"] != null)
             {
                 dgvChiTietDV.Columns["SL"].FillWeight = 12;
                 dgvChiTietDV.Columns["SL"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             }
-            if (dgvChiTietDV.Columns["ÄÆ¡n GiÃ¡"] != null)
+            if (dgvChiTietDV.Columns["Đơn Giá"] != null)
             {
-                dgvChiTietDV.Columns["ÄÆ¡n GiÃ¡"].FillWeight = 18;
-                dgvChiTietDV.Columns["ÄÆ¡n GiÃ¡"].DefaultCellStyle.Format = "N0";
-                dgvChiTietDV.Columns["ÄÆ¡n GiÃ¡"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                dgvChiTietDV.Columns["Đơn Giá"].FillWeight = 18;
+                dgvChiTietDV.Columns["Đơn Giá"].DefaultCellStyle.Format = "N0";
+                dgvChiTietDV.Columns["Đơn Giá"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             }
-            if (dgvChiTietDV.Columns["ThÃ nh Tiá»n"] != null)
+            if (dgvChiTietDV.Columns["Thành Tiền"] != null)
             {
-                dgvChiTietDV.Columns["ThÃ nh Tiá»n"].FillWeight = 18;
-                dgvChiTietDV.Columns["ThÃ nh Tiá»n"].DefaultCellStyle.Format = "N0";
-                dgvChiTietDV.Columns["ThÃ nh Tiá»n"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                dgvChiTietDV.Columns["Thành Tiền"].FillWeight = 18;
+                dgvChiTietDV.Columns["Thành Tiền"].DefaultCellStyle.Format = "N0";
+                dgvChiTietDV.Columns["Thành Tiền"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             }
         }
 
@@ -175,6 +177,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 dgvHoaDon.DataSource = null;
                 dgvHoaDon.DataSource = danhSachHoaDon;
 
+                // Ẩn bớt các cột chi tiết phụ để bảng thoáng, không bị co rút chữ thành dấu ...
                 string[] anCot = { "NgayLap", "TienPhong", "TienDichVu", "TienGiamGia", "TienDatCoc", "MaPTTT", "MaVoucher", "TrangThai" };
                 foreach (string col in anCot)
                 {
@@ -185,8 +188,19 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 if (dgvHoaDon.Columns["MaHoaDon"] != null)
                 {
                     dgvHoaDon.Columns["MaHoaDon"].HeaderText = "MÃ HĐ";
-                    dgvHoaDon.Columns["MaHoaDon"].FillWeight = 85;
+                    dgvHoaDon.Columns["MaHoaDon"].FillWeight = 24;
                     dgvHoaDon.Columns["MaHoaDon"].DefaultCellStyle.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
+                }
+                if (dgvHoaDon.Columns["MaDatPhong"] != null)
+                {
+                    dgvHoaDon.Columns["MaDatPhong"].HeaderText = "ĐẶT PHÒNG";
+                    dgvHoaDon.Columns["MaDatPhong"].FillWeight = 26;
+                }
+                if (dgvHoaDon.Columns["NgayThanhToan"] != null)
+                {
+                    dgvHoaDon.Columns["NgayThanhToan"].HeaderText = "NGÀY TT";
+                    dgvHoaDon.Columns["NgayThanhToan"].DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
+                    dgvHoaDon.Columns["NgayThanhToan"].FillWeight = 25;
                 }
                 if (dgvHoaDon.Columns["TongTien"] != null)
                 {
@@ -195,11 +209,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     dgvHoaDon.Columns["TongTien"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                     dgvHoaDon.Columns["TongTien"].DefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
                     dgvHoaDon.Columns["TongTien"].DefaultCellStyle.ForeColor = UITheme.PrimaryOrange;
-                }
-                if (dgvHoaDon.Columns["NgayThanhToan"] != null)
-                {
-                    dgvHoaDon.Columns["NgayThanhToan"].HeaderText = "NGÀY TT";
-                    dgvHoaDon.Columns["NgayThanhToan"].DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
+                    dgvHoaDon.Columns["TongTien"].FillWeight = 25;
                 }
             }
             catch (Exception ex)
@@ -210,6 +220,17 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void cboDatPhong_SelectedIndexChanged(object sender, EventArgs e)
         {
+            // Khi chọn lượt đặt phòng cần thanh toán, tự động bật lại nút thu tiền và tạo mã mới
+            if (maHDDangChon != null)
+            {
+                maHDDangChon = null;
+                txtMaHD.Text = "HD" + DateTime.Now.ToString("yyMMddHHmmss");
+            }
+
+            btnThanhToan.Enabled = true;
+            btnThanhToan.BackColor = UITheme.PrimaryOrange;
+            btnThanhToan.Text = "Xác nhận thu";
+
             if (cboDatPhong.SelectedItem is ThongTinDatPhongThanhToan dp)
             {
                 txtTienPhong.Text = dp.TienPhong.ToString("N0");
@@ -234,6 +255,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
             if (dv == null) return;
 
             int sl = (int)nudSoLuongDV.Value;
+            if (sl <= 0) return;
+
             decimal donGia = dv.DonGia;
             decimal thanhTien = sl * donGia;
 
@@ -249,9 +272,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             if (existing != null)
             {
-                int slMoi = Convert.ToInt32(existing["SL"]) + sl;
-                existing["SL"] = slMoi;
-                existing["Thành Tiền"] = slMoi * donGia;
+                int currentSl = Convert.ToInt32(existing["SL"]);
+                existing["SL"] = currentSl + sl;
+                existing["Thành Tiền"] = (currentSl + sl) * donGia;
             }
             else
             {
@@ -267,6 +290,21 @@ namespace Quản_Lý_Khách_Sạn.Forms
             TinhTongTienTuDong(null, null);
         }
 
+        private void dgvChiTietDV_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.RowIndex < dtChiTietTam.Rows.Count)
+            {
+                dtChiTietTam.Rows.RemoveAt(e.RowIndex);
+                decimal tongDV = 0;
+                foreach (DataRow r in dtChiTietTam.Rows)
+                {
+                    tongDV += Convert.ToDecimal(r["Thành Tiền"]);
+                }
+                txtTienDV.Text = tongDV.ToString("N0");
+                TinhTongTienTuDong(null, null);
+            }
+        }
+
         private void btnGoiYVoucher_Click(object sender, EventArgs e)
         {
             cmsVoucher.Items.Clear();
@@ -277,23 +315,23 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
                 if (activeVouchers.Count == 0)
                 {
-                    cmsVoucher.Items.Add(new ToolStripMenuItem("KhÃ´ng cÃ³ mÃ£ voucher nÃ o Ä‘ang kháº£ dá»¥ng") { Enabled = false });
+                    cmsVoucher.Items.Add(new ToolStripMenuItem("Không có mã voucher nào đang khả dụng") { Enabled = false });
                 }
                 else
                 {
                     decimal tienPhong = ParseMoney(txtTienPhong.Text);
                     foreach (var v in activeVouchers)
                     {
-                        string giamStr = v.LoaiGiam == "PhanTram" ? $"Giáº£m {v.GiaTri}%" : $"Giáº£m {v.GiaTri:N0} Ä‘";
-                        string minStr = v.DonToiThieu > 0 ? $"(ÄÆ¡n tá»« {v.DonToiThieu:N0} Ä‘)" : "(KhÃ´ng giá»›i háº¡n)";
-                        string itemText = $"ðŸŽŸï¸ {v.Code} â€” {v.TenChuongTrinh} [{giamStr} {minStr}]";
+                        string giamStr = v.LoaiGiam == "PhanTram" ? $"Giảm {v.GiaTri}%" : $"Giảm {v.GiaTri:N0} đ";
+                        string minStr = v.DonToiThieu > 0 ? $"(Đơn từ {v.DonToiThieu:N0} đ)" : "(Không giới hạn)";
+                        string itemText = $"Mã {v.Code} — {v.TenChuongTrinh} [{giamStr} {minStr}]";
 
                         var item = new ToolStripMenuItem(itemText);
                         item.Font = new Font("Segoe UI", 9.5f, FontStyle.Regular);
                         if (v.DonToiThieu > 0 && tienPhong < v.DonToiThieu)
                         {
                             item.ForeColor = Color.Gray;
-                            item.ToolTipText = $"Cáº§n tá»‘i thiá»ƒu {v.DonToiThieu:N0} Ä‘ tiá»n phÃ²ng";
+                            item.ToolTipText = $"Cần tối thiểu {v.DonToiThieu:N0} đ tiền phòng";
                         }
                         else
                         {
@@ -312,11 +350,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
             }
             catch (Exception ex)
             {
-                cmsVoucher.Items.Add(new ToolStripMenuItem("Lá»—i táº£i voucher: " + ex.Message) { Enabled = false });
+                cmsVoucher.Items.Add(new ToolStripMenuItem("Lỗi tải voucher: " + ex.Message) { Enabled = false });
             }
 
             cmsVoucher.Show(btnGoiYVoucher, new Point(0, btnGoiYVoucher.Height));
         }
+
         private void btnApDungVoucher_Click(object sender, EventArgs e)
         {
             string code = txtVoucherCode.Text.Trim().ToUpper();
@@ -369,7 +408,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private decimal ParseMoney(string txt)
         {
             if (string.IsNullOrWhiteSpace(txt)) return 0;
-            if (decimal.TryParse(txt.Replace(",", "").Replace(".", "").Trim(), out decimal val))
+            // Dùng Regex lấy tất cả ký tự số và dấu trừ, tự động bỏ qua ký hiệu đ, dấu chấm, phẩy
+            string clean = Regex.Replace(txt, @"[^\d\-]", "");
+            if (decimal.TryParse(clean, out decimal val))
                 return val;
             return 0;
         }
@@ -411,6 +452,11 @@ namespace Quản_Lý_Khách_Sạn.Forms
             txtTienDatCoc.Text = h.TienDatCoc.ToString("N0");
             lblTongTienValue.Text = h.TongTien.ToString("N0") + " đ";
 
+            // Khi click xem một hóa đơn cũ đã thanh toán xong:
+            btnThanhToan.Enabled = false;
+            btnThanhToan.BackColor = Color.FromArgb(148, 163, 184);
+            btnThanhToan.Text = "Đã thanh toán";
+
             DataTable dtChiTiet = chiTietDAL.LayChiTietTheoHoaDon(h.MaHoaDon);
             dtChiTietTam.Rows.Clear();
             foreach (DataRow r in dtChiTiet.Rows)
@@ -436,13 +482,13 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             if (string.IsNullOrWhiteSpace(txtMaHD.Text))
             {
-                txtMaHD.Text = "HD" + DateTime.Now.ToString("yyMMddHHmm");
+                txtMaHD.Text = "HD" + DateTime.Now.ToString("yyMMddHHmmss");
             }
 
-            decimal canThu = ParseMoney(lblTongTienValue.Text.Replace(" Ä‘", ""));
+            decimal canThu = ParseMoney(lblTongTienValue.Text);
             if (canThu <= 0)
             {
-                MessageBox.Show("Sá»‘ tiá»n thanh toÃ¡n pháº£i lá»›n hÆ¡n 0 Ä‘á»ƒ táº¡o mÃ£ VietQR.", "ThÃ´ng bÃ¡o", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Số tiền thanh toán phải lớn hơn 0 để tạo mã VietQR.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -454,7 +500,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     for (int i = 0; i < cboPTTT.Items.Count; i++)
                     {
                         string itemStr = cboPTTT.GetItemText(cboPTTT.Items[i]);
-                        if (itemStr.IndexOf("chuyá»ƒn khoáº£n", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        if (itemStr.IndexOf("chuyển khoản", StringComparison.OrdinalIgnoreCase) >= 0 ||
                             itemStr.IndexOf("qr", StringComparison.OrdinalIgnoreCase) >= 0)
                         {
                             cboPTTT.SelectedIndex = i;
@@ -462,7 +508,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                         }
                     }
 
-                    var hoi = MessageBox.Show($"KhÃ¡ch Ä‘Ã£ quÃ©t VietQR thÃ nh cÃ´ng ({canThu:N0} Ä‘).\nBáº¡n cÃ³ muá»‘n xÃ¡c nháº­n hoÃ n táº¥t thanh toÃ¡n hÃ³a Ä‘Æ¡n ngay bÃ¢y giá»?", "XÃ¡c nháº­n thu", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    var hoi = MessageBox.Show($"Khách đã quét VietQR thành công ({canThu:N0} đ).\nBạn có muốn xác nhận hoàn tất thanh toán hóa đơn ngay bây giờ?", "Xác nhận thu", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     if (hoi == DialogResult.Yes)
                     {
                         btnThanhToan_Click(sender, e);
@@ -470,6 +516,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 }
             }
         }
+
         private void btnThanhToan_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtMaHD.Text))
@@ -478,14 +525,23 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 return;
             }
 
+            string maHD = txtMaHD.Text.Trim().ToUpper();
+
+            // Kiểm tra trùng lặp khóa chính
+            if (danhSachHoaDon.Any(x => string.Equals(x.MaHoaDon, maHD, StringComparison.OrdinalIgnoreCase)))
+            {
+                MessageBox.Show($"Hóa đơn [{maHD}] đã tồn tại và đã được thanh toán trước đó!\nNếu muốn lập hóa đơn mới cho phòng khác, vui lòng bấm nút 'Làm mới'.", "Cảnh báo trùng hóa đơn", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             string maDP = (cboDatPhong.SelectedItem is ThongTinDatPhongThanhToan dpItem)
                 ? dpItem.MaHienThi
                 : cboDatPhong.Text.Split(' ')[0];
 
-            decimal canThu = ParseMoney(lblTongTienValue.Text.Replace(" đ", ""));
+            decimal canThu = ParseMoney(lblTongTienValue.Text);
             var hd = new HoaDon
             {
-                MaHoaDon = txtMaHD.Text.Trim().ToUpper(),
+                MaHoaDon = maHD,
                 MaDatPhong = maDP,
                 TienPhong = ParseMoney(txtTienPhong.Text),
                 TienDichVu = ParseMoney(txtTienDV.Text),
@@ -522,6 +578,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 MessageBox.Show($"Thanh toán hóa đơn [{hd.MaHoaDon}] thành công! Thực thu: {canThu:N0} đ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 TaiDanhSachDatPhong();
                 TaiDanhSachHoaDon();
+                LamMoiForm();
             }
         }
 
@@ -531,7 +588,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             maHDDangChon = null;
             maVoucherDaApDung = null;
-            txtMaHD.Text = "HD" + DateTime.Now.ToString("yyMMddHHmm");
+            txtMaHD.Text = "HD" + DateTime.Now.ToString("yyMMddHHmmss");
             txtVoucherCode.Clear();
             txtTienGiamGia.Text = "0";
             txtTienDV.Text = "0";
@@ -539,6 +596,10 @@ namespace Quản_Lý_Khách_Sạn.Forms
             cboDatPhong_SelectedIndexChanged(null, null);
             txtTimKiem.Clear();
             dgvHoaDon.ClearSelection();
+
+            btnThanhToan.Enabled = true;
+            btnThanhToan.BackColor = UITheme.PrimaryOrange;
+            btnThanhToan.Text = "Xác nhận thu";
         }
 
         private void btnInHoaDon_Click(object sender, EventArgs e)
@@ -622,9 +683,30 @@ namespace Quản_Lý_Khách_Sạn.Forms
             y += 8;
 
             DrawRowBill(g, fBold, "THỰC THU:", lblTongTienValue.Text, y, w);
-            y += 28;
+            y += 24;
 
-            g.DrawString("Cảm ơn Quý khách & Hẹn gặp lại!", fSmall, b, new RectangleF(0, y, w, 20), sfCenter);
+            g.DrawLine(pDash, 10, y, w - 10, y);
+            y += 8;
+
+            g.DrawString("QUÉT MÃ THANH TOÁN VIETQR", fBold, b, new RectangleF(0, y, w, 18), sfCenter);
+            y += 18;
+
+            using (Bitmap qrBmp = frmVietQR.TaoAnhQROffline(100))
+            {
+                int qrX = (w - 100) / 2;
+                g.DrawImage(qrBmp, qrX, y, 100, 100);
+            }
+            y += 105;
+
+            g.DrawString("MB Bank: 0901234567 | KHACH SAN LUXURY", fSmall, b, new RectangleF(0, y, w, 16), sfCenter);
+            y += 16;
+            g.DrawString($"Nội dung: THANH TOAN {txtMaHD.Text}", fSmall, b, new RectangleF(0, y, w, 16), sfCenter);
+            y += 20;
+
+            g.DrawLine(pDash, 10, y, w - 10, y);
+            y += 10;
+
+            g.DrawString("Cảm ơn Quý khách & Hẹn gặp lại!", fBold, b, new RectangleF(0, y, w, 20), sfCenter);
         }
 
         private void DrawRowBill(Graphics g, Font font, string leftText, string rightText, int y, int w)
