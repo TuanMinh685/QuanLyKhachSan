@@ -54,7 +54,7 @@
             this.txtVoucherCode = new System.Windows.Forms.TextBox();
             this.btnApDungVoucher = new System.Windows.Forms.Button();
             this.btnGoiYVoucher = new System.Windows.Forms.Button();
-            this.cmsVoucher = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.cmsVoucher = new System.Windows.Forms.ContextMenuStrip();
             this.tbl2ColMoney2 = new System.Windows.Forms.TableLayoutPanel();
             this.pnlColGiamGia = new System.Windows.Forms.Panel();
             this.lblGiamGia = new System.Windows.Forms.Label();
