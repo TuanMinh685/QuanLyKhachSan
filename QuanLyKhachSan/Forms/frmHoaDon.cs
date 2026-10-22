@@ -298,14 +298,24 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     cboDatPhong.Items.Add(item);
                 }
             }
-            catch { }
-
-            if (cboDatPhong.Items.Count == 0)
+            catch (Exception ex)
             {
-                cboDatPhong.Items.Add("DP01 - Phòng P206 (Đỗ Thu Trang)");
-                cboDatPhong.Items.Add("DP02 - Phòng P301 (Nguyễn Văn Hùng)");
+                MessageBox.Show("Lỗi lấy danh sách đặt phòng từ CSDL: " + ex.Message, "Lỗi kết nối", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
-            if (cboDatPhong.Items.Count > 0) cboDatPhong.SelectedIndex = 0;
+
+            if (cboDatPhong.Items.Count > 0)
+            {
+                cboDatPhong.SelectedIndex = 0;
+            }
+            else
+            {
+                cboDatPhong.Text = "(Không có lượt đặt phòng nào đang chờ thanh toán)";
+                txtTienPhong.Text = "0";
+                txtTienDatCoc.Text = "0";
+                btnThanhToan.Enabled = false;
+                btnThanhToan.BackColor = Color.FromArgb(148, 163, 184);
+                btnThanhToan.Text = "Không có phòng";
+            }
         }
 
         private void TaiDanhSachHoaDon()
@@ -371,24 +381,22 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 txtMaHD.Text = "HD" + DateTime.Now.ToString("yyMMddHHmmss");
             }
 
-            btnThanhToan.Enabled = true;
-            btnThanhToan.BackColor = UITheme.PrimaryOrange;
-            btnThanhToan.Text = "Xác nhận thu";
-
             if (cboDatPhong.SelectedItem is ThongTinDatPhongThanhToan dp)
             {
+                btnThanhToan.Enabled = true;
+                btnThanhToan.BackColor = UITheme.PrimaryOrange;
+                btnThanhToan.Text = "Xác nhận thu";
+
                 txtTienPhong.Text = dp.TienPhong.ToString("N0");
                 txtTienDatCoc.Text = dp.TienCoc.ToString("N0");
             }
-            else if (cboDatPhong.SelectedIndex == 0)
-            {
-                txtTienPhong.Text = "2,900,000";
-                txtTienDatCoc.Text = "1,000,000";
-            }
             else
             {
-                txtTienPhong.Text = "1,450,000";
-                txtTienDatCoc.Text = "500,000";
+                txtTienPhong.Text = "0";
+                txtTienDatCoc.Text = "0";
+                btnThanhToan.Enabled = false;
+                btnThanhToan.BackColor = Color.FromArgb(148, 163, 184);
+                btnThanhToan.Text = "Chưa chọn phòng";
             }
             TinhTongTienTuDong(null, null);
         }
@@ -681,21 +689,26 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 return;
             }
 
-            string maDP = (cboDatPhong.SelectedItem is ThongTinDatPhongThanhToan dpItem)
-                ? dpItem.MaHienThi
-                : cboDatPhong.Text.Split(' ')[0];
+            if (!(cboDatPhong.SelectedItem is ThongTinDatPhongThanhToan dpItem))
+            {
+                MessageBox.Show("Vui lòng chọn một lượt đặt phòng thực tế từ cơ sở dữ liệu để thực hiện thanh toán.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string maDP = dpItem.MaHienThi;
 
             decimal canThu = ParseMoney(lblTongTienValue.Text);
             var hd = new HoaDon
             {
                 MaHoaDon = maHD,
                 MaDatPhong = maDP,
+                NgayLap = DateTime.Now,
+                NgayThanhToan = DateTime.Now,
                 TienPhong = ParseMoney(txtTienPhong.Text),
                 TienDichVu = ParseMoney(txtTienDV.Text),
                 TienGiamGia = ParseMoney(txtTienGiamGia.Text),
                 TienDatCoc = ParseMoney(txtTienDatCoc.Text),
                 TongTien = canThu,
-                NgayThanhToan = DateTime.Now,
                 MaPTTT = LayMaPTTT(),
                 MaVoucher = maVoucherDaApDung,
                 TrangThai = "Đã thanh toán"
@@ -714,12 +727,19 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             if (hoaDonBLL.ThanhToanVaTraPhong(hd, maDP))
             {
+                // Lưu từng dòng dịch vụ thực tế vào bảng ChiTietHoaDon
                 foreach (DataRow r in dtChiTietTam.Rows)
                 {
                     string maDV = r["Mã DV"].ToString();
                     int sl = Convert.ToInt32(r["SL"]);
                     decimal donGia = Convert.ToDecimal(r["Đơn Giá"]);
                     chiTietDAL.LuuChiTiet(hd.MaHoaDon, maDV, sl, donGia);
+                }
+
+                // Cập nhật số lượng voucher nếu có sử dụng
+                if (hd.MaVoucher.HasValue)
+                {
+                    voucherBLL.GiamSoLuongVoucher(hd.MaVoucher.Value);
                 }
 
                 MessageBox.Show($"Thanh toán hóa đơn [{hd.MaHoaDon}] thành công! Thực thu: {canThu:N0} đ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -740,6 +760,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             txtTienGiamGia.Text = "0";
             txtTienDV.Text = "0";
             dtChiTietTam.Rows.Clear();
+            TaiDanhSachDatPhong();
             cboDatPhong_SelectedIndexChanged(null, null);
             txtTimKiem.Clear();
             dgvHoaDon.ClearSelection();

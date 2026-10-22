@@ -6,22 +6,17 @@ namespace Quản_Lý_Khách_Sạn.DAL
 {
     public class BaoCaoDAL
     {
-        // 1. KPI Doanh Thu (Tính chính xác từ ChiTietHoaDon)
+        // 1. KPI Doanh Thu (Tính từ dữ liệu thực tế đã lưu trong HoaDon)
         public DataTable LayTongQuanDoanhThu(DateTime tuNgay, DateTime denNgay)
         {
             string sql = @"
                 SELECT 
                     ISNULL(SUM(hd.TongTien), 0) AS TongDoanhThu,
-                    ISNULL(SUM(ISNULL(ct.TienDV, 0)), 0) AS DoanhThuDichVu,
-                    ISNULL(SUM(hd.TongTien) - SUM(ISNULL(ct.TienDV, 0)), 0) AS DoanhThuPhong,
+                    ISNULL(SUM(hd.TienDichVu), 0) AS DoanhThuDichVu,
+                    ISNULL(SUM(hd.TienPhong), 0) AS DoanhThuPhong,
                     COUNT(DISTINCT hd.MaHoaDon) AS SoLuongHoaDon
                 FROM HoaDon hd
-                LEFT JOIN (
-                    SELECT MaHoaDon, SUM(ThanhTien) AS TienDV 
-                    FROM ChiTietHoaDon 
-                    GROUP BY MaHoaDon
-                ) ct ON hd.MaHoaDon = ct.MaHoaDon
-                WHERE CAST(ISNULL(hd.NgayLap, GETDATE()) AS DATE) BETWEEN @TuNgay AND @DenNgay";
+                WHERE CAST(ISNULL(hd.NgayThanhToan, hd.NgayLap) AS DATE) BETWEEN @TuNgay AND @DenNgay";
 
             SqlParameter[] pars = {
                 new SqlParameter("@TuNgay", tuNgay.Date),
@@ -37,12 +32,12 @@ namespace Quản_Lý_Khách_Sạn.DAL
                 SELECT 
                     hd.MaHoaDon AS [Mã HĐ],
                     hd.MaDatPhong AS [Mã Đặt Phòng],
-                    ISNULL(hd.NgayLap, GETDATE()) AS [Ngày Lập],
+                    ISNULL(hd.NgayThanhToan, hd.NgayLap) AS [Ngày Lập],
                     hd.TongTien AS [Thực Thu],
-                    N'Đã thanh toán' AS [Trạng Thái]
+                    hd.TrangThai AS [Trạng Thái]
                 FROM HoaDon hd
-                WHERE CAST(ISNULL(hd.NgayLap, GETDATE()) AS DATE) BETWEEN @TuNgay AND @DenNgay
-                ORDER BY hd.NgayLap DESC";
+                WHERE CAST(ISNULL(hd.NgayThanhToan, hd.NgayLap) AS DATE) BETWEEN @TuNgay AND @DenNgay
+                ORDER BY ISNULL(hd.NgayThanhToan, hd.NgayLap) DESC";
 
             SqlParameter[] pars = {
                 new SqlParameter("@TuNgay", tuNgay.Date),
@@ -62,7 +57,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
                 FROM DichVu dv
                 INNER JOIN ChiTietHoaDon ct ON dv.MaDichVu = ct.MaDichVu
                 INNER JOIN HoaDon hd ON ct.MaHoaDon = hd.MaHoaDon
-                WHERE CAST(ISNULL(hd.NgayLap, GETDATE()) AS DATE) BETWEEN @TuNgay AND @DenNgay
+                WHERE CAST(ISNULL(hd.NgayThanhToan, hd.NgayLap) AS DATE) BETWEEN @TuNgay AND @DenNgay
                 GROUP BY dv.TenDichVu
                 ORDER BY [Doanh Thu] DESC";
 

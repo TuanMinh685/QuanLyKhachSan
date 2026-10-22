@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
 using Quản_Lý_Khách_Sạn.Models;
@@ -62,6 +62,22 @@ namespace Quản_Lý_Khách_Sạn.DAL
         {
             if (!id.HasValue) return null;
             return GetById(id.Value);
+        }
+
+        public bool GiamSoLuong(int maVoucher)
+        {
+            string sql = "UPDATE Voucher SET SoLuong = SoLuong - 1 WHERE MaVoucher = @Ma AND SoLuong > 0";
+            try
+            {
+                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Ma", maVoucher);
+                    conn.Open();
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+            catch { return false; }
         }
 
         public Voucher GetByCode(string code)

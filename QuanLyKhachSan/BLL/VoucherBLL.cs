@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Quản_Lý_Khách_Sạn.DAL;
 using Quản_Lý_Khách_Sạn.Models;
 
@@ -48,6 +48,11 @@ namespace Quản_Lý_Khách_Sạn.BLL
         {
             if (!id.HasValue) return false;
             return dal.Delete(id.Value);
+        }
+
+        public bool GiamSoLuongVoucher(int id)
+        {
+            return dal.GiamSoLuong(id);
         }
     }
 }
