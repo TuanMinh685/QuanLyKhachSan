@@ -578,6 +578,24 @@
             this.txtVoucherCode.PlaceholderText = "Nhập mã voucher (VD: CHAOHET2026)";
             this.txtVoucherCode.Size = new System.Drawing.Size(320, 29);
             this.txtVoucherCode.TabIndex = 0;
+                        // 
+            // btnGoiYVoucher
+            // 
+            this.btnGoiYVoucher.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnGoiYVoucher.BackColor = System.Drawing.Color.White;
+            this.btnGoiYVoucher.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnGoiYVoucher.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(234)))), ((int)(((byte)(88)))), ((int)(((byte)(12)))));
+            this.btnGoiYVoucher.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnGoiYVoucher.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold);
+            this.btnGoiYVoucher.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(234)))), ((int)(((byte)(88)))), ((int)(((byte)(12)))));
+            this.btnGoiYVoucher.Location = new System.Drawing.Point(330, 1);
+            this.btnGoiYVoucher.Name = "btnGoiYVoucher";
+            this.btnGoiYVoucher.Size = new System.Drawing.Size(90, 31);
+            this.btnGoiYVoucher.TabIndex = 2;
+            this.btnGoiYVoucher.Text = "ðŸŽ Gá»£i Ã½";
+            this.btnGoiYVoucher.UseVisualStyleBackColor = false;
+            this.btnGoiYVoucher.Click += new System.EventHandler(this.btnGoiYVoucher_Click);
+            this.btnGoiYVoucher.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawPillBorder);
             // 
             // btnApDungVoucher
             // 

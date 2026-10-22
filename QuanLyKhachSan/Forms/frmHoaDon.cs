@@ -37,6 +37,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
             UITheme.StyleModernGrid(dgvChiTietDV);
             KhoiTaoBangChiTietTam();
 
+            btnVietQR.Text = "ðŸ“± MÃ£ VietQR";
+            btnInHoaDon.Text = "ðŸ–¨ï¸ In bill";
+            btnGoiYVoucher.Text = "ðŸŽ Gá»£i Ã½";
+            btnApDungVoucher.Text = "Ãp dá»¥ng";
+            btnThemDV.Text = "+ ThÃªm DV";
+
             TaiDanhSachPhuongThucTT();
             TaiDanhSachDichVu();
             TaiDanhSachDatPhong();
@@ -80,6 +86,26 @@ namespace Quản_Lý_Khách_Sạn.Forms
             dtChiTietTam.Columns.Add("Đơn Giá", typeof(decimal));
             dtChiTietTam.Columns.Add("Thành Tiền", typeof(decimal));
             dgvChiTietDV.DataSource = dtChiTietTam;
+
+            if (dgvChiTietDV.Columns["MÃ£ DV"] != null) dgvChiTietDV.Columns["MÃ£ DV"].FillWeight = 16;
+            if (dgvChiTietDV.Columns["TÃªn Dá»‹ch Vá»¥"] != null) dgvChiTietDV.Columns["TÃªn Dá»‹ch Vá»¥"].FillWeight = 36;
+            if (dgvChiTietDV.Columns["SL"] != null)
+            {
+                dgvChiTietDV.Columns["SL"].FillWeight = 12;
+                dgvChiTietDV.Columns["SL"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            }
+            if (dgvChiTietDV.Columns["ÄÆ¡n GiÃ¡"] != null)
+            {
+                dgvChiTietDV.Columns["ÄÆ¡n GiÃ¡"].FillWeight = 18;
+                dgvChiTietDV.Columns["ÄÆ¡n GiÃ¡"].DefaultCellStyle.Format = "N0";
+                dgvChiTietDV.Columns["ÄÆ¡n GiÃ¡"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            }
+            if (dgvChiTietDV.Columns["ThÃ nh Tiá»n"] != null)
+            {
+                dgvChiTietDV.Columns["ThÃ nh Tiá»n"].FillWeight = 18;
+                dgvChiTietDV.Columns["ThÃ nh Tiá»n"].DefaultCellStyle.Format = "N0";
+                dgvChiTietDV.Columns["ThÃ nh Tiá»n"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            }
         }
 
         private void TaiDanhSachPhuongThucTT()
@@ -148,6 +174,13 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 danhSachHoaDon = hoaDonBLL.LayDanhSachHoaDon();
                 dgvHoaDon.DataSource = null;
                 dgvHoaDon.DataSource = danhSachHoaDon;
+
+                string[] anCot = { "NgayLap", "TienPhong", "TienDichVu", "TienGiamGia", "TienDatCoc", "MaPTTT", "MaVoucher", "TrangThai" };
+                foreach (string col in anCot)
+                {
+                    if (dgvHoaDon.Columns[col] != null)
+                        dgvHoaDon.Columns[col].Visible = false;
+                }
 
                 if (dgvHoaDon.Columns["MaHoaDon"] != null)
                 {
@@ -347,6 +380,13 @@ namespace Quản_Lý_Khách_Sạn.Forms
             if (string.IsNullOrEmpty(k))
             {
                 dgvHoaDon.DataSource = danhSachHoaDon;
+
+                string[] anCot = { "NgayLap", "TienPhong", "TienDichVu", "TienGiamGia", "TienDatCoc", "MaPTTT", "MaVoucher", "TrangThai" };
+                foreach (string col in anCot)
+                {
+                    if (dgvHoaDon.Columns[col] != null)
+                        dgvHoaDon.Columns[col].Visible = false;
+                }
             }
             else
             {
