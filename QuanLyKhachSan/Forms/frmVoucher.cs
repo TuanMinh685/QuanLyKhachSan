@@ -163,38 +163,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
             var column = dgvVoucher.Columns[e.ColumnIndex];
             string col = column.Name;
 
-            if (col == "TrangThai" && !(column is DataGridViewCheckBoxColumn) && e.Value != null)
+            if (col == "TrangThaiHienThi" && e.Value != null)
             {
-                bool active = Convert.ToBoolean(e.Value);
-                e.Value = active ? "● Đang kích hoạt" : "● Tạm ngưng";
+                string text = e.Value.ToString();
+                bool active = text.Contains("áp dụng");
                 e.CellStyle.ForeColor = active ? Color.FromArgb(22, 163, 74) : Color.FromArgb(220, 38, 38);
                 e.CellStyle.Font = new Font("Segoe UI", 9.25f, active ? FontStyle.Bold : FontStyle.Regular);
-                e.FormattingApplied = true;
-            }
-            else if (col == "LoaiGiam" && e.Value != null)
-            {
-                string loai = e.Value.ToString();
-                e.Value = (loai == "PhanTram") ? "Giảm theo %" : "Tiền mặt (VNĐ)";
-                e.FormattingApplied = true;
-            }
-            else if (col == "GiaTri" && e.Value != null)
-            {
-                var row = dgvVoucher.Rows[e.RowIndex].DataBoundItem as Voucher;
-                if (row != null && decimal.TryParse(e.Value.ToString(), out decimal val))
-                {
-                    e.Value = (row.LoaiGiam == "PhanTram") ? $"{val:N0} %" : $"{val:N0} đ";
-                    e.CellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
-                    e.CellStyle.ForeColor = UITheme.PrimaryOrange;
-                    e.FormattingApplied = true;
-                }
-            }
-            else if (col == "DonToiThieu" && e.Value != null)
-            {
-                if (decimal.TryParse(e.Value.ToString(), out decimal val))
-                {
-                    e.Value = $"{val:N0} đ";
-                    e.FormattingApplied = true;
-                }
             }
         }
 
@@ -260,24 +234,27 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 dgvVoucher.Columns["Code"].DefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
                 dgvVoucher.Columns["Code"].DefaultCellStyle.ForeColor = UITheme.DarkNavy;
             }
-            if (dgvVoucher.Columns["LoaiGiam"] != null)
+            if (dgvVoucher.Columns["LoaiGiamHienThi"] != null)
             {
-                dgvVoucher.Columns["LoaiGiam"].Visible = true;
-                dgvVoucher.Columns["LoaiGiam"].HeaderText = "HÌNH THỨC";
-                dgvVoucher.Columns["LoaiGiam"].FillWeight = 80;
-                dgvVoucher.Columns["LoaiGiam"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                dgvVoucher.Columns["LoaiGiamHienThi"].Visible = true;
+                dgvVoucher.Columns["LoaiGiamHienThi"].HeaderText = "HÌNH THỨC";
+                dgvVoucher.Columns["LoaiGiamHienThi"].FillWeight = 80;
+                dgvVoucher.Columns["LoaiGiamHienThi"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             }
-            if (dgvVoucher.Columns["GiaTri"] != null)
+            if (dgvVoucher.Columns["MucGiamHienThi"] != null)
             {
-                dgvVoucher.Columns["GiaTri"].Visible = true;
-                dgvVoucher.Columns["GiaTri"].HeaderText = "MỨC GIẢM";
-                dgvVoucher.Columns["GiaTri"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                dgvVoucher.Columns["GiaTri"].FillWeight = 85;
+                dgvVoucher.Columns["MucGiamHienThi"].Visible = true;
+                dgvVoucher.Columns["MucGiamHienThi"].HeaderText = "MỨC GIẢM";
+                dgvVoucher.Columns["MucGiamHienThi"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                dgvVoucher.Columns["MucGiamHienThi"].DefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
+                dgvVoucher.Columns["MucGiamHienThi"].DefaultCellStyle.ForeColor = UITheme.PrimaryOrange;
+                dgvVoucher.Columns["MucGiamHienThi"].FillWeight = 85;
             }
             if (dgvVoucher.Columns["DonToiThieu"] != null)
             {
                 dgvVoucher.Columns["DonToiThieu"].Visible = true;
                 dgvVoucher.Columns["DonToiThieu"].HeaderText = "ĐƠN TỐI THIỂU";
+                dgvVoucher.Columns["DonToiThieu"].DefaultCellStyle.Format = "N0";
                 dgvVoucher.Columns["DonToiThieu"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 dgvVoucher.Columns["DonToiThieu"].FillWeight = 90;
             }
@@ -296,27 +273,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 dgvVoucher.Columns["NgayHetHan"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 dgvVoucher.Columns["NgayHetHan"].FillWeight = 75;
             }
-            if (dgvVoucher.Columns["TrangThai"] is DataGridViewCheckBoxColumn)
+            if (dgvVoucher.Columns["TrangThaiHienThi"] != null)
             {
-                int idx = dgvVoucher.Columns["TrangThai"].Index;
-                dgvVoucher.Columns.Remove("TrangThai");
-                var col = new DataGridViewTextBoxColumn
-                {
-                    Name = "TrangThai",
-                    DataPropertyName = "TrangThai",
-                    HeaderText = "TRẠNG THÁI",
-                    FillWeight = 80,
-                    Visible = true
-                };
-                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                dgvVoucher.Columns.Insert(idx, col);
-            }
-            else if (dgvVoucher.Columns["TrangThai"] != null)
-            {
-                dgvVoucher.Columns["TrangThai"].Visible = true;
-                dgvVoucher.Columns["TrangThai"].HeaderText = "TRẠNG THÁI";
-                dgvVoucher.Columns["TrangThai"].FillWeight = 80;
-                dgvVoucher.Columns["TrangThai"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                dgvVoucher.Columns["TrangThaiHienThi"].Visible = true;
+                dgvVoucher.Columns["TrangThaiHienThi"].HeaderText = "TRẠNG THÁI";
+                dgvVoucher.Columns["TrangThaiHienThi"].FillWeight = 80;
+                dgvVoucher.Columns["TrangThaiHienThi"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             }
         }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Quản_Lý_Khách_Sạn.Models
 {
@@ -67,5 +67,9 @@ namespace Quản_Lý_Khách_Sạn.Models
             get => TrangThai;
             set => TrangThai = value;
         }
+
+        public string TrangThaiHienThi => (TrangThai && NgayHetHan >= DateTime.Now.Date) ? "● Đang áp dụng" : "● Tạm ngưng";
+        public string LoaiGiamHienThi => (LoaiGiam == "PhanTram") ? "Giảm theo %" : "Tiền mặt (VNĐ)";
+        public string MucGiamHienThi => (LoaiGiam == "PhanTram") ? $"{GiaTri:N0} %" : $"{GiaTri:N0} đ";
     }
 }

@@ -143,13 +143,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
             if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
             var column = dgvPTTT.Columns[e.ColumnIndex];
 
-            if (column.Name == "KichHoat" && !(column is DataGridViewCheckBoxColumn) && e.Value != null)
+            if (column.Name == "TrangThaiHienThi" && e.Value != null)
             {
-                bool active = Convert.ToBoolean(e.Value);
-                e.Value = active ? "● Đang hoạt động" : "● Tạm ngưng";
+                string text = e.Value.ToString();
+                bool active = text.Contains("hoạt động");
                 e.CellStyle.ForeColor = active ? Color.FromArgb(22, 163, 74) : Color.FromArgb(220, 38, 38);
                 e.CellStyle.Font = new Font("Segoe UI", 9.25f, active ? FontStyle.Bold : FontStyle.Regular);
-                e.FormattingApplied = true;
             }
         }
 
@@ -220,25 +219,14 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 dgvPTTT.Columns["MoTa"].HeaderText = "GHI CHÚ / MÔ TẢ";
                 dgvPTTT.Columns["MoTa"].FillWeight = 180;
             }
-            if (dgvPTTT.Columns["KichHoat"] is DataGridViewCheckBoxColumn)
+            if (dgvPTTT.Columns["KichHoat"] != null)
+                dgvPTTT.Columns["KichHoat"].Visible = false;
+
+            if (dgvPTTT.Columns["TrangThaiHienThi"] != null)
             {
-                int idx = dgvPTTT.Columns["KichHoat"].Index;
-                dgvPTTT.Columns.Remove("KichHoat");
-                var col = new DataGridViewTextBoxColumn
-                {
-                    Name = "KichHoat",
-                    DataPropertyName = "KichHoat",
-                    HeaderText = "TRẠNG THÁI",
-                    FillWeight = 75
-                };
-                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                dgvPTTT.Columns.Insert(idx, col);
-            }
-            else if (dgvPTTT.Columns["KichHoat"] != null)
-            {
-                dgvPTTT.Columns["KichHoat"].HeaderText = "TRẠNG THÁI";
-                dgvPTTT.Columns["KichHoat"].FillWeight = 75;
-                dgvPTTT.Columns["KichHoat"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                dgvPTTT.Columns["TrangThaiHienThi"].HeaderText = "TRẠNG THÁI";
+                dgvPTTT.Columns["TrangThaiHienThi"].FillWeight = 75;
+                dgvPTTT.Columns["TrangThaiHienThi"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             }
         }
 

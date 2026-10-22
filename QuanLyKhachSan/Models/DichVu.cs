@@ -1,4 +1,4 @@
-﻿namespace Quản_Lý_Khách_Sạn.Models
+namespace Quản_Lý_Khách_Sạn.Models
 {
     public class DichVu
     {
@@ -8,5 +8,6 @@
         public decimal DonGia { get; set; }
         public string DonViTinh { get; set; } = "Lần";
         public bool TrangThai { get; set; } = true;
+        public string TrangThaiHienThi => TrangThai ? "● Đang phục vụ" : "● Tạm ngưng";
     }
 }

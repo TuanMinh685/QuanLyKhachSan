@@ -162,13 +162,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
             if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
             var col = dgvDichVu.Columns[e.ColumnIndex];
 
-            if (col.Name == "TrangThai" && !(col is DataGridViewCheckBoxColumn) && e.Value != null)
+            if (col.Name == "TrangThaiHienThi" && e.Value != null)
             {
-                bool active = Convert.ToBoolean(e.Value);
-                e.Value = active ? "● Đang phục vụ" : "● Tạm ngưng";
+                string text = e.Value.ToString();
+                bool active = text.Contains("phục vụ");
                 e.CellStyle.ForeColor = active ? Color.FromArgb(22, 163, 74) : Color.FromArgb(220, 38, 38);
                 e.CellStyle.Font = new Font("Segoe UI", 9.25f, active ? FontStyle.Bold : FontStyle.Regular);
-                e.FormattingApplied = true;
             }
             else if (col.Name == "DonGia" && e.Value != null)
             {
@@ -261,25 +260,14 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 dgvDichVu.Columns["DonViTinh"].FillWeight = 55;
                 dgvDichVu.Columns["DonViTinh"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             }
-            if (dgvDichVu.Columns["TrangThai"] is DataGridViewCheckBoxColumn)
+            if (dgvDichVu.Columns["TrangThai"] != null)
+                dgvDichVu.Columns["TrangThai"].Visible = false;
+
+            if (dgvDichVu.Columns["TrangThaiHienThi"] != null)
             {
-                int idx = dgvDichVu.Columns["TrangThai"].Index;
-                dgvDichVu.Columns.Remove("TrangThai");
-                var col = new DataGridViewTextBoxColumn
-                {
-                    Name = "TrangThai",
-                    DataPropertyName = "TrangThai",
-                    HeaderText = "TRẠNG THÁI",
-                    FillWeight = 85
-                };
-                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                dgvDichVu.Columns.Insert(idx, col);
-            }
-            else if (dgvDichVu.Columns["TrangThai"] != null)
-            {
-                dgvDichVu.Columns["TrangThai"].HeaderText = "TRẠNG THÁI";
-                dgvDichVu.Columns["TrangThai"].FillWeight = 85;
-                dgvDichVu.Columns["TrangThai"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                dgvDichVu.Columns["TrangThaiHienThi"].HeaderText = "TRẠNG THÁI";
+                dgvDichVu.Columns["TrangThaiHienThi"].FillWeight = 85;
+                dgvDichVu.Columns["TrangThaiHienThi"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             }
         }
 
