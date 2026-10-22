@@ -37,11 +37,11 @@ namespace Quản_Lý_Khách_Sạn.Forms
             UITheme.StyleModernGrid(dgvChiTietDV);
             KhoiTaoBangChiTietTam();
 
-            btnVietQR.Text = "ðŸ“± MÃ£ VietQR";
-            btnInHoaDon.Text = "ðŸ–¨ï¸ In bill";
-            btnGoiYVoucher.Text = "ðŸŽ Gá»£i Ã½";
-            btnApDungVoucher.Text = "Ãp dá»¥ng";
-            btnThemDV.Text = "+ ThÃªm DV";
+            btnVietQR.Text = "M\u00E3 VietQR";
+            btnInHoaDon.Text = "In bill";
+            btnGoiYVoucher.Text = "G\u1EE3i \u00FD";
+            btnApDungVoucher.Text = "\u00C1p d\u1EE5ng";
+            btnThemDV.Text = "Th\u00EAm DV";
 
             TaiDanhSachPhuongThucTT();
             TaiDanhSachDichVu();

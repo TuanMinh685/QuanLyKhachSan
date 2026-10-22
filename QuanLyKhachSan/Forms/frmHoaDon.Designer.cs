@@ -406,7 +406,7 @@
             this.btnThemDV.Name = "btnThemDV";
             this.btnThemDV.Size = new System.Drawing.Size(90, 30);
             this.btnThemDV.TabIndex = 2;
-            this.btnThemDV.Text = "+ Gọi món";
+            this.btnThemDV.Text = "Th\u00EAm DV";
             this.btnThemDV.UseVisualStyleBackColor = false;
             this.btnThemDV.Click += new System.EventHandler(this.btnThemDV_Click);
             // 
@@ -592,7 +592,7 @@
             this.btnGoiYVoucher.Name = "btnGoiYVoucher";
             this.btnGoiYVoucher.Size = new System.Drawing.Size(90, 31);
             this.btnGoiYVoucher.TabIndex = 2;
-            this.btnGoiYVoucher.Text = "ðŸŽ Gá»£i Ã½";
+            this.btnGoiYVoucher.Text = "G\u1EE3i \u00FD";
             this.btnGoiYVoucher.UseVisualStyleBackColor = false;
             this.btnGoiYVoucher.Click += new System.EventHandler(this.btnGoiYVoucher_Click);
             this.btnGoiYVoucher.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawPillBorder);
@@ -610,7 +610,7 @@
             this.btnApDungVoucher.Name = "btnApDungVoucher";
             this.btnApDungVoucher.Size = new System.Drawing.Size(90, 31);
             this.btnApDungVoucher.TabIndex = 1;
-            this.btnApDungVoucher.Text = "Áp dụng";
+            this.btnApDungVoucher.Text = "\u00C1p d\u1EE5ng";
             this.btnApDungVoucher.UseVisualStyleBackColor = false;
             this.btnApDungVoucher.Click += new System.EventHandler(this.btnApDungVoucher_Click);
             // 
@@ -830,7 +830,7 @@
             this.btnVietQR.Name = "btnVietQR";
             this.btnVietQR.Size = new System.Drawing.Size(115, 40);
             this.btnVietQR.TabIndex = 3;
-            this.btnVietQR.Text = "ðŸ“± MÃ£ VietQR";
+            this.btnVietQR.Text = "M\u00E3 VietQR";
             this.btnVietQR.UseVisualStyleBackColor = false;
             this.btnVietQR.Click += new System.EventHandler(this.btnVietQR_Click);
             this.btnVietQR.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawPillBorder);
@@ -882,7 +882,7 @@
             this.btnInHoaDon.Name = "btnInHoaDon";
             this.btnInHoaDon.Size = new System.Drawing.Size(100, 40);
             this.btnInHoaDon.TabIndex = 0;
-            this.btnInHoaDon.Text = "🖨️ In bill";
+            this.btnInHoaDon.Text = "In bill";
             this.btnInHoaDon.UseVisualStyleBackColor = false;
             this.btnInHoaDon.Click += new System.EventHandler(this.btnInHoaDon_Click);
             // 
