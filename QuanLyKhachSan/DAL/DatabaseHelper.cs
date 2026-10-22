@@ -11,6 +11,19 @@ namespace Quản_Lý_Khách_Sạn.DAL
         private static string connectionString = ConfigurationManager.ConnectionStrings["HotelDB"]?.ConnectionString
             ?? "Host=aws-0-ap-northeast-2.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.xfudgdoksedzyqinnkup;Password=TuanMinh@2004;SSL Mode=Require;Trust Server Certificate=true;Timeout=30;Command Timeout=60;";
 
+        static DatabaseHelper()
+        {
+            try
+            {
+                ExecuteNonQuery(@"
+                    ALTER TABLE Phong ADD COLUMN IF NOT EXISTS HinhAnh TEXT;
+                    ALTER TABLE Phong ADD COLUMN IF NOT EXISTS TienNghi TEXT;
+                    ALTER TABLE Phong ADD COLUMN IF NOT EXISTS GhiChu TEXT;
+                ");
+            }
+            catch { }
+        }
+
         public static SqlConnection GetConnection()
         {
             return new SqlConnection(connectionString);
