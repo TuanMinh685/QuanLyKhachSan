@@ -93,34 +93,73 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             cardLeft.Controls.Add(pnlHeaderLeft);
 
-            // Cân đối vị trí tìm kiếm và bảng
-            pnlSearch.Location = new Point(20, 108);
-            pnlSearch.Height = 40;
+            // 1. Ẩn cardRight để cardLeft hiển thị toàn màn hình 100%
+            tblMainLayout.ColumnStyles[0].SizeType = SizeType.Percent;
+            tblMainLayout.ColumnStyles[0].Width = 100F;
+            tblMainLayout.ColumnStyles[1].SizeType = SizeType.Absolute;
+            tblMainLayout.ColumnStyles[1].Width = 0F;
+            cardRight.Visible = false;
+            cardLeft.Margin = new Padding(0);
 
-            pnlGridWrapper.Location = new Point(20, 160);
+            // 2. Nâng cấp Toolbar trên cardLeft với các nút nghiệp vụ
+            pnlSearch.Location = new Point(20, 108);
+            pnlSearch.Height = 44;
+            pnlSearch.Width = cardLeft.ClientSize.Width - 40;
+            pnlSearch.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+
+            // Nút Lập hóa đơn & Thanh toán (Modal Popup)
+            btnThanhToan.Parent = cardLeft;
+            btnThanhToan.Text = "💳 Lập hóa đơn / Thanh toán";
+            btnThanhToan.Size = new Size(225, 40);
+            btnThanhToan.Location = new Point(cardLeft.ClientSize.Width - 245, 108);
+            btnThanhToan.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnThanhToan.BackColor = UITheme.PrimaryOrange;
+            btnThanhToan.ForeColor = Color.White;
+            btnThanhToan.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnThanhToan.BringToFront();
+
+            btnInHoaDon.Parent = cardLeft;
+            btnInHoaDon.Text = "🖨️ In lại bill";
+            btnInHoaDon.Size = new Size(115, 40);
+            btnInHoaDon.Location = new Point(cardLeft.ClientSize.Width - 368, 108);
+            btnInHoaDon.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnInHoaDon.BackColor = Color.FromArgb(248, 250, 252);
+            btnInHoaDon.ForeColor = UITheme.DarkNavy;
+            btnInHoaDon.BringToFront();
+
+            btnVietQR.Parent = cardLeft;
+            btnVietQR.Text = "📱 Xem VietQR";
+            btnVietQR.Size = new Size(125, 40);
+            btnVietQR.Location = new Point(cardLeft.ClientSize.Width - 501, 108);
+            btnVietQR.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnVietQR.BackColor = UITheme.DarkNavy;
+            btnVietQR.ForeColor = Color.White;
+            btnVietQR.BringToFront();
+
+            btnLamMoi.Parent = cardLeft;
+            btnLamMoi.Text = "🔄 Làm mới";
+            btnLamMoi.Size = new Size(100, 40);
+            btnLamMoi.Location = new Point(cardLeft.ClientSize.Width - 609, 108);
+            btnLamMoi.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnLamMoi.BackColor = Color.FromArgb(248, 250, 252);
+            btnLamMoi.ForeColor = UITheme.TextMain;
+            btnLamMoi.BringToFront();
+
+            // Khung tìm kiếm bên trái
+            pnlSearch.Width = cardLeft.ClientSize.Width - 620;
+            pnlSearch.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            txtTimKiem.Width = pnlSearch.Width - 45;
+
+            // Bảng danh sách hóa đơn Full 100%
+            pnlGridWrapper.Location = new Point(20, 164);
             pnlGridWrapper.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
             cardLeft.Resize += (s, e) =>
             {
-                pnlGridWrapper.Size = new Size(cardLeft.ClientSize.Width - 40, cardLeft.ClientSize.Height - 180);
+                pnlGridWrapper.Size = new Size(cardLeft.ClientSize.Width - 40, cardLeft.ClientSize.Height - 184);
+                pnlSearch.Width = cardLeft.ClientSize.Width - 620;
+                txtTimKiem.Width = Math.Max(150, pnlSearch.Width - 45);
             };
-
-            // 2. Nâng cấp các nút thao tác
-            btnVietQR.Text = "📱 Mã VietQR";
-            btnVietQR.BackColor = UITheme.DarkNavy;
-            btnVietQR.ForeColor = Color.White;
-
-            btnInHoaDon.Text = "🖨️ In bill";
-            btnInHoaDon.BackColor = Color.FromArgb(248, 250, 252);
-            btnInHoaDon.ForeColor = UITheme.DarkNavy;
-
-            btnLamMoi.Text = "🔄 Làm mới";
-            btnLamMoi.BackColor = Color.FromArgb(248, 250, 252);
-            btnLamMoi.ForeColor = UITheme.TextMain;
-
-            btnThanhToan.Text = "💳 Xác nhận thu";
-            btnThanhToan.BackColor = UITheme.PrimaryOrange;
-            btnThanhToan.ForeColor = Color.White;
 
             btnThemDV.Text = "➕ Thêm DV";
             btnGoiYVoucher.Text = "💡 Gợi ý";
@@ -633,119 +672,13 @@ namespace Quản_Lý_Khách_Sạn.Forms
             return cboPTTT.SelectedValue?.ToString() ?? "TM";
         }
 
-        private void btnVietQR_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(txtMaHD.Text))
-            {
-                txtMaHD.Text = "HD" + DateTime.Now.ToString("yyMMddHHmmss");
-            }
-
-            decimal canThu = ParseMoney(lblTongTienValue.Text);
-            if (canThu <= 0)
-            {
-                MessageBox.Show("Số tiền thanh toán phải lớn hơn 0 để tạo mã VietQR.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            string noiDung = $"THANH TOAN {txtMaHD.Text.Trim().ToUpper()}";
-            using (var qrForm = new frmVietQR(txtMaHD.Text.Trim().ToUpper(), canThu, noiDung))
-            {
-                if (qrForm.ShowDialog(this) == DialogResult.OK)
-                {
-                    for (int i = 0; i < cboPTTT.Items.Count; i++)
-                    {
-                        string itemStr = cboPTTT.GetItemText(cboPTTT.Items[i]);
-                        if (itemStr.IndexOf("chuyển khoản", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                            itemStr.IndexOf("qr", StringComparison.OrdinalIgnoreCase) >= 0)
-                        {
-                            cboPTTT.SelectedIndex = i;
-                            break;
-                        }
-                    }
-
-                    var hoi = MessageBox.Show($"Khách đã quét VietQR thành công ({canThu:N0} đ).\nBạn có muốn xác nhận hoàn tất thanh toán hóa đơn ngay bây giờ?", "Xác nhận thu", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                    if (hoi == DialogResult.Yes)
-                    {
-                        btnThanhToan_Click(sender, e);
-                    }
-                }
-            }
-        }
 
         private void btnThanhToan_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtMaHD.Text))
+            using var modal = new frmThanhToanModal();
+            if (modal.ShowDialog(this) == DialogResult.OK)
             {
-                MessageBox.Show("Vui lòng nhập mã hóa đơn.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            string maHD = txtMaHD.Text.Trim().ToUpper();
-
-            // Kiểm tra trùng lặp khóa chính
-            if (danhSachHoaDon.Any(x => string.Equals(x.MaHoaDon, maHD, StringComparison.OrdinalIgnoreCase)))
-            {
-                MessageBox.Show($"Hóa đơn [{maHD}] đã tồn tại và đã được thanh toán trước đó!\nNếu muốn lập hóa đơn mới cho phòng khác, vui lòng bấm nút 'Làm mới'.", "Cảnh báo trùng hóa đơn", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            if (!(cboDatPhong.SelectedItem is ThongTinDatPhongThanhToan dpItem))
-            {
-                MessageBox.Show("Vui lòng chọn một lượt đặt phòng thực tế từ cơ sở dữ liệu để thực hiện thanh toán.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            string maDP = dpItem.MaHienThi;
-
-            decimal canThu = ParseMoney(lblTongTienValue.Text);
-            var hd = new HoaDon
-            {
-                MaHoaDon = maHD,
-                MaDatPhong = maDP,
-                NgayLap = DateTime.Now,
-                NgayThanhToan = DateTime.Now,
-                TienPhong = ParseMoney(txtTienPhong.Text),
-                TienDichVu = ParseMoney(txtTienDV.Text),
-                TienGiamGia = ParseMoney(txtTienGiamGia.Text),
-                TienDatCoc = ParseMoney(txtTienDatCoc.Text),
-                TongTien = canThu,
-                MaPTTT = LayMaPTTT(),
-                MaVoucher = maVoucherDaApDung,
-                TrangThai = "Đã thanh toán"
-            };
-
-            if (LayMaPTTT() == "CK")
-            {
-                using (var qr = new frmVietQR(hd.MaHoaDon, canThu, $"THANH TOAN {hd.MaHoaDon}"))
-                {
-                    if (qr.ShowDialog(this) != DialogResult.OK)
-                    {
-                        return;
-                    }
-                }
-            }
-
-            if (hoaDonBLL.ThanhToanVaTraPhong(hd, maDP))
-            {
-                // Lưu từng dòng dịch vụ thực tế vào bảng ChiTietHoaDon
-                foreach (DataRow r in dtChiTietTam.Rows)
-                {
-                    string maDV = r["Mã DV"].ToString();
-                    int sl = Convert.ToInt32(r["SL"]);
-                    decimal donGia = Convert.ToDecimal(r["Đơn Giá"]);
-                    chiTietDAL.LuuChiTiet(hd.MaHoaDon, maDV, sl, donGia);
-                }
-
-                // Cập nhật số lượng voucher nếu có sử dụng
-                if (hd.MaVoucher.HasValue)
-                {
-                    voucherBLL.GiamSoLuongVoucher(hd.MaVoucher.Value);
-                }
-
-                MessageBox.Show($"Thanh toán hóa đơn [{hd.MaHoaDon}] thành công! Thực thu: {canThu:N0} đ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                TaiDanhSachDatPhong();
                 TaiDanhSachHoaDon();
-                LamMoiForm();
             }
         }
 
@@ -775,24 +708,46 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void btnInHoaDon_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(txtMaHD.Text))
+            if (dgvHoaDon.CurrentRow == null || !(dgvHoaDon.CurrentRow.DataBoundItem is HoaDon hd))
             {
-                MessageBox.Show("Vui lòng chọn hoặc lập hóa đơn trước khi in.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng chọn một dòng hóa đơn trong danh sách bên dưới để in lại biên lai.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
             try
             {
+                txtMaHD.Text = hd.MaHoaDon;
+                cboDatPhong.Text = hd.MaDatPhong;
+                txtTienPhong.Text = hd.TienPhong.ToString("N0");
+                txtTienDV.Text = hd.TienDichVu.ToString("N0");
+                txtTienGiamGia.Text = hd.TienGiamGia.ToString("N0");
+                txtTienDatCoc.Text = hd.TienDatCoc.ToString("N0");
+                lblTongTienValue.Text = hd.TongTien.ToString("N0") + " đ";
+
+                dtChiTietTam = chiTietDAL.LayChiTietTheoHoaDon(hd.MaHoaDon);
+
                 printDoc.DefaultPageSettings.PaperSize = new PaperSize("Bill80mm", 315, 780);
                 printPreviewDlg.StartPosition = FormStartPosition.CenterScreen;
                 printPreviewDlg.Width = 480;
                 printPreviewDlg.Height = 700;
-                printPreviewDlg.ShowDialog();
+                printPreviewDlg.ShowDialog(this);
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Lỗi in hóa đơn: " + ex.Message, "Lỗi in", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void btnVietQR_Click(object sender, EventArgs e)
+        {
+            if (dgvHoaDon.CurrentRow == null || !(dgvHoaDon.CurrentRow.DataBoundItem is HoaDon hd))
+            {
+                MessageBox.Show("Vui lòng chọn một dòng hóa đơn trong danh sách bên dưới để xem mã VietQR.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            using var qr = new frmVietQR(hd.MaHoaDon, hd.TongTien, $"THANH TOAN {hd.MaHoaDon}");
+            qr.ShowDialog(this);
         }
 
         private void printDoc_PrintPage(object sender, PrintPageEventArgs e)

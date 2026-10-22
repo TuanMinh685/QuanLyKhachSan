@@ -1,8 +1,6 @@
 using System;
 using System.Data;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Security.Cryptography;
 using System.Windows.Forms;
 using Quản_Lý_Khách_Sạn.DAL;
 using Quản_Lý_Khách_Sạn;
@@ -11,58 +9,27 @@ namespace Quản_Lý_Khách_Sạn.Forms
 {
     public class frmTaiKhoan : Form
     {
-        // Layout chính 2 card
-        private TableLayoutPanel tblMainLayout;
-        private Panel cardLeft;
-        private Panel cardRight;
-
-        // Controls bên trái (Danh sách)
-        private Panel pnlHeaderLeft;
-        private Label lblTitleLeft;
-        private Label lblSubtitleLeft;
+        private Panel cardMain;
+        private Panel pnlHeader;
+        private Label lblTitle;
+        private Label lblSubtitle;
         private FlowLayoutPanel pnlStatsPills;
         private Label lblPillTotal;
         private Label lblPillAdmin;
         private Label lblPillLeTan;
 
+        private Panel pnlToolbar;
         private Panel pnlSearch;
         private Label lblIconSearch;
         private TextBox txtTim;
 
+        private Button btnThem;
+        private Button btnSua;
+        private Button btnXoa;
+        private Button btnLamMoi;
+
         private Panel pnlGridWrapper;
         private DataGridView grid;
-
-        // Controls bên phải (Form nhập liệu)
-        private Label lblRightTitle;
-        private Label lblRightSubtitle;
-        private Panel pnlDivider;
-
-        private Panel pnlHoTenWrap;
-        private TextBox txtHoTen;
-
-        private Panel pnlChucVuWrap;
-        private ComboBox cboChucVu;
-
-        private Panel pnlSDTWrap;
-        private TextBox txtSDT;
-
-        private Panel pnlTenDangNhapWrap;
-        private TextBox txtTenDangNhap;
-
-        private Panel pnlMatKhauWrap;
-        private TextBox txtMatKhau;
-        private Label lblHintMatKhau;
-
-        private Panel pnlVaiTroWrap;
-        private ComboBox cboVaiTro;
-
-        private Panel pnlBottomButtons;
-        private Button btnLuu;
-        private Button btnLamMoi;
-        private Button btnXoa;
-
-        private int maTaiKhoan = 0;
-        private int maNhanVien = 0;
 
         public frmTaiKhoan()
         {
@@ -82,59 +49,44 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 return;
             }
 
-            BuildModernUI();
+            BuildUI();
             LoadTaiKhoan();
         }
 
-        private void BuildModernUI()
+        private void BuildUI()
         {
             SuspendLayout();
+            Padding = new Padding(24);
 
-            // 1. Root TableLayoutPanel chia 2 cột: Trái (62%), Phải (38%)
-            tblMainLayout = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 2,
-                RowCount = 1,
-                Padding = new Padding(24),
-                BackColor = UITheme.BackgroundGray
-            };
-            tblMainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 62F));
-            tblMainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 38F));
-
-            // =========================================================================
-            // CARD TRÁI: DANH SÁCH NHÂN SỰ
-            // =========================================================================
-            cardLeft = new Panel
+            cardMain = new Panel
             {
                 Dock = DockStyle.Fill,
                 BackColor = Color.White,
-                Padding = new Padding(24),
-                Margin = new Padding(0, 0, 16, 0)
+                Padding = new Padding(24)
             };
-            cardLeft.Paint += (s, e) => UITheme.DrawCard(s, e, 12);
+            cardMain.Paint += (s, e) => UITheme.DrawCard(s, e, 12);
 
-            // Header trái
-            pnlHeaderLeft = new Panel
+            // 1. Header
+            pnlHeader = new Panel
             {
                 Dock = DockStyle.Top,
                 Height = 84,
                 BackColor = Color.Transparent
             };
 
-            lblTitleLeft = new Label
+            lblTitle = new Label
             {
-                Text = "👤 QUẢN LÝ NHÂN SỰ & TÀI KHOẢN",
+                Text = "👤 QUẢN LÝ NHÂN SỰ & TÀI KHOẢN HỆ THỐNG",
                 Font = new Font("Segoe UI", 13.5F, FontStyle.Bold),
                 ForeColor = UITheme.DarkNavy,
                 Location = new Point(0, 0),
                 AutoSize = true
             };
 
-            lblSubtitleLeft = new Label
+            lblSubtitle = new Label
             {
-                Text = "Danh sách nhân viên khách sạn, tài khoản đăng nhập và phân cấp quyền hạn",
-                Font = new Font("Segoe UI", 9F, FontStyle.Regular),
+                Text = "Danh sách nhân viên khách sạn, tài khoản đăng nhập và phân quyền truy cập hệ thống",
+                Font = new Font("Segoe UI", 9F),
                 ForeColor = UITheme.TextMuted,
                 Location = new Point(0, 26),
                 AutoSize = true
@@ -158,16 +110,25 @@ namespace Quản_Lý_Khách_Sạn.Forms
             pnlStatsPills.Controls.Add(lblPillAdmin);
             pnlStatsPills.Controls.Add(lblPillLeTan);
 
-            pnlHeaderLeft.Controls.Add(lblTitleLeft);
-            pnlHeaderLeft.Controls.Add(lblSubtitleLeft);
-            pnlHeaderLeft.Controls.Add(pnlStatsPills);
-            cardLeft.Controls.Add(pnlHeaderLeft);
+            pnlHeader.Controls.Add(lblTitle);
+            pnlHeader.Controls.Add(lblSubtitle);
+            pnlHeader.Controls.Add(pnlStatsPills);
+            cardMain.Controls.Add(pnlHeader);
 
-            // Thanh tìm kiếm
-            pnlSearch = new Panel
+            // 2. Toolbar (Tìm kiếm bên trái + Nút hành động bên phải)
+            pnlToolbar = new Panel
             {
                 Location = new Point(24, 114),
-                Size = new Size(cardLeft.ClientSize.Width - 48, 40),
+                Height = 42,
+                Width = cardMain.ClientSize.Width - 48,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
+                BackColor = Color.Transparent
+            };
+
+            pnlSearch = new Panel
+            {
+                Location = new Point(0, 0),
+                Size = new Size(pnlToolbar.Width - 550, 40),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
                 BackColor = Color.White
             };
@@ -197,13 +158,83 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             pnlSearch.Controls.Add(lblIconSearch);
             pnlSearch.Controls.Add(txtTim);
-            cardLeft.Controls.Add(pnlSearch);
+            pnlToolbar.Controls.Add(pnlSearch);
 
-            // Bọc bảng dữ liệu
+            // Nút Thêm mới (Màu cam nổi bật)
+            btnThem = new Button
+            {
+                Text = "➕ Thêm nhân sự mới",
+                Size = new Size(175, 40),
+                Location = new Point(pnlToolbar.Width - 175, 0),
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                FlatStyle = FlatStyle.Flat,
+                BackColor = UITheme.PrimaryOrange,
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnThem.FlatAppearance.BorderSize = 0;
+            btnThem.Click += (_, __) => MoModalThem();
+
+            // Nút Chỉnh sửa (Màu xanh dương)
+            btnSua = new Button
+            {
+                Text = "✏️ Chỉnh sửa",
+                Size = new Size(120, 40),
+                Location = new Point(pnlToolbar.Width - 305, 0),
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                FlatStyle = FlatStyle.Flat,
+                BackColor = UITheme.PrimaryBlue,
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnSua.FlatAppearance.BorderSize = 0;
+            btnSua.Click += (_, __) => MoModalSua();
+
+            // Nút Xóa
+            btnXoa = new Button
+            {
+                Text = "🗑 Xóa",
+                Size = new Size(95, 40),
+                Location = new Point(pnlToolbar.Width - 410, 0),
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.FromArgb(254, 242, 242),
+                ForeColor = Color.FromArgb(220, 38, 38),
+                Font = new Font("Segoe UI", 9.5F, FontStyle.Regular),
+                Cursor = Cursors.Hand
+            };
+            btnXoa.FlatAppearance.BorderColor = Color.FromArgb(254, 202, 202);
+            btnXoa.Click += (_, __) => XoaTaiKhoan();
+
+            // Nút Làm mới
+            btnLamMoi = new Button
+            {
+                Text = "🔄 Làm mới",
+                Size = new Size(100, 40),
+                Location = new Point(pnlToolbar.Width - 520, 0),
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.FromArgb(248, 250, 252),
+                ForeColor = UITheme.DarkNavy,
+                Font = new Font("Segoe UI", 9.5F),
+                Cursor = Cursors.Hand
+            };
+            btnLamMoi.FlatAppearance.BorderColor = UITheme.BorderColor;
+            btnLamMoi.Click += (_, __) => { txtTim.Clear(); LoadTaiKhoan(); };
+
+            pnlToolbar.Controls.Add(btnThem);
+            pnlToolbar.Controls.Add(btnSua);
+            pnlToolbar.Controls.Add(btnXoa);
+            pnlToolbar.Controls.Add(btnLamMoi);
+            cardMain.Controls.Add(pnlToolbar);
+
+            // 3. Bọc bảng DataGridView Full 100%
             pnlGridWrapper = new Panel
             {
-                Location = new Point(24, 166),
-                Size = new Size(cardLeft.ClientSize.Width - 48, cardLeft.ClientSize.Height - 190),
+                Location = new Point(24, 168),
+                Size = new Size(cardMain.ClientSize.Width - 48, cardMain.ClientSize.Height - 192),
                 Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
                 BackColor = Color.White
             };
@@ -224,266 +255,13 @@ namespace Quản_Lý_Khách_Sạn.Forms
             };
             UITheme.StyleModernGrid(grid);
             grid.CellFormatting += Grid_CellFormatting;
-            grid.SelectionChanged += (_, __) => ChonTaiKhoan();
+            grid.CellDoubleClick += (_, __) => MoModalSua();
 
             pnlGridWrapper.Controls.Add(grid);
-            cardLeft.Controls.Add(pnlGridWrapper);
+            cardMain.Controls.Add(pnlGridWrapper);
 
-            // =========================================================================
-            // CARD PHẢI: FORM THÔNG TIN NHÂN SỰ & TÀI KHOẢN
-            // =========================================================================
-            cardRight = new Panel
-            {
-                Dock = DockStyle.Fill,
-                BackColor = Color.White,
-                Padding = new Padding(24),
-                Margin = new Padding(0)
-            };
-            cardRight.Paint += (s, e) => UITheme.DrawCard(s, e, 12);
-
-            lblRightTitle = new Label
-            {
-                Text = "CHI TIẾT NHÂN SỰ & PHÂN QUYỀN",
-                Font = new Font("Segoe UI", 12F, FontStyle.Bold),
-                ForeColor = UITheme.DarkNavy,
-                Location = new Point(24, 20),
-                AutoSize = true
-            };
-
-            lblRightSubtitle = new Label
-            {
-                Text = "Điền thông tin nhân viên và thiết lập tài khoản truy cập",
-                Font = new Font("Segoe UI", 8.5F, FontStyle.Regular),
-                ForeColor = UITheme.TextMuted,
-                Location = new Point(24, 46),
-                AutoSize = true
-            };
-
-            pnlDivider = new Panel
-            {
-                Location = new Point(24, 72),
-                Size = new Size(cardRight.ClientSize.Width - 48, 1),
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
-                BackColor = UITheme.BorderColor
-            };
-
-            cardRight.Controls.Add(lblRightTitle);
-            cardRight.Controls.Add(lblRightSubtitle);
-            cardRight.Controls.Add(pnlDivider);
-
-            int startY = 88;
-            int gapY = 62;
-
-            // 1. Họ tên nhân viên
-            TaoNhanInput(cardRight, "Họ và tên nhân viên *", 24, startY);
-            pnlHoTenWrap = TaoInputBoxWrap(cardRight, 24, startY + 22);
-            txtHoTen = new TextBox
-            {
-                BorderStyle = BorderStyle.None,
-                Font = new Font("Segoe UI", 9.5F),
-                Dock = DockStyle.Fill,
-                PlaceholderText = "Ví dụ: Nguyễn Văn A"
-            };
-            pnlHoTenWrap.Controls.Add(txtHoTen);
-
-            // 2. Chức vụ & Số điện thoại (2 cột)
-            int row2Y = startY + gapY;
-            int halfW = (cardRight.ClientSize.Width - 58) / 2;
-
-            TaoNhanInput(cardRight, "Chức vụ *", 24, row2Y);
-            pnlChucVuWrap = new Panel
-            {
-                Location = new Point(24, row2Y + 22),
-                Size = new Size(halfW, 36),
-                BackColor = Color.White,
-                Padding = new Padding(6, 4, 6, 4)
-            };
-            pnlChucVuWrap.Paint += (s, e) => UITheme.DrawInputBox(s, e, 6);
-            cboChucVu = new ComboBox
-            {
-                Dock = DockStyle.Fill,
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9.5F)
-            };
-            cboChucVu.Items.AddRange(new object[] { "Quản lý", "Lễ tân", "Kế toán", "Buồng phòng", "Bảo vệ" });
-            cboChucVu.SelectedIndex = 1;
-            pnlChucVuWrap.Controls.Add(cboChucVu);
-            cardRight.Controls.Add(pnlChucVuWrap);
-
-            TaoNhanInput(cardRight, "Số điện thoại", 24 + halfW + 10, row2Y);
-            pnlSDTWrap = new Panel
-            {
-                Location = new Point(24 + halfW + 10, row2Y + 22),
-                Size = new Size(halfW, 36),
-                BackColor = Color.White,
-                Padding = new Padding(8, 7, 8, 4),
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
-            };
-            pnlSDTWrap.Paint += (s, e) => UITheme.DrawInputBox(s, e, 6);
-            txtSDT = new TextBox
-            {
-                BorderStyle = BorderStyle.None,
-                Font = new Font("Segoe UI", 9.5F),
-                Dock = DockStyle.Fill,
-                PlaceholderText = "09xxxxxxxx"
-            };
-            pnlSDTWrap.Controls.Add(txtSDT);
-            cardRight.Controls.Add(pnlSDTWrap);
-
-            // 3. Tên đăng nhập
-            int row3Y = row2Y + gapY;
-            TaoNhanInput(cardRight, "Tên đăng nhập *", 24, row3Y);
-            pnlTenDangNhapWrap = TaoInputBoxWrap(cardRight, 24, row3Y + 22);
-            txtTenDangNhap = new TextBox
-            {
-                BorderStyle = BorderStyle.None,
-                Font = new Font("Segoe UI", 9.5F),
-                Dock = DockStyle.Fill,
-                PlaceholderText = "Tối thiểu 4 ký tự"
-            };
-            pnlTenDangNhapWrap.Controls.Add(txtTenDangNhap);
-
-            // 4. Mật khẩu
-            int row4Y = row3Y + gapY;
-            TaoNhanInput(cardRight, "Mật khẩu truy cập *", 24, row4Y);
-            pnlMatKhauWrap = TaoInputBoxWrap(cardRight, 24, row4Y + 22);
-            txtMatKhau = new TextBox
-            {
-                BorderStyle = BorderStyle.None,
-                Font = new Font("Segoe UI", 9.5F),
-                Dock = DockStyle.Fill,
-                UseSystemPasswordChar = true,
-                PlaceholderText = "Tối thiểu 8 ký tự (hoặc để trống khi sửa)"
-            };
-            pnlMatKhauWrap.Controls.Add(txtMatKhau);
-
-            lblHintMatKhau = new Label
-            {
-                Text = "💡 Mẹo: Khi cập nhật tài khoản, để trống ô mật khẩu nếu muốn giữ nguyên mật khẩu cũ.",
-                Font = new Font("Segoe UI", 8F, FontStyle.Italic),
-                ForeColor = UITheme.TextMuted,
-                Location = new Point(24, row4Y + 62),
-                Size = new Size(cardRight.ClientSize.Width - 48, 30),
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
-            };
-            cardRight.Controls.Add(lblHintMatKhau);
-
-            // 5. Vai trò phân quyền
-            int row5Y = row4Y + gapY + 24;
-            TaoNhanInput(cardRight, "Vai trò & Quyền hạn hệ thống *", 24, row5Y);
-            pnlVaiTroWrap = new Panel
-            {
-                Location = new Point(24, row5Y + 22),
-                Size = new Size(cardRight.ClientSize.Width - 48, 36),
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
-                BackColor = Color.White,
-                Padding = new Padding(6, 4, 6, 4)
-            };
-            pnlVaiTroWrap.Paint += (s, e) => UITheme.DrawInputBox(s, e, 6);
-            cboVaiTro = new ComboBox
-            {
-                Dock = DockStyle.Fill,
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9.5F)
-            };
-            cboVaiTro.Items.AddRange(new object[] { "Admin - Quản trị viên (Toàn quyền)", "LeTan - Lễ tân thu ngân (Nghiệp vụ phòng)" });
-            cboVaiTro.SelectedIndex = 1;
-            pnlVaiTroWrap.Controls.Add(cboVaiTro);
-            cardRight.Controls.Add(pnlVaiTroWrap);
-
-            // Buttons dưới cùng
-            pnlBottomButtons = new Panel
-            {
-                Dock = DockStyle.Bottom,
-                Height = 60,
-                BackColor = Color.Transparent
-            };
-
-            btnLuu = new Button
-            {
-                Text = "💾 Lưu tài khoản",
-                Size = new Size(130, 42),
-                Location = new Point(0, 10),
-                FlatStyle = FlatStyle.Flat,
-                BackColor = UITheme.PrimaryOrange,
-                ForeColor = Color.White,
-                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
-                Cursor = Cursors.Hand
-            };
-            btnLuu.FlatAppearance.BorderSize = 0;
-            btnLuu.Click += (_, __) => LuuTaiKhoan();
-
-            btnLamMoi = new Button
-            {
-                Text = "🔄 Làm mới",
-                Size = new Size(100, 42),
-                Location = new Point(138, 10),
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.FromArgb(248, 250, 252),
-                ForeColor = UITheme.DarkNavy,
-                Font = new Font("Segoe UI", 9.5F, FontStyle.Regular),
-                Cursor = Cursors.Hand
-            };
-            btnLamMoi.FlatAppearance.BorderColor = UITheme.BorderColor;
-            btnLamMoi.Click += (_, __) => ResetForm();
-
-            btnXoa = new Button
-            {
-                Text = "🗑 Xóa",
-                Size = new Size(85, 42),
-                Location = new Point(246, 10),
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.FromArgb(254, 242, 242),
-                ForeColor = Color.FromArgb(220, 38, 38),
-                Font = new Font("Segoe UI", 9.5F, FontStyle.Regular),
-                Cursor = Cursors.Hand,
-                Enabled = false
-            };
-            btnXoa.FlatAppearance.BorderColor = Color.FromArgb(254, 202, 202);
-            btnXoa.Click += (_, __) => XoaTaiKhoan();
-
-            pnlBottomButtons.Controls.Add(btnLuu);
-            pnlBottomButtons.Controls.Add(btnLamMoi);
-            pnlBottomButtons.Controls.Add(btnXoa);
-            cardRight.Controls.Add(pnlBottomButtons);
-
-            // Đưa vào TableLayoutPanel
-            tblMainLayout.Controls.Add(cardLeft, 0, 0);
-            tblMainLayout.Controls.Add(cardRight, 1, 0);
-            Controls.Add(tblMainLayout);
-
+            Controls.Add(cardMain);
             ResumeLayout(false);
-        }
-
-        private static Label TaoNhanInput(Control parent, string text, int x, int y)
-        {
-            var lbl = new Label
-            {
-                Text = text,
-                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(71, 85, 105),
-                Location = new Point(x, y),
-                AutoSize = true
-            };
-            parent.Controls.Add(lbl);
-            return lbl;
-        }
-
-        private static Panel TaoInputBoxWrap(Control parent, int x, int y)
-        {
-            var pnl = new Panel
-            {
-                Location = new Point(x, y),
-                Size = new Size(parent.ClientSize.Width - (x * 2), 36),
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
-                BackColor = Color.White,
-                Padding = new Padding(10, 8, 10, 4)
-            };
-            pnl.Paint += (s, e) => UITheme.DrawInputBox(s, e, 6);
-            parent.Controls.Add(pnl);
-            return pnl;
         }
 
         private Label TaoPill(string text, Color bg, Color fg)
@@ -501,13 +279,11 @@ namespace Quản_Lý_Khách_Sạn.Forms
             };
             lbl.Paint += (s, e) =>
             {
-                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 Rectangle rect = new Rectangle(0, 0, lbl.Width - 1, lbl.Height - 1);
-                using (GraphicsPath path = UITheme.GetRoundedRectPath(rect, 6))
-                using (Pen pen = new Pen(Color.FromArgb(226, 232, 240), 1F))
-                {
-                    e.Graphics.DrawPath(pen, path);
-                }
+                using var path = UITheme.GetRoundedRectPath(rect, 6);
+                using var pen = new Pen(Color.FromArgb(226, 232, 240), 1F);
+                e.Graphics.DrawPath(pen, path);
             };
             return lbl;
         }
@@ -563,7 +339,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 if (grid.Columns.Contains("MaTaiKhoan")) grid.Columns["MaTaiKhoan"].Visible = false;
                 if (grid.Columns.Contains("MaNhanVien")) grid.Columns["MaNhanVien"].Visible = false;
 
-                // Cập nhật thống kê Pills
                 int total = dt.Rows.Count;
                 int adminCount = 0;
                 int leTanCount = 0;
@@ -585,206 +360,54 @@ namespace Quản_Lý_Khách_Sạn.Forms
             }
         }
 
-        private void ChonTaiKhoan()
+        private void MoModalThem()
         {
-            if (grid.CurrentRow == null || grid.CurrentRow.Cells["MaTaiKhoan"].Value == null) return;
-
-            try
+            using var modal = new frmTaiKhoanModal(0, 0);
+            if (modal.ShowDialog(this) == DialogResult.OK)
             {
-                maTaiKhoan = Convert.ToInt32(grid.CurrentRow.Cells["MaTaiKhoan"].Value);
-                maNhanVien = Convert.ToInt32(grid.CurrentRow.Cells["MaNhanVien"].Value);
-
-                string sql = @"
-                    SELECT t.TenDangNhap, t.VaiTro, n.HoTen, n.ChucVu, n.SoDienThoai
-                    FROM TaiKhoan t
-                    JOIN NhanVien n ON n.MaNhanVien = t.MaNhanVien
-                    WHERE t.MaTaiKhoan = @id";
-
-                using var conn = DatabaseHelper.GetConnection();
-                conn.Open();
-                using var cmd = new SqlCommand(sql, conn);
-                cmd.Parameters.AddWithValue("@id", maTaiKhoan);
-                using var r = cmd.ExecuteReader();
-
-                if (r.Read())
-                {
-                    txtTenDangNhap.Text = r["TenDangNhap"].ToString();
-                    txtHoTen.Text = r["HoTen"].ToString();
-                    txtSDT.Text = r["SoDienThoai"] == DBNull.Value ? "" : r["SoDienThoai"].ToString();
-
-                    string chucVu = r["ChucVu"].ToString();
-                    int idxCv = cboChucVu.FindStringExact(chucVu);
-                    cboChucVu.SelectedIndex = idxCv >= 0 ? idxCv : 1;
-
-                    string vaiTro = r["VaiTro"].ToString();
-                    cboVaiTro.SelectedIndex = vaiTro.Equals("Admin", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
-
-                    txtMatKhau.Clear();
-                    btnLuu.Text = "💾 Cập nhật";
-                    btnLuu.BackColor = UITheme.PrimaryBlue;
-
-                    // Cho phép xóa nếu không phải chính tài khoản đang đăng nhập
-                    bool isSelf = txtTenDangNhap.Text.Trim().Equals(Session.TenDangNhap, StringComparison.OrdinalIgnoreCase);
-                    btnXoa.Enabled = !isSelf;
-                }
+                LoadTaiKhoan();
             }
-            catch { }
         }
 
-        private static string HashPassword(string password)
+        private void MoModalSua()
         {
-            byte[] salt = RandomNumberGenerator.GetBytes(16);
-            byte[] hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, 210000, HashAlgorithmName.SHA256, 32);
-            return "PBKDF2-SHA256$210000$" + Convert.ToBase64String(salt) + "$" + Convert.ToBase64String(hash);
-        }
-
-        private string LayVaiTroDaChon()
-        {
-            return cboVaiTro.SelectedIndex == 0 ? "Admin" : "LeTan";
-        }
-
-        private void LuuTaiKhoan()
-        {
-            if (string.IsNullOrWhiteSpace(txtHoTen.Text))
+            if (grid.CurrentRow == null || grid.CurrentRow.Cells["MaTaiKhoan"].Value == null)
             {
-                MessageBox.Show("Vui lòng nhập họ tên nhân viên.", "Thiếu thông tin", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtHoTen.Focus();
+                MessageBox.Show("Vui lòng chọn một nhân viên trong danh sách để chỉnh sửa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(txtTenDangNhap.Text) || txtTenDangNhap.Text.Trim().Length < 4)
+            int idTK = Convert.ToInt32(grid.CurrentRow.Cells["MaTaiKhoan"].Value);
+            int idNV = Convert.ToInt32(grid.CurrentRow.Cells["MaNhanVien"].Value);
+
+            using var modal = new frmTaiKhoanModal(idTK, idNV);
+            if (modal.ShowDialog(this) == DialogResult.OK)
             {
-                MessageBox.Show("Tên đăng nhập bắt buộc và phải có ít nhất 4 ký tự.", "Thiếu thông tin", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtTenDangNhap.Focus();
-                return;
-            }
-
-            string vaiTro = LayVaiTroDaChon();
-            string chucVu = cboChucVu.Text;
-            string hoTen = txtHoTen.Text.Trim();
-            string sdt = string.IsNullOrWhiteSpace(txtSDT.Text) ? null : txtSDT.Text.Trim();
-            string user = txtTenDangNhap.Text.Trim();
-
-            if (maTaiKhoan == 0)
-            {
-                // TẠO MỚI
-                if (string.IsNullOrWhiteSpace(txtMatKhau.Text) || txtMatKhau.Text.Length < 8)
-                {
-                    MessageBox.Show("Vui lòng nhập mật khẩu ban đầu (ít nhất 8 ký tự).", "Mật khẩu không hợp lệ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    txtMatKhau.Focus();
-                    return;
-                }
-
-                try
-                {
-                    using var conn = DatabaseHelper.GetConnection();
-                    conn.Open();
-                    using var tx = conn.BeginTransaction();
-
-                    // 1. Thêm hồ sơ nhân viên
-                    int newMaNV;
-                    string sqlNV = "INSERT INTO NhanVien (HoTen, ChucVu, SoDienThoai) VALUES (@ten, @cv, @sdt) RETURNING MaNhanVien";
-                    using (var cmd = new SqlCommand(sqlNV, conn, tx))
-                    {
-                        cmd.Parameters.AddWithValue("@ten", hoTen);
-                        cmd.Parameters.AddWithValue("@cv", chucVu);
-                        cmd.Parameters.AddWithValue("@sdt", (object)sdt ?? DBNull.Value);
-                        newMaNV = Convert.ToInt32(cmd.ExecuteScalar());
-                    }
-
-                    // 2. Thêm tài khoản đăng nhập
-                    string sqlTK = "INSERT INTO TaiKhoan (TenDangNhap, MatKhau, VaiTro, MaNhanVien) VALUES (@user, @pass, @role, @nv)";
-                    using (var cmd = new SqlCommand(sqlTK, conn, tx))
-                    {
-                        cmd.Parameters.AddWithValue("@user", user);
-                        cmd.Parameters.AddWithValue("@pass", HashPassword(txtMatKhau.Text));
-                        cmd.Parameters.AddWithValue("@role", vaiTro);
-                        cmd.Parameters.AddWithValue("@nv", newMaNV);
-                        cmd.ExecuteNonQuery();
-                    }
-
-                    tx.Commit();
-                    MessageBox.Show($"Tạo mới nhân viên & tài khoản [{user}] thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    LoadTaiKhoan();
-                    ResetForm();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Không thể tạo tài khoản. Tên đăng nhập có thể đã tồn tại trong hệ thống.\n" + ex.Message,
-                        "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            else
-            {
-                // CẬP NHẬT
-                try
-                {
-                    using var conn = DatabaseHelper.GetConnection();
-                    conn.Open();
-                    using var tx = conn.BeginTransaction();
-
-                    // 1. Cập nhật nhân viên
-                    string sqlNV = "UPDATE NhanVien SET HoTen = @ten, ChucVu = @cv, SoDienThoai = @sdt WHERE MaNhanVien = @nv";
-                    using (var cmd = new SqlCommand(sqlNV, conn, tx))
-                    {
-                        cmd.Parameters.AddWithValue("@ten", hoTen);
-                        cmd.Parameters.AddWithValue("@cv", chucVu);
-                        cmd.Parameters.AddWithValue("@sdt", (object)sdt ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@nv", maNhanVien);
-                        cmd.ExecuteNonQuery();
-                    }
-
-                    // 2. Cập nhật tài khoản
-                    string sqlTK;
-                    if (!string.IsNullOrWhiteSpace(txtMatKhau.Text))
-                    {
-                        if (txtMatKhau.Text.Length < 8)
-                        {
-                            throw new Exception("Mật khẩu mới phải có ít nhất 8 ký tự.");
-                        }
-                        sqlTK = "UPDATE TaiKhoan SET TenDangNhap = @user, VaiTro = @role, MatKhau = @pass WHERE MaTaiKhoan = @id";
-                    }
-                    else
-                    {
-                        sqlTK = "UPDATE TaiKhoan SET TenDangNhap = @user, VaiTro = @role WHERE MaTaiKhoan = @id";
-                    }
-
-                    using (var cmd = new SqlCommand(sqlTK, conn, tx))
-                    {
-                        cmd.Parameters.AddWithValue("@user", user);
-                        cmd.Parameters.AddWithValue("@role", vaiTro);
-                        cmd.Parameters.AddWithValue("@id", maTaiKhoan);
-                        if (!string.IsNullOrWhiteSpace(txtMatKhau.Text))
-                        {
-                            cmd.Parameters.AddWithValue("@pass", HashPassword(txtMatKhau.Text));
-                        }
-                        cmd.ExecuteNonQuery();
-                    }
-
-                    tx.Commit();
-                    MessageBox.Show($"Cập nhật thông tin nhân viên [{hoTen}] thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    LoadTaiKhoan();
-                    ResetForm();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Không thể cập nhật nhân sự: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                LoadTaiKhoan();
             }
         }
 
         private void XoaTaiKhoan()
         {
-            if (maTaiKhoan == 0) return;
+            if (grid.CurrentRow == null || grid.CurrentRow.Cells["MaTaiKhoan"].Value == null)
+            {
+                MessageBox.Show("Vui lòng chọn một tài khoản trong danh sách để xóa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
 
-            if (txtTenDangNhap.Text.Trim().Equals(Session.TenDangNhap, StringComparison.OrdinalIgnoreCase))
+            int idTK = Convert.ToInt32(grid.CurrentRow.Cells["MaTaiKhoan"].Value);
+            int idNV = Convert.ToInt32(grid.CurrentRow.Cells["MaNhanVien"].Value);
+            string user = grid.CurrentRow.Cells["Tên đăng nhập"]?.Value?.ToString() ?? "";
+            string hoTen = grid.CurrentRow.Cells["Nhân viên"]?.Value?.ToString() ?? "";
+
+            if (user.Equals(Session.TenDangNhap, StringComparison.OrdinalIgnoreCase))
             {
                 MessageBox.Show("Bạn không thể xóa tài khoản của chính mình đang đăng nhập!", "Cảnh báo",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            if (MessageBox.Show($"Bạn có chắc chắn muốn xóa tài khoản [{txtTenDangNhap.Text}] của nhân viên [{txtHoTen.Text}]?\nThao tác này sẽ thu hồi quyền đăng nhập vào hệ thống.",
+            if (MessageBox.Show($"Bạn có chắc chắn muốn xóa tài khoản [{user}] của nhân viên [{hoTen}]?\nThao tác này sẽ thu hồi quyền đăng nhập vào hệ thống.",
                 "Xác nhận xóa tài khoản", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
             {
                 return;
@@ -796,55 +419,30 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 conn.Open();
                 using var tx = conn.BeginTransaction();
 
-                // 1. Xóa tài khoản đăng nhập
                 using (var cmd = new SqlCommand("DELETE FROM TaiKhoan WHERE MaTaiKhoan = @id", conn, tx))
                 {
-                    cmd.Parameters.AddWithValue("@id", maTaiKhoan);
+                    cmd.Parameters.AddWithValue("@id", idTK);
                     cmd.ExecuteNonQuery();
                 }
 
-                // 2. Thử xóa hồ sơ nhân viên nếu chưa từng phụ trách đơn đặt phòng nào
                 try
                 {
                     using (var cmd = new SqlCommand("DELETE FROM NhanVien WHERE MaNhanVien = @nv", conn, tx))
                     {
-                        cmd.Parameters.AddWithValue("@nv", maNhanVien);
+                        cmd.Parameters.AddWithValue("@nv", idNV);
                         cmd.ExecuteNonQuery();
                     }
                 }
-                catch
-                {
-                    // Nếu nhân viên đã gắn với dữ liệu đặt phòng trước đó, giữ lại hồ sơ NhanVien để bảo toàn lịch sử giao dịch
-                }
+                catch { }
 
                 tx.Commit();
                 MessageBox.Show("Đã xóa tài khoản nhân sự thành công.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoadTaiKhoan();
-                ResetForm();
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Không thể xóa tài khoản: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void ResetForm()
-        {
-            maTaiKhoan = 0;
-            maNhanVien = 0;
-            txtTenDangNhap.Clear();
-            txtMatKhau.Clear();
-            txtHoTen.Clear();
-            txtSDT.Clear();
-            cboChucVu.SelectedIndex = 1;
-            cboVaiTro.SelectedIndex = 1;
-
-            btnLuu.Text = "💾 Lưu tài khoản";
-            btnLuu.BackColor = UITheme.PrimaryOrange;
-            btnXoa.Enabled = false;
-
-            grid.ClearSelection();
-            txtHoTen.Focus();
         }
     }
 }

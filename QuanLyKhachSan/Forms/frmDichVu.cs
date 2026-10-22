@@ -84,37 +84,102 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             cardLeft.Controls.Add(pnlHeaderLeft);
 
-            // Đặt lại vị trí search bar và grid để cân đối với Header
-            pnlSearch.Location = new Point(20, 108);
-            pnlSearch.Height = 40;
+            // 1. Ẩn cardRight để cardLeft hiển thị toàn màn hình 100%
+            tblMainLayout.ColumnStyles[0].SizeType = SizeType.Percent;
+            tblMainLayout.ColumnStyles[0].Width = 100F;
+            tblMainLayout.ColumnStyles[1].SizeType = SizeType.Absolute;
+            tblMainLayout.ColumnStyles[1].Width = 0F;
+            cardRight.Visible = false;
+            cardLeft.Margin = new Padding(0);
 
-            pnlGridWrapper.Location = new Point(20, 160);
+            // 2. Nâng cấp Toolbar trên cardLeft
+            pnlSearch.Location = new Point(20, 108);
+            pnlSearch.Height = 44;
+            pnlSearch.Width = cardLeft.ClientSize.Width - 530;
+            pnlSearch.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+
+            btnLuu.Parent = cardLeft;
+            btnLuu.Text = "➕ Thêm dịch vụ mới";
+            btnLuu.Size = new Size(170, 40);
+            btnLuu.Location = new Point(cardLeft.ClientSize.Width - 190, 108);
+            btnLuu.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnLuu.BackColor = UITheme.PrimaryOrange;
+            btnLuu.ForeColor = Color.White;
+            btnLuu.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnLuu.BringToFront();
+            btnLuu.Click -= btnLuu_Click;
+            btnLuu.Click += (_, __) => MoModalThem();
+
+            Button btnSuaDV = new Button
+            {
+                Text = "✏️ Chỉnh sửa",
+                Size = new Size(115, 40),
+                Location = new Point(cardLeft.ClientSize.Width - 313, 108),
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                FlatStyle = FlatStyle.Flat,
+                BackColor = UITheme.PrimaryBlue,
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnSuaDV.FlatAppearance.BorderSize = 0;
+            btnSuaDV.Click += (_, __) => MoModalSua();
+            btnSuaDV.Parent = cardLeft;
+            btnSuaDV.BringToFront();
+
+            btnXoa.Parent = cardLeft;
+            btnXoa.Text = "🗑 Xóa";
+            btnXoa.Size = new Size(90, 40);
+            btnXoa.Location = new Point(cardLeft.ClientSize.Width - 411, 108);
+            btnXoa.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnXoa.BackColor = Color.FromArgb(254, 242, 242);
+            btnXoa.ForeColor = Color.FromArgb(220, 38, 38);
+            btnXoa.BringToFront();
+
+            btnLamMoi.Parent = cardLeft;
+            btnLamMoi.Text = "🔄 Làm mới";
+            btnLamMoi.Size = new Size(95, 40);
+            btnLamMoi.Location = new Point(cardLeft.ClientSize.Width - 514, 108);
+            btnLamMoi.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnLamMoi.BackColor = Color.FromArgb(248, 250, 252);
+            btnLamMoi.ForeColor = UITheme.TextMain;
+            btnLamMoi.BringToFront();
+
+            pnlGridWrapper.Location = new Point(20, 164);
             pnlGridWrapper.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
             cardLeft.Resize += (s, e) =>
             {
-                pnlGridWrapper.Size = new Size(cardLeft.ClientSize.Width - 40, cardLeft.ClientSize.Height - 180);
+                pnlGridWrapper.Size = new Size(cardLeft.ClientSize.Width - 40, cardLeft.ClientSize.Height - 184);
+                pnlSearch.Width = cardLeft.ClientSize.Width - 530;
             };
 
-            // 2. Nâng cấp nút bấm bên phải với icon và màu chuẩn SaaS
-            btnLuu.Text = "💾 Lưu dịch vụ";
-            btnLamMoi.Text = "🔄 Làm mới";
-            btnXoa.Text = "🗑 Xóa dịch vụ";
-
-            btnLuu.BackColor = UITheme.PrimaryOrange;
-            btnLuu.ForeColor = Color.White;
-
-            btnLamMoi.BackColor = Color.FromArgb(248, 250, 252);
-            btnLamMoi.ForeColor = UITheme.TextMain;
-
-            btnXoa.BackColor = Color.FromArgb(254, 242, 242);
-            btnXoa.ForeColor = Color.FromArgb(220, 38, 38);
-
-            // 3. Sự kiện định dạng đơn giá trực tiếp khi người dùng gõ
-            txtDonGia.TextChanged += TxtDonGia_TextChanged;
-
-            // 4. Sự kiện định dạng cell trong DataGridView
+            dgvDichVu.CellDoubleClick += (_, __) => MoModalSua();
             dgvDichVu.CellFormatting += DgvDichVu_CellFormatting;
+        }
+
+        private void MoModalThem()
+        {
+            using var modal = new frmDichVuModal(null);
+            if (modal.ShowDialog(this) == DialogResult.OK)
+            {
+                TaiDanhSach();
+            }
+        }
+
+        private void MoModalSua()
+        {
+            if (dgvDichVu.CurrentRow == null || !(dgvDichVu.CurrentRow.DataBoundItem is DichVu dv))
+            {
+                MessageBox.Show("Vui lòng chọn 1 dịch vụ trong danh sách để chỉnh sửa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            using var modal = new frmDichVuModal(dv);
+            if (modal.ShowDialog(this) == DialogResult.OK)
+            {
+                TaiDanhSach();
+            }
         }
 
         private Label TaoTheThongKe(string text, Color bg, Color fg)
