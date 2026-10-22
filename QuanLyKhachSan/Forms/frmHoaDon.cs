@@ -234,6 +234,56 @@ namespace Quản_Lý_Khách_Sạn.Forms
             TinhTongTienTuDong(null, null);
         }
 
+        private void btnGoiYVoucher_Click(object sender, EventArgs e)
+        {
+            cmsVoucher.Items.Clear();
+            try
+            {
+                var vouchers = voucherBLL.LayDanhSachVoucher();
+                var activeVouchers = vouchers.FindAll(v => v.TrangThai && DateTime.Now.Date <= v.NgayHetHan.Date && DateTime.Now.Date >= v.NgayBatDau.Date);
+
+                if (activeVouchers.Count == 0)
+                {
+                    cmsVoucher.Items.Add(new ToolStripMenuItem("KhÃ´ng cÃ³ mÃ£ voucher nÃ o Ä‘ang kháº£ dá»¥ng") { Enabled = false });
+                }
+                else
+                {
+                    decimal tienPhong = ParseMoney(txtTienPhong.Text);
+                    foreach (var v in activeVouchers)
+                    {
+                        string giamStr = v.LoaiGiam == "PhanTram" ? $"Giáº£m {v.GiaTri}%" : $"Giáº£m {v.GiaTri:N0} Ä‘";
+                        string minStr = v.DonToiThieu > 0 ? $"(ÄÆ¡n tá»« {v.DonToiThieu:N0} Ä‘)" : "(KhÃ´ng giá»›i háº¡n)";
+                        string itemText = $"ðŸŽŸï¸ {v.Code} â€” {v.TenChuongTrinh} [{giamStr} {minStr}]";
+
+                        var item = new ToolStripMenuItem(itemText);
+                        item.Font = new Font("Segoe UI", 9.5f, FontStyle.Regular);
+                        if (v.DonToiThieu > 0 && tienPhong < v.DonToiThieu)
+                        {
+                            item.ForeColor = Color.Gray;
+                            item.ToolTipText = $"Cáº§n tá»‘i thiá»ƒu {v.DonToiThieu:N0} Ä‘ tiá»n phÃ²ng";
+                        }
+                        else
+                        {
+                            item.ForeColor = UITheme.PrimaryOrange;
+                            item.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
+                        }
+
+                        item.Click += (s, ev) =>
+                        {
+                            txtVoucherCode.Text = v.Code;
+                            btnApDungVoucher_Click(null, null);
+                        };
+                        cmsVoucher.Items.Add(item);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                cmsVoucher.Items.Add(new ToolStripMenuItem("Lá»—i táº£i voucher: " + ex.Message) { Enabled = false });
+            }
+
+            cmsVoucher.Show(btnGoiYVoucher, new Point(0, btnGoiYVoucher.Height));
+        }
         private void btnApDungVoucher_Click(object sender, EventArgs e)
         {
             string code = txtVoucherCode.Text.Trim().ToUpper();
@@ -461,7 +511,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             try
             {
-                printDoc.DefaultPageSettings.PaperSize = new PaperSize("Bill80mm", 315, 600);
+                printDoc.DefaultPageSettings.PaperSize = new PaperSize("Bill80mm", 315, 780);
                 printPreviewDlg.StartPosition = FormStartPosition.CenterScreen;
                 printPreviewDlg.Width = 480;
                 printPreviewDlg.Height = 700;

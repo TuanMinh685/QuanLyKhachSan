@@ -1,4 +1,4 @@
-namespace Quản_Lý_Khách_Sạn.Forms
+﻿namespace Quản_Lý_Khách_Sạn.Forms
 {
     partial class frmBaoCao
     {
@@ -26,6 +26,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             this.lblGridTitle = new System.Windows.Forms.Label();
             this.cardGridRight = new System.Windows.Forms.Panel();
             this.pnlVipInfo = new System.Windows.Forms.Panel();
+            this.pnlChartCongSuat = new System.Windows.Forms.Panel();
             this.lblVipDesc = new System.Windows.Forms.Label();
             this.lblVipTitle = new System.Windows.Forms.Label();
             this.dgvLuotDat = new System.Windows.Forms.DataGridView();
@@ -182,6 +183,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             // 
             this.cardGridRight.BackColor = System.Drawing.Color.White;
             this.cardGridRight.Controls.Add(this.pnlVipInfo);
+            this.cardGridRight.Controls.Add(this.pnlChartCongSuat);
             this.cardGridRight.Controls.Add(this.dgvLuotDat);
             this.cardGridRight.Controls.Add(this.dgvTopDichVu);
             this.cardGridRight.Controls.Add(this.lblTopDvTitle);
@@ -706,6 +708,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private System.Windows.Forms.DataGridView dgvTopDichVu;
         private System.Windows.Forms.DataGridView dgvLuotDat;
         private System.Windows.Forms.Panel pnlVipInfo;
+        private System.Windows.Forms.Panel pnlChartCongSuat;
         private System.Windows.Forms.Label lblVipTitle;
         private System.Windows.Forms.Label lblVipDesc;
     }

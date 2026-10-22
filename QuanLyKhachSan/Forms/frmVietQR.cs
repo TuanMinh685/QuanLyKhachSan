@@ -51,45 +51,45 @@ namespace Quản_Lý_Khách_Sạn.Forms
             }
             catch
             {
-                // Fallback offline mock QR representation
-                picQR.Image = TaoAnhQROffline();
+                picQR.Image = TaoAnhQROffline(260);
                 lblStatus.Text = "Chế độ mô phỏng QR (Sẵn sàng nhận thanh toán chuyển khoản)";
                 lblStatus.ForeColor = Color.FromArgb(234, 88, 12);
             }
         }
 
-        private Bitmap TaoAnhQROffline()
+        public static Bitmap TaoAnhQROffline(int size = 260)
         {
-            Bitmap bmp = new Bitmap(260, 260);
+            Bitmap bmp = new Bitmap(size, size);
             using (Graphics g = Graphics.FromImage(bmp))
             {
                 g.SmoothingMode = SmoothingMode.AntiAlias;
                 g.Clear(Color.White);
 
-                // Draw decorative QR pattern placeholder
-                using (Pen pen = new Pen(Color.FromArgb(15, 37, 55), 6))
+                float scale = size / 260f;
+
+                using (Pen pen = new Pen(Color.FromArgb(15, 37, 55), Math.Max(2, 6 * scale)))
                 {
                     // 3 corner locator boxes
-                    g.DrawRectangle(pen, 15, 15, 55, 55);
-                    g.FillRectangle(new SolidBrush(Color.FromArgb(15, 37, 55)), 27, 27, 31, 31);
+                    g.DrawRectangle(pen, 15 * scale, 15 * scale, 55 * scale, 55 * scale);
+                    g.FillRectangle(new SolidBrush(Color.FromArgb(15, 37, 55)), 27 * scale, 27 * scale, 31 * scale, 31 * scale);
 
-                    g.DrawRectangle(pen, 190, 15, 55, 55);
-                    g.FillRectangle(new SolidBrush(Color.FromArgb(15, 37, 55)), 202, 27, 31, 31);
+                    g.DrawRectangle(pen, 190 * scale, 15 * scale, 55 * scale, 55 * scale);
+                    g.FillRectangle(new SolidBrush(Color.FromArgb(15, 37, 55)), 202 * scale, 27 * scale, 31 * scale, 31 * scale);
 
-                    g.DrawRectangle(pen, 15, 190, 55, 55);
-                    g.FillRectangle(new SolidBrush(Color.FromArgb(15, 37, 55)), 27, 202, 31, 31);
+                    g.DrawRectangle(pen, 15 * scale, 190 * scale, 55 * scale, 55 * scale);
+                    g.FillRectangle(new SolidBrush(Color.FromArgb(15, 37, 55)), 27 * scale, 202 * scale, 31 * scale, 31 * scale);
                 }
 
                 // Center logo box
-                g.FillRectangle(new SolidBrush(Color.FromArgb(234, 88, 12)), 95, 95, 70, 70);
-                using (Font f = new Font("Segoe UI", 10f, FontStyle.Bold))
+                g.FillRectangle(new SolidBrush(Color.FromArgb(234, 88, 12)), 95 * scale, 95 * scale, 70 * scale, 70 * scale);
+                using (Font f = new Font("Segoe UI", Math.Max(6f, 10f * scale), FontStyle.Bold))
                 {
                     StringFormat sf = new StringFormat
                     {
                         Alignment = StringAlignment.Center,
                         LineAlignment = StringAlignment.Center
                     };
-                    g.DrawString("VietQR\nMBBANK", f, Brushes.White, new RectangleF(95, 95, 70, 70), sf);
+                    g.DrawString("VietQR\nMBBANK", f, Brushes.White, new RectangleF(95 * scale, 95 * scale, 70 * scale, 70 * scale), sf);
                 }
 
                 // Grid pattern simulated dots
@@ -97,17 +97,17 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 {
                     for (int x = 85; x <= 175; x += 18)
                     {
-                        g.FillRectangle(b, x, 30, 8, 8);
-                        g.FillRectangle(b, x, 55, 8, 8);
-                        g.FillRectangle(b, x, 200, 8, 8);
-                        g.FillRectangle(b, x, 225, 8, 8);
+                        g.FillRectangle(b, x * scale, 30 * scale, 8 * scale, 8 * scale);
+                        g.FillRectangle(b, x * scale, 55 * scale, 8 * scale, 8 * scale);
+                        g.FillRectangle(b, x * scale, 200 * scale, 8 * scale, 8 * scale);
+                        g.FillRectangle(b, x * scale, 225 * scale, 8 * scale, 8 * scale);
                     }
                     for (int y = 85; y <= 175; y += 18)
                     {
-                        g.FillRectangle(b, 30, y, 8, 8);
-                        g.FillRectangle(b, 55, y, 8, 8);
-                        g.FillRectangle(b, 200, y, 8, 8);
-                        g.FillRectangle(b, 225, y, 8, 8);
+                        g.FillRectangle(b, 30 * scale, y * scale, 8 * scale, 8 * scale);
+                        g.FillRectangle(b, 55 * scale, y * scale, 8 * scale, 8 * scale);
+                        g.FillRectangle(b, 200 * scale, y * scale, 8 * scale, 8 * scale);
+                        g.FillRectangle(b, 225 * scale, y * scale, 8 * scale, 8 * scale);
                     }
                 }
             }

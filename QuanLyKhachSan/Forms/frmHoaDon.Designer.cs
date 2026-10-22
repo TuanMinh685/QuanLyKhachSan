@@ -53,6 +53,8 @@
             this.pnlVoucherWrap = new System.Windows.Forms.Panel();
             this.txtVoucherCode = new System.Windows.Forms.TextBox();
             this.btnApDungVoucher = new System.Windows.Forms.Button();
+            this.btnGoiYVoucher = new System.Windows.Forms.Button();
+            this.cmsVoucher = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.tbl2ColMoney2 = new System.Windows.Forms.TableLayoutPanel();
             this.pnlColGiamGia = new System.Windows.Forms.Panel();
             this.lblGiamGia = new System.Windows.Forms.Label();
@@ -558,6 +560,7 @@
             this.pnlVoucherWrap.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pnlVoucherWrap.Controls.Add(this.btnApDungVoucher);
+            this.pnlVoucherWrap.Controls.Add(this.btnGoiYVoucher);
             this.pnlVoucherWrap.Controls.Add(this.txtVoucherCode);
             this.pnlVoucherWrap.Location = new System.Drawing.Point(20, 458);
             this.pnlVoucherWrap.Name = "pnlVoucherWrap";
@@ -573,7 +576,7 @@
             this.txtVoucherCode.Location = new System.Drawing.Point(0, 2);
             this.txtVoucherCode.Name = "txtVoucherCode";
             this.txtVoucherCode.PlaceholderText = "Nhập mã voucher (VD: CHAOHET2026)";
-            this.txtVoucherCode.Size = new System.Drawing.Size(415, 29);
+            this.txtVoucherCode.Size = new System.Drawing.Size(320, 29);
             this.txtVoucherCode.TabIndex = 0;
             // 
             // btnApDungVoucher
@@ -973,6 +976,8 @@
         private System.Windows.Forms.Panel pnlVoucherWrap;
         private System.Windows.Forms.TextBox txtVoucherCode;
         private System.Windows.Forms.Button btnApDungVoucher;
+        private System.Windows.Forms.Button btnGoiYVoucher;
+        private System.Windows.Forms.ContextMenuStrip cmsVoucher;
         private System.Windows.Forms.TableLayoutPanel tbl2ColMoney2;
         private System.Windows.Forms.Panel pnlColGiamGia;
         private System.Windows.Forms.Label lblGiamGia;

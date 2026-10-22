@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
@@ -12,6 +13,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
     {
         private BaoCaoDAL baoCaoDAL = new BaoCaoDAL();
         private int currentTabIndex = 0; // 0: Doanh thu, 1: Cong suat, 2: Khach hang
+
+        private DataTable _dtCongSuat;
+        private DataTable _dtLuotDat;
 
         public frmBaoCao()
         {
@@ -73,21 +77,25 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
                 lblTopDvTitle.Text = "Top 5 Dịch Vụ Doanh Thu Cao";
                 dgvTopDichVu.Visible = true;
+                pnlChartCongSuat.Visible = false;
                 dgvLuotDat.Visible = false;
                 pnlVipInfo.Visible = false;
             }
             else if (tabIndex == 1)
             {
-                // Tab 2: Công suất & Lượt đặt
-                lblGridTitle.Text = "Công Suất Sử Dụng Phòng (%) Theo Loại";
+                // Tab 2: Công suất & Lượt đặt (Bảng bên trái + Biểu đồ trực quan bên phải)
+                lblGridTitle.Text = "Báo Cáo Công Suất Sử Dụng Phòng (%)";
                 dgvDoanhThu.Visible = false;
                 dgvCongSuat.Visible = true;
                 dgvTopKhachHang.Visible = false;
 
-                lblTopDvTitle.Text = "Thống Kê Lượt Đặt & Hủy Phòng";
+                lblTopDvTitle.Text = "Biểu Đồ Trực Quan Tỷ Lệ Lấp Đầy & Đặt Phòng";
                 dgvTopDichVu.Visible = false;
-                dgvLuotDat.Visible = true;
+                pnlChartCongSuat.Visible = true;
+                dgvLuotDat.Visible = false;
                 pnlVipInfo.Visible = false;
+
+                pnlChartCongSuat.Invalidate();
             }
             else
             {
@@ -99,6 +107,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
                 lblTopDvTitle.Text = "Chính Sách Khách Hàng VIP & Thân Thiết";
                 dgvTopDichVu.Visible = false;
+                pnlChartCongSuat.Visible = false;
                 dgvLuotDat.Visible = false;
                 pnlVipInfo.Visible = true;
             }
@@ -155,8 +164,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 }
 
                 // 4. Công suất sử dụng phòng
-                DataTable dtCongSuat = baoCaoDAL.LayCongSuatPhong();
-                dgvCongSuat.DataSource = dtCongSuat;
+                _dtCongSuat = baoCaoDAL.LayCongSuatPhong();
+                dgvCongSuat.DataSource = _dtCongSuat;
                 if (dgvCongSuat.Columns["Công Suất"] != null)
                 {
                     dgvCongSuat.Columns["Công Suất"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
@@ -165,8 +174,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 }
 
                 // 5. Thống kê lượt đặt & hủy
-                DataTable dtLuotDat = baoCaoDAL.LayLuotDatPhong(tu, den);
-                dgvLuotDat.DataSource = dtLuotDat;
+                _dtLuotDat = baoCaoDAL.LayLuotDatPhong(tu, den);
+                dgvLuotDat.DataSource = _dtLuotDat;
                 if (dgvLuotDat.Columns["Lượt Đặt"] != null)
                 {
                     dgvLuotDat.Columns["Lượt Đặt"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
@@ -188,10 +197,180 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     dgvTopKhachHang.Columns["Tổng Chi Tiêu"].DefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
                     dgvTopKhachHang.Columns["Tổng Chi Tiêu"].DefaultCellStyle.ForeColor = UITheme.PrimaryOrange;
                 }
+
+                if (pnlChartCongSuat.Visible)
+                {
+                    pnlChartCongSuat.Invalidate();
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Lỗi lấy báo cáo: " + ex.Message, "Thông báo lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void pnlChartCongSuat_Paint(object sender, PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+
+            int w = pnlChartCongSuat.Width;
+            int h = pnlChartCongSuat.Height;
+
+            if (w < 100 || h < 100) return;
+
+            g.Clear(Color.White);
+
+            using (Font fTitle = new Font("Segoe UI", 10f, FontStyle.Bold))
+            using (Font fNormal = new Font("Segoe UI", 9f, FontStyle.Regular))
+            using (Font fBold = new Font("Segoe UI", 9f, FontStyle.Bold))
+            using (Font fSmall = new Font("Segoe UI", 8.5f, FontStyle.Regular))
+            using (Brush bNavy = new SolidBrush(UITheme.DarkNavy))
+            using (Brush bGray = new SolidBrush(Color.FromArgb(100, 116, 139)))
+            using (Brush bTrack = new SolidBrush(Color.FromArgb(241, 245, 249)))
+            {
+                int y = 8;
+
+                // --- PHẦN 1: TỶ LỆ LẤP ĐẦY PHÒNG ---
+                g.DrawString("📊 TỶ LỆ LẤP ĐẦY THEO HẠNG PHÒNG", fTitle, bNavy, 5, y);
+                y += 26;
+
+                if (_dtCongSuat != null && _dtCongSuat.Rows.Count > 0)
+                {
+                    Color[] barColors = {
+                        Color.FromArgb(2, 132, 199),   // Sky blue
+                        Color.FromArgb(234, 88, 12),   // Orange
+                        Color.FromArgb(16, 185, 129),  // Emerald Green
+                        Color.FromArgb(147, 51, 234)   // Purple
+                    };
+
+                    int colorIdx = 0;
+                    foreach (DataRow r in _dtCongSuat.Rows)
+                    {
+                        string tenLoai = r["Loại Phòng"].ToString();
+                        int tongPhong = Convert.ToInt32(r["Tổng Số Phòng"]);
+                        int dangO = Convert.ToInt32(r["Đang Ở"]);
+                        float percent = (tongPhong > 0) ? (float)dangO * 100f / tongPhong : 0f;
+
+                        g.DrawString(tenLoai, fBold, bNavy, 5, y);
+                        string statStr = $"{dangO}/{tongPhong} phòng ({percent:0.#}%)";
+                        float statW = g.MeasureString(statStr, fBold).Width;
+                        g.DrawString(statStr, fBold, bGray, w - statW - 10, y);
+                        y += 20;
+
+                        // Progress Bar
+                        int barW = w - 15;
+                        int barH = 16;
+                        var trackRect = new Rectangle(5, y, barW, barH);
+                        using (GraphicsPath trackPath = UITheme.GetRoundedRectPath(trackRect, 4))
+                        {
+                            g.FillPath(bTrack, trackPath);
+                        }
+
+                        int fillW = Math.Max(0, (int)(barW * (percent / 100f)));
+                        if (fillW > 4)
+                        {
+                            var fillRect = new Rectangle(5, y, fillW, barH);
+                            using (GraphicsPath fillPath = UITheme.GetRoundedRectPath(fillRect, 4))
+                            using (Brush bFill = new SolidBrush(barColors[colorIdx % barColors.Length]))
+                            {
+                                g.FillPath(bFill, fillPath);
+                            }
+                        }
+                        colorIdx++;
+                        y += 28;
+                    }
+                }
+                else
+                {
+                    g.DrawString("Chưa có số liệu phòng.", fNormal, bGray, 10, y);
+                    y += 30;
+                }
+
+                y += 6;
+                using (Pen pLine = new Pen(Color.FromArgb(226, 232, 240), 1))
+                {
+                    g.DrawLine(pLine, 5, y, w - 10, y);
+                }
+                y += 14;
+
+                // --- PHẦN 2: BIỂU ĐỒ CỘT LƯỢT ĐẶT & HỦY PHÒNG ---
+                g.DrawString("📈 LƯỢT ĐẶT VÀ HỦY GẦN ĐÂY", fTitle, bNavy, 5, y);
+                y += 22;
+
+                // Legend
+                using (Brush bDat = new SolidBrush(Color.FromArgb(16, 185, 129)))
+                using (Brush bHuy = new SolidBrush(Color.FromArgb(239, 68, 68)))
+                {
+                    g.FillRectangle(bDat, 5, y + 3, 10, 10);
+                    g.DrawString("Đặt phòng", fSmall, bNavy, 20, y + 1);
+
+                    g.FillRectangle(bHuy, 110, y + 3, 10, 10);
+                    g.DrawString("Hủy phòng", fSmall, bNavy, 125, y + 1);
+                }
+                y += 22;
+
+                if (_dtLuotDat != null && _dtLuotDat.Rows.Count > 0)
+                {
+                    int maxDays = Math.Min(6, _dtLuotDat.Rows.Count);
+                    int chartAreaH = Math.Max(70, h - y - 35);
+                    int chartAreaW = w - 20;
+                    int colWidth = chartAreaW / maxDays;
+
+                    int maxVal = 1;
+                    for (int i = 0; i < maxDays; i++)
+                    {
+                        int dat = Convert.ToInt32(_dtLuotDat.Rows[i]["Lượt Đặt"]);
+                        int huy = Convert.ToInt32(_dtLuotDat.Rows[i]["Lượt Hủy"]);
+                        if (dat > maxVal) maxVal = dat;
+                        if (huy > maxVal) maxVal = huy;
+                    }
+
+                    int baselineY = y + chartAreaH;
+                    using (Pen pAxis = new Pen(Color.FromArgb(203, 213, 225), 1))
+                    {
+                        g.DrawLine(pAxis, 5, baselineY, w - 10, baselineY);
+                    }
+
+                    for (int i = 0; i < maxDays; i++)
+                    {
+                        DataRow row = _dtLuotDat.Rows[maxDays - 1 - i];
+                        string ngay = row["Ngày Đặt"].ToString();
+                        if (ngay.Length >= 5) ngay = ngay.Substring(0, 5); // dd/MM
+
+                        int dat = Convert.ToInt32(row["Lượt Đặt"]);
+                        int huy = Convert.ToInt32(row["Lượt Hủy"]);
+
+                        int colX = 10 + i * colWidth;
+                        int barSubW = Math.Max(8, (colWidth - 14) / 2);
+
+                        int hDat = (int)((float)dat / maxVal * (chartAreaH - 18));
+                        int hHuy = (int)((float)huy / maxVal * (chartAreaH - 18));
+
+                        if (dat > 0)
+                        {
+                            var rectDat = new Rectangle(colX, baselineY - hDat, barSubW, hDat);
+                            using (Brush bDat = new SolidBrush(Color.FromArgb(16, 185, 129)))
+                            {
+                                g.FillRectangle(bDat, rectDat);
+                            }
+                            g.DrawString(dat.ToString(), fSmall, Brushes.Black, colX + (barSubW / 2) - 4, baselineY - hDat - 14);
+                        }
+
+                        if (huy > 0)
+                        {
+                            var rectHuy = new Rectangle(colX + barSubW + 2, baselineY - hHuy, barSubW, hHuy);
+                            using (Brush bHuy = new SolidBrush(Color.FromArgb(239, 68, 68)))
+                            {
+                                g.FillRectangle(bHuy, rectHuy);
+                            }
+                            g.DrawString(huy.ToString(), fSmall, Brushes.Red, colX + barSubW + 2 + (barSubW / 2) - 4, baselineY - hHuy - 14);
+                        }
+
+                        g.DrawString(ngay, fSmall, bGray, colX, baselineY + 5);
+                    }
+                }
             }
         }
 
