@@ -28,9 +28,148 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private DataTable dtChiTietTam = new DataTable();
         private int? maVoucherDaApDung = null;
 
+        // Controls giao diện nâng cấp hiện đại
+        private Panel pnlHeaderLeft;
+        private Label lblTitleLeft;
+        private Label lblSubtitleLeft;
+        private FlowLayoutPanel pnlStatsPills;
+        private Label lblPillCount;
+        private Label lblPillRevenue;
+
         public frmHoaDon()
         {
             InitializeComponent();
+            UITheme.ApplyTheme(this);
+            KhoiTaoGiaoDienNangCao();
+        }
+
+        private void KhoiTaoGiaoDienNangCao()
+        {
+            // 1. Header và Thẻ thống kê (Stats Pills) ở bên trái
+            pnlHeaderLeft = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 82,
+                BackColor = Color.Transparent
+            };
+
+            lblTitleLeft = new Label
+            {
+                Text = "🧾 LỊCH SỬ HÓA ĐƠN & THU NGÂN",
+                Font = new Font("Segoe UI", 12.5f, FontStyle.Bold),
+                ForeColor = UITheme.DarkNavy,
+                Location = new Point(0, 0),
+                AutoSize = true
+            };
+
+            lblSubtitleLeft = new Label
+            {
+                Text = "Tra cứu giao dịch, xem chi tiết hóa đơn và in biên lai thanh toán",
+                Font = new Font("Segoe UI", 9f, FontStyle.Regular),
+                ForeColor = UITheme.TextMuted,
+                Location = new Point(0, 26),
+                AutoSize = true
+            };
+
+            pnlStatsPills = new FlowLayoutPanel
+            {
+                Location = new Point(0, 52),
+                Height = 30,
+                AutoSize = true,
+                FlowDirection = FlowDirection.LeftToRight,
+                WrapContents = false,
+                BackColor = Color.Transparent
+            };
+
+            lblPillCount = TaoTheThongKe("Tổng: 0 hóa đơn", Color.FromArgb(241, 245, 249), UITheme.DarkNavy);
+            lblPillRevenue = TaoTheThongKe("💰 Thực thu: 0 đ", Color.FromArgb(255, 247, 237), UITheme.PrimaryOrange);
+
+            pnlStatsPills.Controls.Add(lblPillCount);
+            pnlStatsPills.Controls.Add(lblPillRevenue);
+
+            pnlHeaderLeft.Controls.Add(lblTitleLeft);
+            pnlHeaderLeft.Controls.Add(lblSubtitleLeft);
+            pnlHeaderLeft.Controls.Add(pnlStatsPills);
+
+            cardLeft.Controls.Add(pnlHeaderLeft);
+
+            // Cân đối vị trí tìm kiếm và bảng
+            pnlSearch.Location = new Point(20, 108);
+            pnlSearch.Height = 40;
+
+            pnlGridWrapper.Location = new Point(20, 160);
+            pnlGridWrapper.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+
+            cardLeft.Resize += (s, e) =>
+            {
+                pnlGridWrapper.Size = new Size(cardLeft.ClientSize.Width - 40, cardLeft.ClientSize.Height - 180);
+            };
+
+            // 2. Nâng cấp các nút thao tác
+            btnVietQR.Text = "📱 Mã VietQR";
+            btnVietQR.BackColor = UITheme.DarkNavy;
+            btnVietQR.ForeColor = Color.White;
+
+            btnInHoaDon.Text = "🖨️ In bill";
+            btnInHoaDon.BackColor = Color.FromArgb(248, 250, 252);
+            btnInHoaDon.ForeColor = UITheme.DarkNavy;
+
+            btnLamMoi.Text = "🔄 Làm mới";
+            btnLamMoi.BackColor = Color.FromArgb(248, 250, 252);
+            btnLamMoi.ForeColor = UITheme.TextMain;
+
+            btnThanhToan.Text = "💳 Xác nhận thu";
+            btnThanhToan.BackColor = UITheme.PrimaryOrange;
+            btnThanhToan.ForeColor = Color.White;
+
+            btnThemDV.Text = "➕ Thêm DV";
+            btnGoiYVoucher.Text = "💡 Gợi ý";
+            btnApDungVoucher.Text = "✓ Áp dụng";
+
+            dgvHoaDon.CellFormatting += DgvHoaDon_CellFormatting;
+        }
+
+        private Label TaoTheThongKe(string text, Color bg, Color fg)
+        {
+            var lbl = new Label
+            {
+                Text = text,
+                BackColor = bg,
+                ForeColor = fg,
+                Font = new Font("Segoe UI", 8.5f, FontStyle.Bold),
+                AutoSize = true,
+                Padding = new Padding(10, 4, 10, 4),
+                Margin = new Padding(0, 0, 8, 0),
+                Cursor = Cursors.Default
+            };
+            lbl.Paint += (s, e) =>
+            {
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                Rectangle rect = new Rectangle(0, 0, lbl.Width - 1, lbl.Height - 1);
+                using (GraphicsPath path = UITheme.GetRoundedRectPath(rect, 6))
+                using (Pen pen = new Pen(Color.FromArgb(226, 232, 240), 1f))
+                {
+                    e.Graphics.DrawPath(pen, path);
+                }
+            };
+            return lbl;
+        }
+
+        private void DgvHoaDon_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            string col = dgvHoaDon.Columns[e.ColumnIndex].Name;
+
+            if (col == "TongTien" && e.Value != null)
+            {
+                if (decimal.TryParse(e.Value.ToString(), out decimal val))
+                {
+                    e.Value = val.ToString("N0") + " đ";
+                    e.CellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
+                    e.CellStyle.ForeColor = UITheme.PrimaryOrange;
+                    e.FormattingApplied = true;
+                }
+            }
         }
 
         private void frmHoaDon_Load(object sender, EventArgs e)
@@ -211,6 +350,11 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     dgvHoaDon.Columns["TongTien"].DefaultCellStyle.ForeColor = UITheme.PrimaryOrange;
                     dgvHoaDon.Columns["TongTien"].FillWeight = 25;
                 }
+
+                int count = danhSachHoaDon.Count;
+                decimal tongThu = danhSachHoaDon.Sum(x => x.TongTien);
+                if (lblPillCount != null) lblPillCount.Text = $"Tổng số: {count} hóa đơn";
+                if (lblPillRevenue != null) lblPillRevenue.Text = $"💰 Thực thu: {tongThu:N0} đ";
             }
             catch (Exception ex)
             {
@@ -452,6 +596,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
             txtTienDatCoc.Text = h.TienDatCoc.ToString("N0");
             lblTongTienValue.Text = h.TongTien.ToString("N0") + " đ";
 
+            lblCardTitle.Text = $"🧾 Hóa đơn đã thu: [{h.MaHoaDon}]";
+            lblCardSubtitle.Text = $"Thanh toán lúc {h.NgayThanhToan:dd/MM/yyyy HH:mm} (Chế độ xem lịch sử)";
+
             // Khi click xem một hóa đơn cũ đã thanh toán xong:
             btnThanhToan.Enabled = false;
             btnThanhToan.BackColor = Color.FromArgb(148, 163, 184);
@@ -596,6 +743,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
             cboDatPhong_SelectedIndexChanged(null, null);
             txtTimKiem.Clear();
             dgvHoaDon.ClearSelection();
+
+            lblCardTitle.Text = "LẬP HÓA ĐƠN & THANH TOÁN";
+            lblCardSubtitle.Text = "Chọn lượt đặt phòng, cộng dịch vụ và xác nhận thu ngân";
 
             btnThanhToan.Enabled = true;
             btnThanhToan.BackColor = UITheme.PrimaryOrange;

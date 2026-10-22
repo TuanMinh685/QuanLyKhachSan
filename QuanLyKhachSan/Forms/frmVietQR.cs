@@ -29,6 +29,25 @@ namespace Quản_Lý_Khách_Sạn.Forms
             lblTienValue.Text = _soTien.ToString("N0") + " VND";
             lblMemoValue.Text = _noiDung;
 
+            btnXacNhan.Text = "✓ Đã chuyển khoản xong";
+            btnDong.Text = "✕ Đóng";
+
+            lblStkValue.Cursor = Cursors.Hand;
+            lblStkValue.Text = "0901234567 📋";
+            lblStkValue.Click += (s, ev) =>
+            {
+                Clipboard.SetText("0901234567");
+                MessageBox.Show("Đã sao chép STK [0901234567] vào Clipboard!", "Sao chép thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            };
+
+            lblMemoValue.Cursor = Cursors.Hand;
+            lblMemoValue.Text = _noiDung + " 📋";
+            lblMemoValue.Click += (s, ev) =>
+            {
+                Clipboard.SetText(_noiDung);
+                MessageBox.Show($"Đã sao chép nội dung chuyển khoản [{_noiDung}] vào Clipboard!", "Sao chép thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            };
+
             await LoadVietQRImageAsync();
         }
 

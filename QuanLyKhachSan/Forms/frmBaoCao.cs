@@ -31,6 +31,19 @@ namespace Quản_Lý_Khách_Sạn.Forms
             UITheme.StyleModernGrid(dgvLuotDat);
             UITheme.StyleModernGrid(dgvTopKhachHang);
 
+            // Nâng cấp nhãn KPI và Tabs trực quan
+            lblKpi1Title.Text = "💰 TỔNG DOANH THU";
+            lblKpi2Title.Text = "🏨 DOANH THU PHÒNG";
+            lblKpi3Title.Text = "🛎️ DOANH THU DỊCH VỤ";
+            lblKpi4Title.Text = "🧾 HÓA ĐƠN ĐÃ THU";
+
+            btnTabDoanhThu.Text = "📊 Doanh Thu & Dịch Vụ";
+            btnTabCongSuat.Text = "🏨 Công Suất & Lượt Đặt";
+            btnTabKhachHang.Text = "👑 Khách Hàng VIP";
+
+            btnLoc.Text = "🔍 Lọc dữ liệu";
+            btnXuatExcel.Text = "📥 Xuất Excel";
+
             dtpTuNgay.Value = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             dtpDenNgay.Value = DateTime.Now;
 
@@ -436,8 +449,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
                         sb.AppendLine();
                     }
 
-                    File.WriteAllText(sfd.FileName, sb.ToString(), Encoding.UTF8);
-                    MessageBox.Show($"Xuất báo cáo [{tabName}] thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    File.WriteAllText(sfd.FileName, sb.ToString(), new UTF8Encoding(true));
+                    MessageBox.Show($"Xuất báo cáo [{tabName}] thành công!\nFile đã được mã hóa UTF-8 chuẩn mở trực tiếp bằng Microsoft Excel không lỗi font tiếng Việt.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
