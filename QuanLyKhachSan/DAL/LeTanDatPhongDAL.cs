@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Data;
-using Microsoft.Data.SqlClient;    // Nếu DatabaseHelper.cs của nhóm dùng System.Data.SqlClient thì đổi dòng này cho giống
+// using Microsoft.Data.SqlClient; // migrated to Supabase Npgsql    // Nếu DatabaseHelper.cs của nhóm dùng System.Data.SqlClient thì đổi dòng này cho giống
 
 namespace Quản_Lý_Khách_Sạn.DAL
 {
@@ -45,13 +45,13 @@ SELECT p.MaPhong, p.SoPhong, lp.MaLoai, lp.TenLoai, p.MoTaGiuong, p.DienTich, p.
        COUNT(*) OVER (PARTITION BY lp.MaLoai) AS SoPhongConLai
 FROM Phong p
 JOIN LoaiPhong lp ON lp.MaLoai = p.MaLoai
-WHERE p.TinhTrang = N'Hoạt động'
+WHERE p.TinhTrang = 'Hoạt động'
   AND lp.SoNguoiToiDa >= @TongNguoi
   AND (@MaLoai IS NULL OR lp.MaLoai = @MaLoai)
   AND NOT EXISTS (
         SELECT 1 FROM DatPhong d
         WHERE d.MaPhong = p.MaPhong
-          AND d.TrangThai IN (N'Đã đặt', N'Đang ở')
+          AND d.TrangThai IN ('Đã đặt', 'Đang ở')
           AND d.NgayNhan < @Tra
           AND d.NgayTra  > @Nhan)
 ORDER BY p.SoPhong";
@@ -80,7 +80,7 @@ ORDER BY HoTen";
             const string sql = @"
 SELECT lp.GiaMotDem
 FROM Phong p JOIN LoaiPhong lp ON lp.MaLoai = p.MaLoai
-WHERE p.MaPhong = @MaPhong AND p.TinhTrang = N'Hoạt động'";
+WHERE p.MaPhong = @MaPhong AND p.TinhTrang = 'Hoạt động'";
 
             using (var conn = TaoKetNoi())
             using (var cmd = new SqlCommand(sql, conn))
@@ -113,7 +113,7 @@ WHERE p.MaPhong = @MaPhong AND p.TinhTrang = N'Hoạt động'";
                         int soDonTrung;
                         using (var cmd = new SqlCommand(@"
 SELECT COUNT(*) FROM DatPhong
-WHERE MaPhong = @MaPhong AND TrangThai IN (N'Đã đặt', N'Đang ở')
+WHERE MaPhong = @MaPhong AND TrangThai IN ('Đã đặt', 'Đang ở')
   AND NgayNhan < @Tra AND NgayTra > @Nhan", conn, tran))
                         {
                             cmd.Parameters.Add("@MaPhong", SqlDbType.Int).Value = maPhong;
@@ -130,7 +130,7 @@ WHERE MaPhong = @MaPhong AND TrangThai IN (N'Đã đặt', N'Đang ở')
                         // 2) Sinh mã đặt phòng: DP-yyMMdd-STT (STT tăng theo từng ngày)
                         int stt;
                         using (var cmd = new SqlCommand(
-                            "SELECT COUNT(*) + 1 FROM DatPhong WHERE CAST(NgayTao AS DATE) = CAST(GETDATE() AS DATE)",
+                            "SELECT COUNT(*) + 1 FROM DatPhong WHERE CAST(NgayTao AS DATE) = CURRENT_DATE",
                             conn, tran))
                         {
                             stt = Convert.ToInt32(cmd.ExecuteScalar());
@@ -142,7 +142,7 @@ WHERE MaPhong = @MaPhong AND TrangThai IN (N'Đã đặt', N'Đang ở')
 INSERT INTO DatPhong (MaDat, MaKH, MaPhong, NgayNhan, NgayTra, SoNguoiLon, SoTreEm,
                       GiaMotDem, PhuThu, ThueVaPhi, TongTien, TrangThai, MaNhanVien)
 VALUES (@MaDat, @MaKH, @MaPhong, @Nhan, @Tra, @NguoiLon, @TreEm,
-        @Gia, @PhuThu, @Thue, @Tong, N'Đã đặt', @MaNV)", conn, tran))
+        @Gia, @PhuThu, @Thue, @Tong, 'Đã đặt', @MaNV)", conn, tran))
                         {
                             cmd.Parameters.Add("@MaDat", SqlDbType.NVarChar, 20).Value = maDat;
                             cmd.Parameters.Add("@MaKH", SqlDbType.Int).Value = maKH;

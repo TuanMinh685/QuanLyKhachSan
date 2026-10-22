@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using Microsoft.Data.SqlClient;
+// using Microsoft.Data.SqlClient; // migrated to Supabase Npgsql
 
 namespace Quản_Lý_Khách_Sạn.DAL
 {

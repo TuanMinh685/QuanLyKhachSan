@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Microsoft.Data.SqlClient;
+// using Microsoft.Data.SqlClient; // migrated to Supabase Npgsql
 using Quản_Lý_Khách_Sạn.DAL;
 using Quản_Lý_Khách_Sạn.Models;
 
@@ -80,14 +80,14 @@ namespace Quản_Lý_Khách_Sạn.BLL
                 kq.ThanhCong = true;
                 kq.ThongBao = "Đã thêm khách hàng \"" + kh.HoTen + "\".";
             }
-            catch (SqlException ex) when (ex.Number == 2601 || ex.Number == 2627)
+            catch (Exception ex) when (ex is PostgresException pe && pe.SqlState == "23505" || ex.Message.Contains("23505") || ex.Message.Contains("duplicate"))
             {
                 // Hai lễ tân cùng lưu 1 giấy tờ trong cùng 1 giây: bước 3 chưa kịp thấy trùng,
-                // nhưng unique index của SQL Server là "chốt chặn cuối" và ném lỗi 2601/2627.
+                // nhưng unique index của CSDL là "chốt chặn cuối" và ném lỗi trùng.
                 kq.LoiTheoTruong["SoGiayTo"] = MSG_TRUNG_GIAY_TO;
                 kq.ThongBao = "Vui lòng kiểm tra lại các trường được đánh dấu.";
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
                 kq.ThongBao = "Lỗi cơ sở dữ liệu: " + ex.Message;
             }
@@ -129,12 +129,12 @@ namespace Quản_Lý_Khách_Sạn.BLL
                     kq.ThongBao = "Không tìm thấy hồ sơ (có thể đã bị người khác xóa). Hãy tải lại danh sách.";
                 }
             }
-            catch (SqlException ex) when (ex.Number == 2601 || ex.Number == 2627)
+            catch (Exception ex) when (ex is PostgresException pe && pe.SqlState == "23505" || ex.Message.Contains("23505") || ex.Message.Contains("duplicate"))
             {
                 kq.LoiTheoTruong["SoGiayTo"] = MSG_TRUNG_GIAY_TO;
                 kq.ThongBao = "Vui lòng kiểm tra lại các trường được đánh dấu.";
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
                 kq.ThongBao = "Lỗi cơ sở dữ liệu: " + ex.Message;
             }

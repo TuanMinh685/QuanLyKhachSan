@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Data;
-using Microsoft.Data.SqlClient;    // Giống LeTanDatPhongDAL: nếu nhóm dùng System.Data.SqlClient thì đổi cho giống
+// using Microsoft.Data.SqlClient; // migrated to Supabase Npgsql    // Giống LeTanDatPhongDAL: nếu nhóm dùng System.Data.SqlClient thì đổi cho giống
 
 namespace Quản_Lý_Khách_Sạn.DAL
 {
@@ -50,7 +50,7 @@ WHERE d.MaDatPhong = @Id";
         {
             const string sql = @"
 SELECT COUNT(*) FROM DatPhong
-WHERE MaPhong = @MaPhong AND TrangThai = N'Đang ở' AND MaDatPhong <> @Id";
+WHERE MaPhong = @MaPhong AND TrangThai = 'Đang ở' AND MaDatPhong <> @Id";
 
             using (var conn = LeTanDatPhongDAL.TaoKetNoi())
             using (var cmd = new SqlCommand(sql, conn))
@@ -74,12 +74,12 @@ WHERE MaPhong = @MaPhong AND TrangThai = N'Đang ở' AND MaDatPhong <> @Id";
         {
             const string sql = @"
 UPDATE DatPhong
-SET TrangThai = N'Đang ở', GioNhanThucTe = GETDATE()
+SET TrangThai = 'Đang ở', GioNhanThucTe = CURRENT_TIMESTAMP
 WHERE MaDatPhong = @Id
-  AND TrangThai = N'Đã đặt'
+  AND TrangThai = 'Đã đặt'
   AND NOT EXISTS (SELECT 1 FROM DatPhong x
                   WHERE x.MaPhong = DatPhong.MaPhong
-                    AND x.TrangThai = N'Đang ở'
+                    AND x.TrangThai = 'Đang ở'
                     AND x.MaDatPhong <> @Id)";
             return ChayCapNhat(sql, new SqlParameter("@Id", SqlDbType.Int) { Value = maDatPhong });
         }
@@ -88,8 +88,8 @@ WHERE MaDatPhong = @Id
         {
             const string sql = @"
 UPDATE DatPhong
-SET TrangThai = N'Đã trả', GioTraThucTe = GETDATE()
-WHERE MaDatPhong = @Id AND TrangThai = N'Đang ở'";
+SET TrangThai = 'Đã trả', GioTraThucTe = CURRENT_TIMESTAMP
+WHERE MaDatPhong = @Id AND TrangThai = 'Đang ở'";
             return ChayCapNhat(sql, new SqlParameter("@Id", SqlDbType.Int) { Value = maDatPhong });
         }
 
@@ -97,8 +97,8 @@ WHERE MaDatPhong = @Id AND TrangThai = N'Đang ở'";
         {
             const string sql = @"
 UPDATE DatPhong
-SET TrangThai = N'Đã hủy', NgayHuy = GETDATE(), LyDoHuy = @LyDo
-WHERE MaDatPhong = @Id AND TrangThai = N'Đã đặt'";
+SET TrangThai = 'Đã hủy', NgayHuy = CURRENT_TIMESTAMP, LyDoHuy = @LyDo
+WHERE MaDatPhong = @Id AND TrangThai = 'Đã đặt'";
             return ChayCapNhat(sql,
                 new SqlParameter("@Id", SqlDbType.Int) { Value = maDatPhong },
                 new SqlParameter("@LyDo", SqlDbType.NVarChar, 200) { Value = lyDo });

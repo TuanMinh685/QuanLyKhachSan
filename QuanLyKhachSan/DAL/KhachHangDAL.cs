@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
-using Microsoft.Data.SqlClient;
+// using Microsoft.Data.SqlClient; // migrated to Supabase Npgsql
 using Quản_Lý_Khách_Sạn.Models;
 
 namespace Quản_Lý_Khách_Sạn.DAL
@@ -26,15 +26,16 @@ namespace Quản_Lý_Khách_Sạn.DAL
 
             // COLLATE Vietnamese_CI_AI: không phân biệt hoa/thường và dấu => gõ "hung" vẫn ra "Hùng"
             const string sql = @"
-                SELECT TOP (@Top) *
-                FROM dbo.vw_LeTanKhachHangTongQuan
-                WHERE ( @TuKhoa = N''
-                        OR HoTen COLLATE Vietnamese_CI_AI LIKE @Like ESCAPE '\'
+                SELECT *
+                FROM vw_LeTanKhachHangTongQuan
+                WHERE ( @TuKhoa = ''
+                        OR HoTen ILIKE @Like ESCAPE '\'
                         OR DienThoai LIKE @LikeSo ESCAPE '\'
                         OR SoGiayTo  LIKE @LikeSo ESCAPE '\'
                         OR MaKH      LIKE @LikeSo ESCAPE '\' )
-                  AND ( @Nhom = N'' OR NhomKhach = @Nhom )
-                ORDER BY ISNULL(CAST(LanLuuTruGanNhat AS DATETIME), NgayTao) DESC, MaKhachHang DESC";
+                  AND ( @Nhom = '' OR NhomKhach = @Nhom )
+                ORDER BY COALESCE(LanLuuTruGanNhat, NgayTao) DESC, MaKhachHang DESC
+                LIMIT @Top";
 
             SqlParameter[] p =
             {
@@ -58,7 +59,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
         // ------------------------------------------------------------------
         public int DemHoSo()
         {
-            using (DataTable dt = LeTanDatPhongDAL.LayBang("SELECT COUNT(*) FROM dbo.KhachHang"))
+            using (DataTable dt = LeTanDatPhongDAL.LayBang("SELECT COUNT(*) FROM KhachHang"))
             {
                 return Convert.ToInt32(dt.Rows[0][0]);
             }
@@ -69,7 +70,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
         // ------------------------------------------------------------------
         public KhachHang LayTheoMa(int maKhachHang)
         {
-            const string sql = "SELECT * FROM dbo.vw_LeTanKhachHangTongQuan WHERE MaKhachHang = @Ma";
+            const string sql = "SELECT * FROM vw_LeTanKhachHangTongQuan WHERE MaKhachHang = @Ma";
             using (DataTable dt = LeTanDatPhongDAL.LayBang(sql, new[] { new SqlParameter("@Ma", SqlDbType.Int) { Value = maKhachHang } }))
             {
                 return dt.Rows.Count == 0 ? null : MapRow(dt.Rows[0]);
@@ -84,7 +85,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
         {
             if (string.IsNullOrEmpty(soGiayTo)) return false;
 
-            const string sql = @"SELECT COUNT(1) FROM dbo.KhachHang
+            const string sql = @"SELECT COUNT(1) FROM KhachHang
                                  WHERE CCCD = @So AND (@MaTru IS NULL OR MaKH <> @MaTru)";
             SqlParameter[] p =
             {
@@ -99,17 +100,15 @@ namespace Quản_Lý_Khách_Sạn.DAL
 
         // ------------------------------------------------------------------
         // 5. THÊM MỚI – trả về MaKhachHang vừa sinh
-        //    OUTPUT INSERTED.MaKH: lấy khóa tự tăng ngay trong 1 câu lệnh,
-        //    an toàn hơn SELECT MAX(...) (không bị lẫn khi 2 lễ tân thêm cùng lúc).
         // ------------------------------------------------------------------
         public int Them(KhachHang kh)
         {
             const string sql = @"
-                INSERT INTO dbo.KhachHang
+                INSERT INTO KhachHang
                     (HoTen, SoDienThoai, GioiTinh, NgaySinh, QuocTich, Email, DiaChi, CCCD, GhiChu, DongYNhanUuDai)
-                OUTPUT INSERTED.MaKH
                 VALUES
-                    (@HoTen, @DienThoai, @GioiTinh, @NgaySinh, @QuocTich, @Email, @DiaChi, @SoGiayTo, @GhiChu, @DongY)";
+                    (@HoTen, @DienThoai, @GioiTinh, @NgaySinh, @QuocTich, @Email, @DiaChi, @SoGiayTo, @GhiChu, @DongY)
+                RETURNING MaKH";
 
             using (DataTable dt = LeTanDatPhongDAL.LayBang(sql, ThamSoGhi(kh)))
             {
@@ -123,10 +122,10 @@ namespace Quản_Lý_Khách_Sạn.DAL
         public bool CapNhat(KhachHang kh)
         {
             const string sql = @"
-                UPDATE dbo.KhachHang
+                UPDATE KhachHang
                 SET HoTen = @HoTen, SoDienThoai = @DienThoai, GioiTinh = @GioiTinh, NgaySinh = @NgaySinh,
                     QuocTich = @QuocTich, Email = @Email, DiaChi = @DiaChi, CCCD = @SoGiayTo,
-                    GhiChu = @GhiChu, DongYNhanUuDai = @DongY, NgayCapNhat = GETDATE()
+                    GhiChu = @GhiChu, DongYNhanUuDai = @DongY, NgayCapNhat = CURRENT_TIMESTAMP
                 WHERE MaKH = @Ma";
 
             var p = new List<SqlParameter>(ThamSoGhi(kh))
@@ -146,13 +145,13 @@ namespace Quản_Lý_Khách_Sạn.DAL
                 SELECT dp.MaDatPhong, p.SoPhong, lp.TenLoai AS TenLoaiPhong,
                        dp.NgayNhan AS NgayNhanDuKien, dp.NgayTra AS NgayTraDuKien,
                        dp.SoDem,
-                       CASE WHEN dp.TrangThai = N'Đang ở' THEN N'Đang lưu trú'
-                            ELSE N'Đã trả phòng' END AS TrangThai,
+                       CASE WHEN dp.TrangThai = 'Đang ở' THEN 'Đang lưu trú'
+                            ELSE 'Đã trả phòng' END AS TrangThai,
                        dp.TongTien
-                FROM dbo.DatPhong dp
-                JOIN dbo.Phong p ON p.MaPhong = dp.MaPhong
-                JOIN dbo.LoaiPhong lp ON lp.MaLoai = p.MaLoai
-                WHERE dp.MaKH = @Ma AND dp.TrangThai IN (N'Đang ở', N'Đã trả')
+                FROM DatPhong dp
+                JOIN Phong p ON p.MaPhong = dp.MaPhong
+                JOIN LoaiPhong lp ON lp.MaLoai = p.MaLoai
+                WHERE dp.MaKH = @Ma AND dp.TrangThai IN ('Đang ở', 'Đã trả')
                 ORDER BY dp.NgayNhan DESC, dp.MaDatPhong DESC";
 
             var list = new List<LichSuLuuTru>();

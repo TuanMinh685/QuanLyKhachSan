@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+// using Microsoft.Data.SqlClient; // migrated to Supabase Npgsql
 using Quản_Lý_Khách_Sạn.Models;
 
 namespace Quản_Lý_Khách_Sạn.DAL
@@ -30,8 +30,8 @@ namespace Quản_Lý_Khách_Sạn.DAL
 
                                 if (col == "mahoadon") hd.MaHoaDon = val.ToString() ?? "";
                                 else if (col == "madatphong") hd.MaDatPhong = val.ToString() ?? "";
-                                else if (col == "ngaylap") hd.NgayLap = Convert.ToDateTime(val);
-                                else if (col == "ngaythanhtoan") hd.NgayThanhToan = Convert.ToDateTime(val);
+                                else if (col == "ngaylap") hd.NgayLap = val is DateOnly dl ? dl.ToDateTime(TimeOnly.MinValue) : Convert.ToDateTime(val);
+                                else if (col == "ngaythanhtoan") hd.NgayThanhToan = val is DateOnly dt ? dt.ToDateTime(TimeOnly.MinValue) : Convert.ToDateTime(val);
                                 else if (col == "tienphong") hd.TienPhong = Convert.ToDecimal(val);
                                 else if (col == "tiendichvu") hd.TienDichVu = Convert.ToDecimal(val);
                                 else if (col == "tiengiamgia") hd.TienGiamGia = Convert.ToDecimal(val);
@@ -119,9 +119,9 @@ namespace Quản_Lý_Khách_Sạn.DAL
                     if (!string.IsNullOrWhiteSpace(maDatPhong))
                     {
                         string sqlDatPhong = @"UPDATE DatPhong
-                                               SET TrangThai = N'Đã trả',
-                                                   GioTraThucTe = ISNULL(GioTraThucTe, GETDATE())
-                                               WHERE CAST(MaDatPhong AS NVARCHAR(30)) = @MaDP OR MaDat = @MaDP";
+                                               SET TrangThai = 'Đã trả',
+                                                   GioTraThucTe = COALESCE(GioTraThucTe, CURRENT_TIMESTAMP)
+                                               WHERE CAST(MaDatPhong AS TEXT) = @MaDP OR MaDat = @MaDP";
                         using (SqlCommand cmdDP = new SqlCommand(sqlDatPhong, conn, trans))
                         {
                             cmdDP.Parameters.AddWithValue("@MaDP", maDatPhong);
