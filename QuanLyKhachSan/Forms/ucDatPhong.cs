@@ -303,12 +303,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             DataRowView r = LayPhongDangChon();
             if (r == null)
             {
-                CanhBao("Vui lòng chọn một phòng trong danh sách.");
-                return;
-            }
-            if (_maKH == 0)
-            {
-                CanhBao("Vui lòng chọn khách đặt phòng (bấm biểu tượng bút ở mục Khách đặt phòng).");
+                CanhBao("Vui lòng chọn một phòng trong danh sách trống.");
                 return;
             }
 
@@ -317,40 +312,28 @@ namespace Quản_Lý_Khách_Sạn.Forms
             int nguoiLon = SoDauTien(cboNguoiLon.Text);
             int treEm = SoDauTien(cboTreEm.Text);
             int maPhong = Convert.ToInt32(r["MaPhong"]);
+            string soPhong = r["SoPhong"].ToString();
+            string tenLoai = r["TenLoai"].ToString();
+            decimal giaMotDem = Convert.ToDecimal(r["GiaMotDem"]);
 
-            ChiPhiDatPhong cp = LeTanDatPhongBLL.TinhChiPhi(
-                Convert.ToDecimal(r["GiaMotDem"]), nhan, tra);
+            using var modal = new frmThanhToanTongDatPhongModal(
+                _maKH,
+                maPhong,
+                soPhong,
+                tenLoai,
+                giaMotDem,
+                nhan,
+                tra,
+                nguoiLon,
+                treEm,
+                null,
+                _maKH > 0 ? lblTenKhach.Text : "",
+                _maKH > 0 ? lblSdtMa.Text : "");
 
-            string noiDung =
-                $"Phòng {r["SoPhong"]} ({r["TenLoai"]})\n" +
-                $"Khách: {lblTenKhach.Text}\n" +
-                $"Từ {nhan:dd/MM/yyyy} đến {tra:dd/MM/yyyy} ({cp.SoDem} đêm)\n" +
-                $"Tổng tiền: {Tien(cp.TongTien)}";
-
-            if (MessageBox.Show(noiDung, "Xác nhận đặt phòng",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
-                return;
-
-            try
+            if (modal.ShowDialog(this) == DialogResult.OK)
             {
-                // maNhanVien = null cho tới khi nhóm ghép phần đăng nhập
-                string maDat = LeTanDatPhongBLL.TaoDatPhong(
-                    _maKH, maPhong, nhan, tra, nguoiLon, treEm, null);
-
-                MessageBox.Show("Đặt phòng thành công!\nMã đặt phòng: " + maDat, "Thành công",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-
                 ResetKhach();
                 TimPhong();    // làm mới: phòng vừa đặt sẽ biến khỏi danh sách
-            }
-            catch (NghiepVuException ex)    // lỗi nghiệp vụ (trùng lịch, thiếu dữ liệu...)
-            {
-                CanhBao(ex.Message);
-                TimPhong();
-            }
-            catch (Exception ex)            // lỗi hệ thống / CSDL
-            {
-                Loi("Lỗi khi đặt phòng: " + ex.Message);
             }
         }
 
