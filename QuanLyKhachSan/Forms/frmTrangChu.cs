@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using Quản_Lý_Khách_Sạn.BLL;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
@@ -9,13 +10,36 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private Control manHinhHienTai;
         private ucDatPhong manHinhDatPhong;
         private frmKhachHang manHinhKhachHang;
+        private ucBanLamViecLeTan manHinhBanLamViec;
         private Button nutDangChon = null;
+        private Button btnBanLamViec;
         private Button btnTaiKhoan;
         private Button btnPhuongThucTT;
 
         public frmTrangChu()
         {
             InitializeComponent();
+
+            btnBanLamViec = new Button
+            {
+                Name = "btnBanLamViec",
+                Text = "⊞ Bàn làm việc lễ tân",
+                Dock = DockStyle.Top,
+                Height = 52,
+                Cursor = Cursors.Hand,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                ForeColor = Color.FromArgb(226, 232, 240),
+                BackColor = Color.FromArgb(15, 37, 55),
+                TextAlign = ContentAlignment.MiddleLeft,
+                Padding = new Padding(24, 0, 0, 0),
+                UseMnemonic = false
+            };
+            btnBanLamViec.FlatAppearance.BorderSize = 0;
+            btnBanLamViec.Click += (_, __) => MoBanLamViec();
+            pnlSidebar.Controls.Add(btnBanLamViec);
+            pnlSidebar.Controls.SetChildIndex(btnBanLamViec, pnlSidebar.Controls.IndexOf(btnPhong));
+
             btnTaiKhoan = new Button
             {
                 Name = "btnTaiKhoan",
@@ -92,7 +116,36 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void frmTrangChu_Load(object sender, EventArgs e)
         {
-            MoDatPhong();
+            MoBanLamViec();
+        }
+
+        private void MoBanLamViec()
+        {
+            if (manHinhBanLamViec == null || manHinhBanLamViec.IsDisposed)
+            {
+                manHinhBanLamViec = new ucBanLamViecLeTan();
+                manHinhBanLamViec.YeuCauDatPhong += (_, __) => MoDatPhong();
+                manHinhBanLamViec.YeuCauNhanPhong += (_, __) =>
+                {
+                    using var f = new frmChonDatPhong(ThaoTacDatPhong.NhanPhong);
+                    f.ShowDialog(this);
+                    manHinhBanLamViec.TaiDuLieuHoatDong();
+                };
+                manHinhBanLamViec.YeuCauTraPhong += (_, __) =>
+                {
+                    using var f = new frmChonDatPhong(ThaoTacDatPhong.TraPhong);
+                    f.ShowDialog(this);
+                    manHinhBanLamViec.TaiDuLieuHoatDong();
+                };
+                manHinhBanLamViec.YeuCauTraCuuKhach += (_, __) => MoKhachHang();
+                manHinhBanLamViec.YeuCauQuanLyPhong += (_, __) => MoFormCon(new frmDanhSachPhong(), btnPhong, "SƠ ĐỒ & QUẢN LÝ PHÒNG");
+            }
+            else
+            {
+                manHinhBanLamViec.TaiDuLieuHoatDong();
+            }
+
+            HienThiManHinh(manHinhBanLamViec, btnBanLamViec, "BÀN LÀM VIỆC LỄ TÂN");
         }
 
         private void MoDatPhong()
@@ -145,9 +198,10 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
                 if (manHinhCu != null && !manHinhCu.IsDisposed)
                 {
-                    // Giữ dữ liệu chưa lưu của hai chức năng được phân công.
+                    // Giữ dữ liệu chưa lưu của các màn hình chính
                     if (ReferenceEquals(manHinhCu, manHinhDatPhong)
-                        || ReferenceEquals(manHinhCu, manHinhKhachHang))
+                        || ReferenceEquals(manHinhCu, manHinhKhachHang)
+                        || ReferenceEquals(manHinhCu, manHinhBanLamViec))
                     {
                         manHinhCu.Hide();
                     }
