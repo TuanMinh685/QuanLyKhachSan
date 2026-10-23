@@ -47,7 +47,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             this.lblTongTienTieuDe = new System.Windows.Forms.Label();
             this.lblTongTienHienThi = new System.Windows.Forms.Label();
             this.pnlFooter = new System.Windows.Forms.Panel();
-            this.btnVietQR = new System.Windows.Forms.Button();
+            this.btnVNPAYQR = new System.Windows.Forms.Button();
             this.btnMoMo = new System.Windows.Forms.Button();
             this.btnApplePay = new System.Windows.Forms.Button();
             this.btnInHoaDon = new System.Windows.Forms.Button();
@@ -107,7 +107,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private System.Windows.Forms.Label lblTongTienTieuDe;
         private System.Windows.Forms.Label lblTongTienHienThi;
         private System.Windows.Forms.Panel pnlFooter;
-        private System.Windows.Forms.Button btnVietQR;
+        private System.Windows.Forms.Button btnVNPAYQR;
         private System.Windows.Forms.Button btnMoMo;
         private System.Windows.Forms.Button btnApplePay;
         private System.Windows.Forms.Button btnInHoaDon;

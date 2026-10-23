@@ -8,7 +8,7 @@ using Quản_Lý_Khách_Sạn.DAL;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
-    public partial class PhuongThucThanhToan : Form
+    public partial class frmPhuongThucThanhToan : Form
     {
         private PhuongThucThanhToanDAL dal = new PhuongThucThanhToanDAL();
         private List<PhuongThucThanhToanModel> danhSachGoc = new List<PhuongThucThanhToanModel>();
@@ -23,7 +23,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private Label lblPillActive;
         private Label lblPillInactive;
 
-        public PhuongThucThanhToan()
+        public frmPhuongThucThanhToan()
         {
             InitializeComponent();
             UITheme.ApplyTheme(this);
@@ -220,7 +220,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             }
         }
 
-        private void PhuongThucThanhToan_Load(object sender, EventArgs e)
+        private void frmPhuongThucThanhToan_Load(object sender, EventArgs e)
         {
             UITheme.StyleModernGrid(dgvPTTT);
             TaiDanhSach();

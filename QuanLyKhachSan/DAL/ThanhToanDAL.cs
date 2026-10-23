@@ -1,27 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Quản_Lý_Khách_Sạn.Models;
 
 namespace Quản_Lý_Khách_Sạn.DAL
 { 
-    internal class ThongTinDatPhongThanhToan
-    {
-        public int MaDatPhong { get; set; }
-        public string MaDat { get; set; } = string.Empty;
-        public string TenKhachHang { get; set; } = string.Empty;
-        public string SoPhong { get; set; } = string.Empty;
-        public DateTime NgayNhanDuKien { get; set; }
-        public DateTime NgayTraDuKien { get; set; }
-        public decimal GiaPhongMoiDem { get; set; }
-        public decimal TongTienDatPhong { get; set; }
-        public decimal TienCoc { get; set; }
-        public int SoDem => Math.Max(1, (NgayTraDuKien.Date - NgayNhanDuKien.Date).Days);
-        public decimal TienPhong => TongTienDatPhong > 0 ? TongTienDatPhong : (SoDem * GiaPhongMoiDem);
-        public string MaHienThi => string.IsNullOrWhiteSpace(MaDat) ? MaDatPhong.ToString() : MaDat;
-
-        public override string ToString() => $"{MaHienThi} - Phòng {SoPhong} ({TenKhachHang})";
-    }
-
-    internal class ThanhToanDAL
+    public class ThanhToanDAL
     {
         // Lấy danh sách các lượt đặt phòng CHƯA có hóa đơn (cần thanh toán) từ Supabase
         public static List<ThongTinDatPhongThanhToan> GetDanhSachChuaThanhToan()

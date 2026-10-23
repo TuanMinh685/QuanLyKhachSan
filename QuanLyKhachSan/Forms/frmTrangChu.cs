@@ -78,7 +78,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 UseMnemonic = false
             };
             btnPhuongThucTT.FlatAppearance.BorderSize = 0;
-            btnPhuongThucTT.Click += (_, __) => { if (YeuCauAdmin()) MoFormCon(new PhuongThucThanhToan(), btnPhuongThucTT, "QUẢN LÝ PHƯƠNG THỨC THANH TOÁN"); };
+            btnPhuongThucTT.Click += (_, __) => { if (YeuCauAdmin()) MoFormCon(new frmPhuongThucThanhToan(), btnPhuongThucTT, "QUẢN LÝ PHƯƠNG THỨC THANH TOÁN"); };
             pnlSidebar.Controls.Add(btnPhuongThucTT);
             pnlSidebar.Controls.SetChildIndex(btnPhuongThucTT, 2);
 

@@ -104,7 +104,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 e.Graphics.DrawLine(p, 0, 0, pnlFooter.Width, 0);
             };
 
-            btnVietQR = new Button
+            btnVNPAYQR = new Button
             {
                 Text = "⚡ VNPAY-QR",
                 Size = new Size(110, 40),
@@ -115,8 +115,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                 Cursor = Cursors.Hand
             };
-            btnVietQR.FlatAppearance.BorderSize = 0;
-            btnVietQR.Click += btnVietQR_Click;
+            btnVNPAYQR.FlatAppearance.BorderSize = 0;
+            btnVNPAYQR.Click += btnVNPAYQR_Click;
 
             btnMoMo = new Button
             {
@@ -190,7 +190,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnHuy.FlatAppearance.BorderColor = UITheme.BorderColor;
             btnHuy.Click += (_, __) => Close();
 
-            pnlFooter.Controls.Add(btnVietQR);
+            pnlFooter.Controls.Add(btnVNPAYQR);
             pnlFooter.Controls.Add(btnMoMo);
             pnlFooter.Controls.Add(btnApplePay);
             pnlFooter.Controls.Add(btnInHoaDon);
@@ -795,7 +795,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             return "TM";
         }
 
-        private void btnVietQR_Click(object sender, EventArgs e)
+        private void btnVNPAYQR_Click(object sender, EventArgs e)
         {
             decimal canThu = ParseMoney(lblTongTienHienThi.Text);
             if (canThu <= 0)
