@@ -111,6 +111,38 @@ namespace Quản_Lý_Khách_Sạn
                     ON CONFLICT DO NOTHING;
                 ";
                 DatabaseHelper.ExecuteNonQuery(sqlVoucher);
+
+                // 5. Thêm đầy đủ các Phương Thức Thanh Toán hiện đại (MoMo, Apple Pay, VietQR, Tiền mặt, Thẻ POS)
+                string sqlPTTT = @"
+                    DO $$
+                    BEGIN
+                        IF NOT EXISTS (SELECT 1 FROM PhuongThucThanhToan WHERE TenPhuongThuc ILIKE '%MoMo%') THEN
+                            INSERT INTO PhuongThucThanhToan (TenPhuongThuc, MoTa, KichHoat)
+                            VALUES ('Ví điện tử MoMo', 'Quét mã QR MoMo hoặc thanh toán qua ứng dụng Ví MoMo', TRUE);
+                        END IF;
+
+                        IF NOT EXISTS (SELECT 1 FROM PhuongThucThanhToan WHERE TenPhuongThuc ILIKE '%Apple Pay%') THEN
+                            INSERT INTO PhuongThucThanhToan (TenPhuongThuc, MoTa, KichHoat)
+                            VALUES ('Apple Pay / Contactless', 'Chạm thanh toán Apple Pay, Google Wallet hoặc thẻ chip qua POS', TRUE);
+                        END IF;
+
+                        IF NOT EXISTS (SELECT 1 FROM PhuongThucThanhToan WHERE TenPhuongThuc ILIKE '%VietQR%' OR TenPhuongThuc ILIKE '%Chuyển khoản%') THEN
+                            INSERT INTO PhuongThucThanhToan (TenPhuongThuc, MoTa, KichHoat)
+                            VALUES ('Chuyển khoản VietQR', 'Quét mã VietQR Napas 247 chuyển khoản ngân hàng tự động', TRUE);
+                        END IF;
+
+                        IF NOT EXISTS (SELECT 1 FROM PhuongThucThanhToan WHERE TenPhuongThuc ILIKE '%Tiền mặt%') THEN
+                            INSERT INTO PhuongThucThanhToan (TenPhuongThuc, MoTa, KichHoat)
+                            VALUES ('Tiền mặt', 'Thanh toán tiền mặt trực tiếp tại quầy lễ tân', TRUE);
+                        END IF;
+
+                        IF NOT EXISTS (SELECT 1 FROM PhuongThucThanhToan WHERE TenPhuongThuc ILIKE '%Thẻ POS%' OR TenPhuongThuc ILIKE '%Visa%') THEN
+                            INSERT INTO PhuongThucThanhToan (TenPhuongThuc, MoTa, KichHoat)
+                            VALUES ('Thẻ POS (Visa/Master/ATM)', 'Cà thẻ nội địa Napas hoặc thẻ quốc tế Visa, MasterCard qua máy POS', TRUE);
+                        END IF;
+                    END $$;
+                ";
+                DatabaseHelper.ExecuteNonQuery(sqlPTTT);
             }
             catch { }
         }

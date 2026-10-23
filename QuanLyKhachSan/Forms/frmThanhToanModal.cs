@@ -70,6 +70,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
         // Footer buttons
         private Panel pnlFooter;
         private Button btnVietQR;
+        private Button btnMoMo;
+        private Button btnApplePay;
         private Button btnInHoaDon;
         private Button btnXacNhan;
         private Button btnHuy;
@@ -155,27 +157,55 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             btnVietQR = new Button
             {
-                Text = "📱 Mã VietQR",
-                Size = new Size(125, 40),
+                Text = "📱 VietQR",
+                Size = new Size(105, 40),
                 Location = new Point(24, 14),
                 FlatStyle = FlatStyle.Flat,
                 BackColor = UITheme.DarkNavy,
                 ForeColor = Color.White,
-                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                 Cursor = Cursors.Hand
             };
             btnVietQR.FlatAppearance.BorderSize = 0;
             btnVietQR.Click += btnVietQR_Click;
 
+            btnMoMo = new Button
+            {
+                Text = "🟣 MoMo",
+                Size = new Size(95, 40),
+                Location = new Point(135, 14),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.FromArgb(165, 0, 100),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnMoMo.FlatAppearance.BorderSize = 0;
+            btnMoMo.Click += btnMoMo_Click;
+
+            btnApplePay = new Button
+            {
+                Text = "🍎 Apple Pay",
+                Size = new Size(110, 40),
+                Location = new Point(236, 14),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.FromArgb(28, 28, 30),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnApplePay.FlatAppearance.BorderSize = 0;
+            btnApplePay.Click += btnApplePay_Click;
+
             btnInHoaDon = new Button
             {
                 Text = "🖨️ In biên lai",
-                Size = new Size(115, 40),
-                Location = new Point(155, 14),
+                Size = new Size(110, 40),
+                Location = new Point(352, 14),
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.White,
                 ForeColor = UITheme.DarkNavy,
-                Font = new Font("Segoe UI", 9.5F),
+                Font = new Font("Segoe UI", 9F),
                 Cursor = Cursors.Hand
             };
             btnInHoaDon.FlatAppearance.BorderColor = UITheme.BorderColor;
@@ -212,6 +242,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnHuy.Click += (_, __) => Close();
 
             pnlFooter.Controls.Add(btnVietQR);
+            pnlFooter.Controls.Add(btnMoMo);
+            pnlFooter.Controls.Add(btnApplePay);
             pnlFooter.Controls.Add(btnInHoaDon);
             pnlFooter.Controls.Add(btnXacNhan);
             pnlFooter.Controls.Add(btnHuy);
@@ -803,7 +835,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             if (cboPTTT.SelectedItem is PhuongThucThanhToanModel model)
             {
-                string ten = model.TenPhuongThuc.ToLower();
+                string ten = (model.TenPhuongThuc ?? "").ToLower();
+                if (ten.Contains("momo")) return "MOMO";
+                if (ten.Contains("apple pay") || ten.Contains("contactless")) return "APPLEPAY";
                 if (ten.Contains("chuyển khoản") || ten.Contains("qr")) return "CK";
                 if (ten.Contains("thẻ") || ten.Contains("pos")) return "THE";
                 return "TM";
@@ -821,6 +855,30 @@ namespace Quản_Lý_Khách_Sạn.Forms
             }
             using var qr = new frmVietQR(txtMaHD.Text, canThu, $"THANH TOAN {txtMaHD.Text}");
             qr.ShowDialog(this);
+        }
+
+        private void btnMoMo_Click(object sender, EventArgs e)
+        {
+            decimal canThu = ParseMoney(lblTongTienHienThi.Text);
+            if (canThu <= 0)
+            {
+                MessageBox.Show("Số tiền cần thu bằng 0 đ, không cần quét mã MoMo.", "Thông báo");
+                return;
+            }
+            using var mm = new frmMoMoQR(txtMaHD.Text, canThu, $"THANH TOAN {txtMaHD.Text}");
+            mm.ShowDialog(this);
+        }
+
+        private void btnApplePay_Click(object sender, EventArgs e)
+        {
+            decimal canThu = ParseMoney(lblTongTienHienThi.Text);
+            if (canThu <= 0)
+            {
+                MessageBox.Show("Số tiền cần thu bằng 0 đ, không cần chạm POS Apple Pay.", "Thông báo");
+                return;
+            }
+            using var ap = new frmApplePayModal(txtMaHD.Text, canThu, $"THANH TOAN {txtMaHD.Text}");
+            ap.ShowDialog(this);
         }
 
         private void btnInHoaDon_Click(object sender, EventArgs e)
@@ -929,10 +987,27 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 TrangThai = "Đã thanh toán"
             };
 
-            if (LayMaPTTT() == "CK")
+            string maPT = LayMaPTTT();
+            if (maPT == "CK")
             {
                 using var qr = new frmVietQR(hd.MaHoaDon, canThu, $"THANH TOAN {hd.MaHoaDon}");
                 if (qr.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+            }
+            else if (maPT == "MOMO")
+            {
+                using var mm = new frmMoMoQR(hd.MaHoaDon, canThu, $"MOMO {hd.MaHoaDon}");
+                if (mm.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+            }
+            else if (maPT == "APPLEPAY")
+            {
+                using var ap = new frmApplePayModal(hd.MaHoaDon, canThu, $"APPLE PAY {hd.MaHoaDon}");
+                if (ap.ShowDialog(this) != DialogResult.OK)
                 {
                     return;
                 }

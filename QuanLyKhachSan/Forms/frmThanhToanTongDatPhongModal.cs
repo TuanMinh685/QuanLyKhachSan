@@ -352,7 +352,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 Font = new Font("Segoe UI", 9.5F)
             };
             cboPTTT.Items.AddRange(new object[] {
-                "📱 Chuyển khoản VietQR Ngân hàng (Tự động tạo mã QR)",
+                "📱 Chuyển khoản VietQR Ngân hàng (Tự động tạo mã QR Napas)",
+                "🟣 Ví điện tử MoMo (Quét mã MoMo QR tức thì)",
+                "🍎 Apple Pay / Google Wallet (Chạm máy POS Contactless)",
                 "💳 OnePay / VNPAY (Thẻ ATM nội địa & Quốc tế Visa/Master)",
                 "💵 Tiền mặt tại quầy lễ tân (Thanh toán khi làm thủ tục nhận phòng)"
             });
@@ -760,12 +762,30 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             decimal tongSauGiam = Math.Max(0, _chiPhi.TongTien - _tienGiamGia);
 
-            // 2. Nếu chọn VietQR thì mở mã QR trước khi lưu
-            if (cboPTTT.SelectedIndex == 0) // VietQR
+            // 2. Mở cổng thanh toán tương ứng trước khi lưu
+            string maTam = "DP" + DateTime.Now.ToString("yyMMddHHmm");
+            string phuongThucChon = cboPTTT.SelectedItem?.ToString() ?? "";
+
+            if (phuongThucChon.Contains("VietQR"))
             {
-                string maTam = "DP" + DateTime.Now.ToString("yyMMddHHmm");
                 using var qr = new frmVietQR(maTam, tongSauGiam, $"DAT PHONG {_soPhong} {hoTen}");
                 if (qr.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+            }
+            else if (phuongThucChon.Contains("MoMo"))
+            {
+                using var mm = new frmMoMoQR(maTam, tongSauGiam, $"DAT PHONG {_soPhong} {hoTen}");
+                if (mm.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+            }
+            else if (phuongThucChon.Contains("Apple Pay"))
+            {
+                using var ap = new frmApplePayModal(maTam, tongSauGiam, $"DAT PHONG {_soPhong} {hoTen}");
+                if (ap.ShowDialog(this) != DialogResult.OK)
                 {
                     return;
                 }
