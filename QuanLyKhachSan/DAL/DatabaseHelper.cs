@@ -58,7 +58,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
                     }
                     using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
                     {
-                        DataTable dt = new DataTable();
+                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
                         return dt;
                     }

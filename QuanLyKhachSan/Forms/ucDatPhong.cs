@@ -40,6 +40,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnTraPhong.Click -= btnTraPhong_Click; btnTraPhong.Click += btnTraPhong_Click;
             btnHuyPhong.Click -= btnHuyPhong_Click; btnHuyPhong.Click += btnHuyPhong_Click;
             btnDoiKhach.Click -= btnDoiKhach_Click; btnDoiKhach.Click += btnDoiKhach_Click;
+            pnlKhach.Cursor = Cursors.Hand;
+            lblTenKhach.Cursor = Cursors.Hand;
+            lblAvatar.Cursor = Cursors.Hand;
+            pnlKhach.Click -= btnDoiKhach_Click; pnlKhach.Click += btnDoiKhach_Click;
+            lblTenKhach.Click -= btnDoiKhach_Click; lblTenKhach.Click += btnDoiKhach_Click;
+            lblAvatar.Click -= btnDoiKhach_Click; lblAvatar.Click += btnDoiKhach_Click;
 
             dgvPhong.SelectionChanged -= dgvPhong_SelectionChanged;
             dgvPhong.SelectionChanged += dgvPhong_SelectionChanged;
