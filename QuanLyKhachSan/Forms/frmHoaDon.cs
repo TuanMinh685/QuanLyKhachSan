@@ -29,6 +29,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
         public frmHoaDon()
         {
             InitializeComponent();
+            txtTienDatCoc.ReadOnly = true;
+            txtTienPhong.ReadOnly = true;
         }
 
         private void frmHoaDon_Load(object sender, EventArgs e)
@@ -131,14 +133,13 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     cboDatPhong.Items.Add(item);
                 }
             }
-            catch { }
-
-            if (cboDatPhong.Items.Count == 0)
+            catch (Exception ex)
             {
-                cboDatPhong.Items.Add("DP01 - Phòng P206 (Đỗ Thu Trang)");
-                cboDatPhong.Items.Add("DP02 - Phòng P301 (Nguyễn Văn Hùng)");
+                MessageBox.Show("Không tải được đơn cần thanh toán: " + ex.Message, "Lỗi CSDL");
             }
             if (cboDatPhong.Items.Count > 0) cboDatPhong.SelectedIndex = 0;
+            else cboDatPhong_SelectedIndexChanged(null, null);
+            btnThanhToan.Enabled = cboDatPhong.SelectedItem is ThongTinDatPhongThanhToan;
         }
 
         private void TaiDanhSachHoaDon()
@@ -182,15 +183,10 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 txtTienPhong.Text = dp.TienPhong.ToString("N0");
                 txtTienDatCoc.Text = dp.TienCoc.ToString("N0");
             }
-            else if (cboDatPhong.SelectedIndex == 0)
-            {
-                txtTienPhong.Text = "2,900,000";
-                txtTienDatCoc.Text = "1,000,000";
-            }
             else
             {
-                txtTienPhong.Text = "1,450,000";
-                txtTienDatCoc.Text = "500,000";
+                txtTienPhong.Text = "0";
+                txtTienDatCoc.Text = "0";
             }
             TinhTongTienTuDong(null, null);
         }
@@ -280,7 +276,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             decimal canThu = hoaDonBLL.TinhTongThanhToan(tp, dv, gg, coc);
 
-            lblTongTienValue.Text = canThu.ToString("N0") + " đ";
+            decimal hoanDu = coc - (tp + dv - gg);
+            lblTongTienValue.Text = hoanDu > 0 ? "Hoàn khách: " + hoanDu.ToString("N0") + " đ" : canThu.ToString("N0") + " đ";
         }
 
         private decimal ParseMoney(string txt)
@@ -350,9 +347,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 return;
             }
 
-            string maDP = (cboDatPhong.SelectedItem is ThongTinDatPhongThanhToan dpItem)
-                ? dpItem.MaHienThi
-                : cboDatPhong.Text.Split(' ')[0];
+            if (cboDatPhong.SelectedItem is not ThongTinDatPhongThanhToan dpItem)
+            {
+                MessageBox.Show("Không có đơn hợp lệ để thanh toán. Hãy nhận phòng trước.");
+                return;
+            }
+            string maDP = dpItem.MaHienThi;
 
             decimal canThu = ParseMoney(lblTongTienValue.Text.Replace(" đ", ""));
             var hd = new HoaDon
@@ -370,20 +370,28 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 TrangThai = "Đã thanh toán"
             };
 
-            if (hoaDonBLL.ThanhToanVaTraPhong(hd, maDP))
+            try
             {
-                foreach (DataRow r in dtChiTietTam.Rows)
+                btnThanhToan.Enabled = false;
+                var chiTiet = dtChiTietTam.AsEnumerable().Select(r => new ChiTietHoaDon
                 {
-                    string maDV = r["Mã DV"].ToString();
-                    int sl = Convert.ToInt32(r["SL"]);
-                    decimal donGia = Convert.ToDecimal(r["Đơn Giá"]);
-                    chiTietDAL.LuuChiTiet(hd.MaHoaDon, maDV, sl, donGia);
-                }
+                    MaDichVu = r["Mã DV"].ToString(), SoLuong = Convert.ToInt32(r["SL"]),
+                    DonGia = Convert.ToDecimal(r["Đơn Giá"])
+                }).ToList();
+                decimal hoanDu = Math.Max(0, hd.TienDatCoc - (hd.TienPhong + chiTiet.Sum(x => x.ThanhTien) - hd.TienGiamGia));
+                string xacNhan = hoanDu > 0
+                    ? $"Cọc đã thu lớn hơn tiền phải trả. Xác nhận đã hoàn khách {hoanDu:N0} đ bằng phương thức đang chọn?"
+                    : $"Xác nhận thanh toán đơn {maDP}, đã trừ cọc {hd.TienDatCoc:N0} đ?";
+                if (MessageBox.Show(xacNhan, "Xác nhận thanh toán", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+                if (!hoaDonBLL.ThanhToanVaTraPhong(hd, maDP, chiTiet, Session.MaNhanVien)) return;
 
-                MessageBox.Show($"Thanh toán hóa đơn [{hd.MaHoaDon}] thành công! Thực thu: {canThu:N0} đ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"Thanh toán hóa đơn [{hd.MaHoaDon}] thành công! Thực thu: {hd.TongTien:N0} đ" + (hoanDu > 0 ? $"\nĐã hoàn cọc dư: {hoanDu:N0} đ" : ""), "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 TaiDanhSachDatPhong();
                 TaiDanhSachHoaDon();
+                LamMoiForm();
             }
+            catch (Exception ex) { MessageBox.Show("Chưa lưu thanh toán: " + ex.Message, "Lỗi thanh toán", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
+            finally { btnThanhToan.Enabled = cboDatPhong.SelectedItem is ThongTinDatPhongThanhToan; }
         }
 
         private void btnLamMoi_Click(object sender, EventArgs e) => LamMoiForm();
@@ -392,7 +400,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             maHDDangChon = null;
             maVoucherDaApDung = null;
-            txtMaHD.Text = "HD" + DateTime.Now.ToString("yyMMddHHmm");
+            txtMaHD.Text = "HD" + DateTime.Now.ToString("yyMMddHHmmssfff") + Guid.NewGuid().ToString("N").Substring(0, 3);
             txtVoucherCode.Clear();
             txtTienGiamGia.Text = "0";
             txtTienDV.Text = "0";

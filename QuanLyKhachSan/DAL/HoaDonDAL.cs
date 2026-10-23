@@ -87,14 +87,40 @@ namespace Quản_Lý_Khách_Sạn.DAL
         }
 
         // --- HÀM NÂNG CẤP ĐÃ ĐƯỢC THÊM VÀO ĐÂY ---
-        public bool LuuHoaDonVaCheckOut(HoaDon hd, string maDatPhong)
+        public bool LuuHoaDonVaCheckOut(HoaDon hd, string maDatPhong, IReadOnlyList<ChiTietHoaDon> chiTiet, int? maNhanVien)
         {
             using (SqlConnection conn = DatabaseHelper.GetConnection())
             {
                 conn.Open();
-                SqlTransaction trans = conn.BeginTransaction();
+                using SqlTransaction trans = conn.BeginTransaction();
                 try
                 {
+                    LeTanDatPhongDAL.KhoaDatPhong(conn, trans);
+                    int id;
+                    string maDat;
+                    using (var don = new SqlCommand(@"
+SELECT MaDatPhong, MaDat, TienCoc, TongTien, TrangThai FROM DatPhong WITH (UPDLOCK, HOLDLOCK)
+WHERE MaDat = @Ma OR CONVERT(nvarchar(30), MaDatPhong) = @Ma", conn, trans))
+                    {
+                        don.Parameters.AddWithValue("@Ma", maDatPhong);
+                        using var reader = don.ExecuteReader();
+                        if (!reader.Read()) throw new BLL.NghiepVuException("Không tìm thấy đơn đặt phòng cần thanh toán.");
+                        id = Convert.ToInt32(reader["MaDatPhong"]);
+                        maDat = Convert.ToString(reader["MaDat"]);
+                        string trangThai = Convert.ToString(reader["TrangThai"]);
+                        if (trangThai != "Đang ở" && trangThai != "Đã trả")
+                            throw new BLL.NghiepVuException("Chỉ thanh toán đơn đã nhận phòng hoặc đã trả phòng.");
+                        if (hd.TienDatCoc != Convert.ToDecimal(reader["TienCoc"]) || hd.TienPhong != Convert.ToDecimal(reader["TongTien"]))
+                            throw new BLL.NghiepVuException("Tiền phòng/cọc không khớp đơn đã lưu. Hãy chọn lại đơn để tải số tiền mới nhất.");
+                    }
+                    using (var duplicate = new SqlCommand("SELECT COUNT(*) FROM HoaDon WHERE MaDatPhong IN (@Id, @Ma)", conn, trans))
+                    {
+                        duplicate.Parameters.AddWithValue("@Id", id.ToString());
+                        duplicate.Parameters.AddWithValue("@Ma", maDat);
+                        if (Convert.ToInt32(duplicate.ExecuteScalar()) > 0)
+                            throw new BLL.NghiepVuException("Đơn này đã được thanh toán. Vui lòng làm mới danh sách.");
+                    }
+                    hd.MaDatPhong = maDat;
                     // 1. Thêm mới Hóa Đơn
                     string sqlHoaDon = @"INSERT INTO HoaDon (MaHoaDon, MaDatPhong, NgayLap, NgayThanhToan, TienPhong, TienDichVu, TienGiamGia, TienDatCoc, TongTien, MaPTTT, MaVoucher, TrangThai)
                                          VALUES (@MaHD, @MaDP, @NgayLap, @NgayTT, @TienPhong, @TienDV, @GiamGia, @DatCoc, @TongTien, @PTTT, @MaVoucher, @TrangThai)";
@@ -115,28 +141,46 @@ namespace Quản_Lý_Khách_Sạn.DAL
                         cmd.ExecuteNonQuery();
                     }
 
-                    // 2. Cập nhật trạng thái đơn Đặt phòng thành 'Đã trả' theo đúng cấu trúc bảng DatPhong trong QLKS.sql
+                    // Chi tiết dịch vụ cùng transaction với hóa đơn và trả phòng.
+                    foreach (var ct in chiTiet)
+                    {
+                        using var detail = new SqlCommand(@"
+INSERT INTO ChiTietHoaDon (MaHoaDon, MaDichVu, SoLuong, DonGia, ThanhTien)
+VALUES (@HD, @DV, @SL, @Gia, @Tien)", conn, trans);
+                        detail.Parameters.AddWithValue("@HD", hd.MaHoaDon);
+                        detail.Parameters.AddWithValue("@DV", ct.MaDichVu);
+                        detail.Parameters.AddWithValue("@SL", ct.SoLuong);
+                        detail.Parameters.AddWithValue("@Gia", ct.DonGia);
+                        detail.Parameters.AddWithValue("@Tien", ct.ThanhTien);
+                        detail.ExecuteNonQuery();
+                    }
+
+                    // Cập nhật chính xác đơn đã khóa và kiểm tra ở trên.
                     if (!string.IsNullOrWhiteSpace(maDatPhong))
                     {
                         string sqlDatPhong = @"UPDATE DatPhong
                                                SET TrangThai = N'Đã trả',
                                                    GioTraThucTe = ISNULL(GioTraThucTe, GETDATE())
-                                               WHERE CAST(MaDatPhong AS NVARCHAR(30)) = @MaDP OR MaDat = @MaDP";
+                                               WHERE MaDatPhong = @MaDP AND TrangThai IN (N'Đang ở', N'Đã trả')";
                         using (SqlCommand cmdDP = new SqlCommand(sqlDatPhong, conn, trans))
                         {
-                            cmdDP.Parameters.AddWithValue("@MaDP", maDatPhong);
-                            cmdDP.ExecuteNonQuery();
+                            cmdDP.Parameters.AddWithValue("@MaDP", id);
+                            if (cmdDP.ExecuteNonQuery() != 1)
+                                throw new BLL.NghiepVuException("Không thể cập nhật trạng thái trả phòng.");
                         }
                     }
 
+                    decimal hoanDu = hd.TienDatCoc - (hd.TienPhong + hd.TienDichVu - hd.TienGiamGia);
+                    if (hoanDu > 0)
+                        PhieuDatCocDAL.GhiPhieu(conn, trans, id, "Hoan", hoanDu, hd.MaPTTT,
+                            maNhanVien.Value, "Hoàn cọc dư khi thanh toán " + hd.MaHoaDon);
                     trans.Commit();
                     return true;
                 }
-                catch (Exception ex)
+                catch
                 {
-                    trans.Rollback();
-                    System.Windows.Forms.MessageBox.Show("Lỗi thanh toán: " + ex.Message, "SQL Error");
-                    return false;
+                    try { trans.Rollback(); } catch { }
+                    throw;
                 }
             }
         }

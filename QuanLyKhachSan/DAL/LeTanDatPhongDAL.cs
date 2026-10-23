@@ -52,8 +52,8 @@ WHERE p.TinhTrang = N'Hoạt động'
         SELECT 1 FROM DatPhong d
         WHERE d.MaPhong = p.MaPhong
           AND d.TrangThai IN (N'Đã đặt', N'Đang ở')
-          AND d.NgayNhan < @Tra
-          AND d.NgayTra  > @Nhan)
+          AND ((d.NgayNhan < @Tra AND d.NgayTra > @Nhan)
+               OR (d.TrangThai = N'Đang ở' AND @Nhan <= CAST(GETDATE() AS date))))
 ORDER BY p.SoPhong";
 
             var pNhan = new SqlParameter("@Nhan", SqlDbType.Date) { Value = nhan.Date };
@@ -99,7 +99,7 @@ WHERE p.MaPhong = @MaPhong AND p.TinhTrang = N'Hoạt động'";
         /// </summary>
         public static string TaoDatPhong(int maKH, int maPhong, DateTime nhan, DateTime tra,
             int nguoiLon, int treEm, decimal giaMotDem, decimal phuThu, decimal thueVaPhi,
-            decimal tongTien, int? maNhanVien)
+            decimal tongTien, decimal tienCoc, string phuongThuc, int maNhanVien)
         {
             using (var conn = TaoKetNoi())
             {
@@ -109,12 +109,29 @@ WHERE p.MaPhong = @MaPhong AND p.TinhTrang = N'Hoạt động'";
                 {
                     try
                     {
+                        // Cùng khóa với nhận/hủy phòng để tuần tự hóa thay đổi đặt phòng.
+                        KhoaDatPhong(conn, tran);
+                        using (var check = new SqlCommand(@"
+SELECT lp.GiaMotDem, lp.SoNguoiToiDa FROM Phong p WITH (UPDLOCK, HOLDLOCK)
+JOIN LoaiPhong lp WITH (HOLDLOCK) ON lp.MaLoai = p.MaLoai
+WHERE p.MaPhong = @Phong AND p.TinhTrang = N'Hoạt động'", conn, tran))
+                        {
+                            check.Parameters.Add("@Phong", SqlDbType.Int).Value = maPhong;
+                            using var reader = check.ExecuteReader();
+                            if (!reader.Read())
+                                throw new BLL.NghiepVuException("Phòng đã ngừng hoạt động. Hãy tìm lại phòng.");
+                            if (Convert.ToDecimal(reader["GiaMotDem"]) != giaMotDem)
+                                throw new BLL.NghiepVuException("Giá phòng vừa thay đổi. Hãy tìm lại và xác nhận số tiền mới.");
+                            if ((long)nguoiLon + treEm > Convert.ToInt32(reader["SoNguoiToiDa"]))
+                                throw new BLL.NghiepVuException("Số khách vượt quá sức chứa hiện tại của phòng.");
+                        }
                         // 1) Kiểm tra trùng lịch NGAY TRONG transaction
                         int soDonTrung;
                         using (var cmd = new SqlCommand(@"
 SELECT COUNT(*) FROM DatPhong
 WHERE MaPhong = @MaPhong AND TrangThai IN (N'Đã đặt', N'Đang ở')
-  AND NgayNhan < @Tra AND NgayTra > @Nhan", conn, tran))
+  AND ((NgayNhan < @Tra AND NgayTra > @Nhan)
+       OR (TrangThai = N'Đang ở' AND @Nhan <= CAST(GETDATE() AS date)))", conn, tran))
                         {
                             cmd.Parameters.Add("@MaPhong", SqlDbType.Int).Value = maPhong;
                             cmd.Parameters.Add("@Nhan", SqlDbType.Date).Value = nhan.Date;
@@ -127,22 +144,28 @@ WHERE MaPhong = @MaPhong AND TrangThai IN (N'Đã đặt', N'Đang ở')
                             return null;   // báo cho BLL biết là trùng lịch
                         }
 
-                        // 2) Sinh mã đặt phòng: DP-yyMMdd-STT (STT tăng theo từng ngày)
+                        // Dùng ngày của SQL Server và số lớn nhất để không tái sử dụng mã khi xóa đơn.
+                        string prefix;
+                        using (var clock = new SqlCommand("SELECT 'DP-' + CONVERT(char(6), GETDATE(), 12) + '-'", conn, tran))
+                            prefix = Convert.ToString(clock.ExecuteScalar());
                         int stt;
-                        using (var cmd = new SqlCommand(
-                            "SELECT COUNT(*) + 1 FROM DatPhong WHERE CAST(NgayTao AS DATE) = CAST(GETDATE() AS DATE)",
-                            conn, tran))
+                        using (var cmd = new SqlCommand(@"
+SELECT ISNULL(MAX(TRY_CONVERT(int, SUBSTRING(MaDat, 11, 10))), 0) + 1
+FROM DatPhong WHERE MaDat LIKE @Prefix + '%'", conn, tran))
                         {
+                            cmd.Parameters.Add("@Prefix", SqlDbType.NVarChar, 10).Value = prefix;
                             stt = Convert.ToInt32(cmd.ExecuteScalar());
                         }
-                        string maDat = "DP-" + DateTime.Now.ToString("yyMMdd") + "-" + stt.ToString("000");
+                        string maDat = prefix + stt.ToString("000");
 
                         // 3) Ghi đơn
+                        int maDatPhong;
                         using (var cmd = new SqlCommand(@"
 INSERT INTO DatPhong (MaDat, MaKH, MaPhong, NgayNhan, NgayTra, SoNguoiLon, SoTreEm,
-                      GiaMotDem, PhuThu, ThueVaPhi, TongTien, TrangThai, MaNhanVien)
+                      GiaMotDem, PhuThu, ThueVaPhi, TongTien, TienCoc, TrangThai, MaNhanVien)
+OUTPUT INSERTED.MaDatPhong
 VALUES (@MaDat, @MaKH, @MaPhong, @Nhan, @Tra, @NguoiLon, @TreEm,
-        @Gia, @PhuThu, @Thue, @Tong, N'Đã đặt', @MaNV)", conn, tran))
+        @Gia, @PhuThu, @Thue, @Tong, @Coc, N'Đã đặt', @MaNV)", conn, tran))
                         {
                             cmd.Parameters.Add("@MaDat", SqlDbType.NVarChar, 20).Value = maDat;
                             cmd.Parameters.Add("@MaKH", SqlDbType.Int).Value = maKH;
@@ -155,11 +178,15 @@ VALUES (@MaDat, @MaKH, @MaPhong, @Nhan, @Tra, @NguoiLon, @TreEm,
                             cmd.Parameters.Add("@PhuThu", SqlDbType.Decimal).Value = phuThu;
                             cmd.Parameters.Add("@Thue", SqlDbType.Decimal).Value = thueVaPhi;
                             cmd.Parameters.Add("@Tong", SqlDbType.Decimal).Value = tongTien;
-                            cmd.Parameters.Add("@MaNV", SqlDbType.Int).Value = (object)maNhanVien ?? DBNull.Value;
-                            cmd.ExecuteNonQuery();
+                            cmd.Parameters.Add("@Coc", SqlDbType.Decimal).Value = tienCoc;
+                            cmd.Parameters.Add("@MaNV", SqlDbType.Int).Value = maNhanVien;
+                            foreach (SqlParameter parameter in cmd.Parameters)
+                                if (parameter.SqlDbType == SqlDbType.Decimal) { parameter.Precision = 18; parameter.Scale = 2; }
+                            maDatPhong = Convert.ToInt32(cmd.ExecuteScalar());
                         }
 
-                        // >>> CHỨC NĂNG 9 sẽ chèn bước ghi phiếu đặt cọc vào ĐÂY (cùng transaction)
+                        // Đơn và phiếu thu cùng thành công hoặc cùng rollback.
+                        PhieuDatCocDAL.GhiPhieu(conn, tran, maDatPhong, "Thu", tienCoc, phuongThuc, maNhanVien);
 
                         tran.Commit();
                         return maDat;
@@ -171,6 +198,17 @@ VALUES (@MaDat, @MaKH, @MaPhong, @Nhan, @Tra, @NguoiLon, @TreEm,
                     }
                 }
             }
+        }
+
+        internal static void KhoaDatPhong(SqlConnection conn, SqlTransaction tran)
+        {
+            using var cmd = new SqlCommand(@"
+DECLARE @Result int;
+EXEC @Result = sys.sp_getapplock @Resource=N'Hotel:DatPhong',
+     @LockMode='Exclusive', @LockOwner='Transaction', @LockTimeout=10000;
+SELECT @Result;", conn, tran);
+            if (Convert.ToInt32(cmd.ExecuteScalar()) < 0)
+                throw new BLL.NghiepVuException("Có thao tác đặt phòng khác đang xử lý. Vui lòng thử lại.");
         }
     }
 }

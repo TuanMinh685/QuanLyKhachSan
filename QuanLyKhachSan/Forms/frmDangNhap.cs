@@ -130,22 +130,26 @@ namespace Quản_Lý_Khách_Sạn.Forms
             {
                 using var conn = DatabaseHelper.GetConnection();
                 conn.Open();
-                using var cmd = new SqlCommand("SELECT MatKhau, VaiTro FROM TaiKhoan WHERE TenDangNhap=@user", conn);
+                using var cmd = new SqlCommand("SELECT MatKhau, VaiTro, MaNhanVien FROM TaiKhoan WHERE TenDangNhap=@user", conn);
                 cmd.Parameters.AddWithValue("@user", txtTenDangNhap.Text.Trim());
                 string storedPassword = null;
                 string role = null;
+                int? maNhanVien = null;
                 using (var reader = cmd.ExecuteReader())
                 {
                     if (reader.Read())
                     {
                         storedPassword = Convert.ToString(reader["MatKhau"]);
                         role = Convert.ToString(reader["VaiTro"]);
+                        if (reader["MaNhanVien"] != DBNull.Value)
+                            maNhanVien = Convert.ToInt32(reader["MaNhanVien"]);
                     }
                 }
                 if (storedPassword == null || !KiemTraMatKhau(txtMatKhau.Text, storedPassword))
                 { lblLoi.Text = "Tên đăng nhập hoặc mật khẩu không đúng."; return; }
                 Session.TenDangNhap = txtTenDangNhap.Text.Trim();
                 Session.VaiTro = role ?? "LeTan";
+                Session.MaNhanVien = maNhanVien;
                 DialogResult = DialogResult.OK;
                 Close();
             }

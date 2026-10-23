@@ -145,7 +145,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
             const string sql = @"
                 SELECT dp.MaDatPhong, p.SoPhong, lp.TenLoai AS TenLoaiPhong,
                        dp.NgayNhan AS NgayNhanDuKien, dp.NgayTra AS NgayTraDuKien,
-                       dp.SoDem,
+                       dp.SoDem, dp.GioNhanThucTe, dp.GioTraThucTe,
                        CASE WHEN dp.TrangThai = N'Đang ở' THEN N'Đang lưu trú'
                             ELSE N'Đã trả phòng' END AS TrangThai,
                        dp.TongTien
@@ -167,6 +167,8 @@ namespace Quản_Lý_Khách_Sạn.DAL
                         TenLoaiPhong = Convert.ToString(r["TenLoaiPhong"]),
                         NgayNhan = Convert.ToDateTime(r["NgayNhanDuKien"]),
                         NgayTra = Convert.ToDateTime(r["NgayTraDuKien"]),
+                        GioNhanThucTe = r["GioNhanThucTe"] == DBNull.Value ? null : Convert.ToDateTime(r["GioNhanThucTe"]),
+                        GioTraThucTe = r["GioTraThucTe"] == DBNull.Value ? null : Convert.ToDateTime(r["GioTraThucTe"]),
                         SoDem = Convert.ToInt32(r["SoDem"]),
                         TrangThai = Convert.ToString(r["TrangThai"]),
                         TongTien = Convert.ToDecimal(r["TongTien"])

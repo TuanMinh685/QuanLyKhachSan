@@ -25,10 +25,21 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private KhachHang khDangChon;                                // hồ sơ đang hiển thị ở panel phải (null khi đang thêm mới)
         private bool cheDoThem;                                      // true = panel phải đang ở chế độ "Thêm khách hàng mới"
         private bool dangNap;                                        // cờ chặn sự kiện dây chuyền khi chính code đang nạp dữ liệu
+        private readonly DataGridView dgvCoc = new() { Dock = DockStyle.Fill, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells };
+        private readonly TabPage tpCoc = new("Thu / hoàn cọc");
 
         public frmKhachHang()
         {
             InitializeComponent();
+            tpCoc.Controls.Add(dgvCoc);
+            tabChiTiet.TabPages.Add(tpCoc);
+            UITheme.FormatDataGridView(dgvCoc);
+            dgvCoc.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            dgvLichSu.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "colLsThucTe", DataPropertyName = "ThucTeHienThi", HeaderText = "Nhận / trả thực tế",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells
+            });
         }
 
         // ==================================================================
@@ -221,6 +232,25 @@ namespace Quản_Lý_Khách_Sạn.Forms
             txtGhiChu.Text = kh.GhiChu ?? "";
             chkNhanUuDai.Checked = kh.DongYNhanUuDai;
 
+            HienThiThongKe(kh);
+        }
+
+        public void LamMoiLuuTru()
+        {
+            // Chỉ cập nhật dữ liệu đọc, giữ nguyên các ô hồ sơ đang sửa.
+            TaiDanhSach();
+            if (cheDoThem || khDangChon == null) return;
+            try
+            {
+                var kh = bll.LayTheoMa(khDangChon.MaKhachHang);
+                if (kh != null) HienThiThongKe(kh);
+            }
+            catch (Exception ex) { HienLoiHeThong("Không thể cập nhật lịch sử lưu trú", ex); }
+        }
+
+        private void HienThiThongKe(KhachHang kh)
+        {
+
             // Badge nhóm khách (VIP / Thân thiết / Mới)
             MauNhom(kh.NhomKhach, out Color nen, out Color chu);
             lblNhomBadge.Text = kh.NhomKhach;
@@ -243,6 +273,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
             if (!maKhachHang.HasValue)
             {
                 dgvLichSu.DataSource = null;
+                dgvCoc.DataSource = null;
+                tpCoc.Text = "Thu / hoàn cọc (0)";
                 tpLichSu.Text = "Lịch sử lưu trú (0)";
                 return;
             }
@@ -250,6 +282,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
             List<LichSuLuuTru> ls = bll.LayLichSu(maKhachHang.Value);
             dgvLichSu.DataSource = ls;
             tpLichSu.Text = "Lịch sử lưu trú (" + ls.Count + ")";
+            var giaoDich = bll.LayGiaoDichCoc(maKhachHang.Value);
+            dgvCoc.DataSource = giaoDich;
+            tpCoc.Text = $"Thu / hoàn cọc ({giaoDich.Rows.Count})";
+            dgvCoc.Columns["Số tiền"].DefaultCellStyle.Format = "N0";
+            dgvCoc.Columns["Số tiền"].DefaultCellStyle.FormatProvider = Vi;
+            dgvCoc.Columns["Thời điểm"].DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
         }
 
         private void DatNgaySinh(DateTime? ngaySinh)

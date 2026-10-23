@@ -16,6 +16,8 @@ namespace Quản_Lý_Khách_Sạn.Models
         public string TenLoaiPhong { get; set; } = string.Empty;
         public DateTime NgayNhan { get; set; }
         public DateTime NgayTra { get; set; }
+        public DateTime? GioNhanThucTe { get; set; }
+        public DateTime? GioTraThucTe { get; set; }
         public int SoDem { get; set; }
         public string TrangThai { get; set; } = string.Empty;   // "Đã nhận phòng" | "Đã trả phòng"
         public decimal TongTien { get; set; }                   // = GiaPhongDem x SoDem (tiền phòng)
@@ -25,5 +27,7 @@ namespace Quản_Lý_Khách_Sạn.Models
         public string ThoiGianHienThi => $"{NgayNhan:dd/MM/yyyy} – {NgayTra:dd/MM/yyyy} • {SoDem} đêm";
         public string TrangThaiHienThi => TrangThai == "Đã nhận phòng" ? "Đang lưu trú" : TrangThai;
         public string TongTienHienThi => TongTien.ToString("N0", Vi) + " đ";
+        public string ThucTeHienThi => !GioNhanThucTe.HasValue ? "Chưa có giờ nhận thực tế"
+            : $"{GioNhanThucTe:dd/MM/yyyy HH:mm} → " + (GioTraThucTe.HasValue ? $"{GioTraThucTe:dd/MM/yyyy HH:mm}" : "Chưa trả phòng");
     }
 }

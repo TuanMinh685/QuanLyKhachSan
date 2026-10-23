@@ -24,6 +24,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         public string TenKhach { get; private set; }
         public string SoPhong { get; private set; }
         public string LyDo { get; private set; }     // chỉ có ý nghĩa khi Hủy phòng
+        public decimal TienCoc { get; private set; }
 
         // Constructor không tham số: dành cho Visual Studio Designer (Designer cần nó để dựng form)
         public frmChonDatPhong() : this(ThaoTacDatPhong.NhanPhong)
@@ -115,6 +116,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             ThemCot("NgayNhan", "Nhận", 90, false, "dd/MM/yyyy");
             ThemCot("NgayTra", "Trả", 90, false, "dd/MM/yyyy");
             ThemCot("TongTien", "Tổng tiền (đ)", 110, false, "#,##0");
+            ThemCot("TienCoc", "Đã cọc (đ)", 110, false, "#,##0");
         }
 
         private void ThemCot(string prop, string tieuDe, int rong, bool fill, string dinhDang)
@@ -194,6 +196,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             TenKhach = Convert.ToString(r["HoTen"]);
             SoPhong = Convert.ToString(r["SoPhong"]);
             LyDo = lyDo;
+            TienCoc = Convert.ToDecimal(r["TienCoc"]);
 
             DialogResult = DialogResult.OK;     // gán DialogResult sẽ tự đóng form
         }

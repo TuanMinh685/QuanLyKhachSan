@@ -61,14 +61,29 @@ namespace Quản_Lý_Khách_Sạn.BLL
             return dal.Insert(hd);
         }
 
-        public bool ThanhToanVaTraPhong(HoaDon hd, string maPhong)
+        public bool ThanhToanVaTraPhong(HoaDon hd, string maPhong, IReadOnlyList<ChiTietHoaDon> chiTiet, int? maNhanVien)
         {
             // Kiểm tra logic nghiệp vụ cơ bản trước khi đẩy xuống CSDL
-            if (hd == null || hd.TongTien < 0 || string.IsNullOrEmpty(maPhong))
+            if (hd == null || string.IsNullOrWhiteSpace(hd.MaHoaDon) || string.IsNullOrWhiteSpace(maPhong) || chiTiet == null)
+                throw new NghiepVuException("Vui lòng chọn đơn đặt phòng và nhập mã hóa đơn.");
+            decimal tongDV = 0;
+            foreach (var ct in chiTiet)
             {
-                return false;
+                if (string.IsNullOrWhiteSpace(ct.MaDichVu) || ct.SoLuong <= 0 || ct.DonGia < 0)
+                    throw new NghiepVuException("Chi tiết dịch vụ có số lượng hoặc đơn giá không hợp lệ.");
+                tongDV += ct.ThanhTien;
             }
-            return dal.LuuHoaDonVaCheckOut(hd, maPhong);
+            if (hd.TienPhong < 0 || hd.TienDatCoc < 0 || hd.TienGiamGia < 0 || hd.TienGiamGia > hd.TienPhong + tongDV)
+                throw new NghiepVuException("Tiền phòng, tiền cọc hoặc giảm giá không hợp lệ.");
+            hd.TienDichVu = tongDV;
+            hd.TongTien = TinhTongThanhToan(hd.TienPhong, tongDV, hd.TienGiamGia, hd.TienDatCoc);
+            if (hd.TienDatCoc > hd.TienPhong + tongDV - hd.TienGiamGia)
+            {
+                if (!maNhanVien.HasValue || maNhanVien <= 0)
+                    throw new NghiepVuException("Vui lòng đăng nhập lại để ghi nhận nhân viên hoàn cọc dư.");
+                LeTanDatPhongBLL.KiemTraPhuongThuc(hd.MaPTTT);
+            }
+            return dal.LuuHoaDonVaCheckOut(hd, maPhong, chiTiet, maNhanVien);
         }
     }
 }

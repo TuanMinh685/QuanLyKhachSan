@@ -4,7 +4,8 @@
     {
         public static string TenDangNhap { get; set; } = "";
         public static string VaiTro { get; set; } = "";
+        public static int? MaNhanVien { get; set; }
         public static bool LaAdmin => string.Equals(VaiTro, "Admin", System.StringComparison.OrdinalIgnoreCase);
-        public static void DangXuat() { TenDangNhap = ""; VaiTro = ""; }
+        public static void DangXuat() { TenDangNhap = ""; VaiTro = ""; MaNhanVien = null; }
     }
 }

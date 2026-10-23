@@ -49,6 +49,7 @@ namespace Quản_Lý_Khách_Sạn.BLL
         public KhachHang LayTheoMa(int ma) => dal.LayTheoMa(ma);
 
         public List<LichSuLuuTru> LayLichSu(int maKhachHang) => dal.LayLichSuLuuTru(maKhachHang);
+        public System.Data.DataTable LayGiaoDichCoc(int maKhachHang) => PhieuDatCocDAL.LayTheoKhach(maKhachHang);
 
         /// <summary>Dùng cho kiểm tra "tức thời" khi người dùng rời ô Số giấy tờ.</summary>
         public bool KiemTraTrungGiayTo(string soGiayTo, int? maHienTai)

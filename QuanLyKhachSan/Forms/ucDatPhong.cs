@@ -18,10 +18,17 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private int _maKH = 0;               // 0 = chưa chọn khách
         private bool _boQuaSuKien = true;    // true khi đang khởi tạo, tránh sự kiện chạy sớm
+        private int _maPhongNhapCoc;
+        private readonly Label lblSoDu = new Label { AutoSize = false, Height = 52, ForeColor = Color.FromArgb(100, 116, 135) };
 
         public ucDatPhong()
         {
             InitializeComponent();
+            lblSoDu.SetBounds(14, 354, 320, 52);
+            lblSoDu.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            pnlTomTat.Controls.Add(lblSoDu);
+            txtTienCoc.PlaceholderText = "Ví dụ: 165.000";
+            txtTienCoc.TextChanged += (_, __) => CapNhatSoDu();
             GanSuKien();
         }
 
@@ -250,6 +257,10 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 lblPhuThuTien.Text = "0 đ";
                 lblThueTien.Text = "0 đ";
                 lblTongCongTien.Text = "0 đ";
+                _maPhongNhapCoc = 0;
+                txtTienCoc.Clear();
+                txtTienCoc.Enabled = false;
+                lblSoDu.Text = "Chọn phòng để nhập tiền cọc.";
                 return;
             }
 
@@ -262,6 +273,33 @@ namespace Quản_Lý_Khách_Sạn.Forms
             lblPhuThuTien.Text = Tien(cp.PhuThu);
             lblThueTien.Text = Tien(cp.ThueVaPhi);
             lblTongCongTien.Text = Tien(cp.TongTien);
+            txtTienCoc.Enabled = true;
+            int maPhong = Convert.ToInt32(r["MaPhong"]);
+            if (_maPhongNhapCoc != maPhong)
+            {
+                _maPhongNhapCoc = maPhong;
+                txtTienCoc.Text = cp.CocToiThieu.ToString("N0", Vi);
+            }
+            CapNhatSoDu();
+        }
+
+        private void CapNhatSoDu()
+        {
+            var r = LayPhongDangChon();
+            if (r == null) return;
+            var cp = LeTanDatPhongBLL.TinhChiPhi(Convert.ToDecimal(r["GiaMotDem"]), dtpNgayNhan.Value, dtpNgayTra.Value);
+            try
+            {
+                decimal coc = LeTanDatPhongBLL.DocTienCoc(txtTienCoc.Text);
+                LeTanDatPhongBLL.KiemTraTienCoc(coc, cp);
+                lblSoDu.ForeColor = Color.FromArgb(15, 122, 74);
+                lblSoDu.Text = $"Cọc tối thiểu: {Tien(cp.CocToiThieu)}\nCòn lại tiền đặt phòng: {Tien(cp.TongTien - coc)}";
+            }
+            catch (NghiepVuException ex)
+            {
+                lblSoDu.ForeColor = Color.Firebrick;
+                lblSoDu.Text = ex.Message;
+            }
         }
 
         // =====================================================================
@@ -315,11 +353,29 @@ namespace Quản_Lý_Khách_Sạn.Forms
             ChiPhiDatPhong cp = LeTanDatPhongBLL.TinhChiPhi(
                 Convert.ToDecimal(r["GiaMotDem"]), nhan, tra);
 
+            decimal tienCoc;
+            try
+            {
+                tienCoc = LeTanDatPhongBLL.DocTienCoc(txtTienCoc.Text);
+                LeTanDatPhongBLL.KiemTraTienCoc(tienCoc, cp);
+            }
+            catch (NghiepVuException ex)
+            {
+                CanhBao(ex.Message);
+                txtTienCoc.Focus();
+                return;
+            }
+            string phuongThuc = rdoChuyenKhoan.Checked ? "CK" : rdoThe.Checked ? "POS" : "TM";
+            string tenPhuongThuc = phuongThuc == "CK" ? "Chuyển khoản" : phuongThuc == "POS" ? "Thẻ" : "Tiền mặt";
+
             string noiDung =
                 $"Phòng {r["SoPhong"]} ({r["TenLoai"]})\n" +
                 $"Khách: {lblTenKhach.Text}\n" +
                 $"Từ {nhan:dd/MM/yyyy} đến {tra:dd/MM/yyyy} ({cp.SoDem} đêm)\n" +
-                $"Tổng tiền: {Tien(cp.TongTien)}";
+                $"Tổng tiền: {Tien(cp.TongTien)}\n" +
+                $"Thu cọc: {Tien(tienCoc)} — {tenPhuongThuc}\n" +
+                $"Còn lại tiền đặt phòng: {Tien(cp.TongTien - tienCoc)}\n\n" +
+                "Chỉ xác nhận khi đã nhận đủ khoản cọc trên.";
 
             if (MessageBox.Show(noiDung, "Xác nhận đặt phòng",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
@@ -327,11 +383,11 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             try
             {
-                // maNhanVien = null cho tới khi nhóm ghép phần đăng nhập
+                btnDatPhong.Enabled = false;
                 string maDat = LeTanDatPhongBLL.TaoDatPhong(
-                    _maKH, maPhong, nhan, tra, nguoiLon, treEm, null);
+                    _maKH, maPhong, nhan, tra, nguoiLon, treEm, tienCoc, phuongThuc, Session.MaNhanVien, cp.GiaMotDem);
 
-                MessageBox.Show("Đặt phòng thành công!\nMã đặt phòng: " + maDat, "Thành công",
+                MessageBox.Show($"Đặt phòng thành công!\nMã đặt phòng: {maDat}\nĐã ghi nhận cọc: {Tien(tienCoc)} ({tenPhuongThuc})", "Thành công",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 ResetKhach();
@@ -346,6 +402,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             {
                 Loi("Lỗi khi đặt phòng: " + ex.Message);
             }
+            finally { btnDatPhong.Enabled = true; }
         }
 
         // =====================================================================
@@ -361,6 +418,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
             // 1) Mở hộp thoại cho lễ tân chọn đơn; đóng form thì lấy kết quả ra rồi hủy form
             int maDatPhong = 0;
             string maDat = "", tenKhach = "", soPhong = "", lyDo = "";
+            decimal tienCoc = 0, tienHoan = 0;
+            string phuongThucHoan = "TM";
             using (var f = new frmChonDatPhong(thaoTac))
             {
                 if (f.ShowDialog(this) != DialogResult.OK) return;
@@ -369,6 +428,15 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 tenKhach = f.TenKhach;
                 soPhong = f.SoPhong;
                 lyDo = f.LyDo;
+                tienCoc = f.TienCoc;
+            }
+
+            if (thaoTac == ThaoTacDatPhong.HuyPhong)
+            {
+                using var hoan = new frmHoanCoc(maDat, tienCoc);
+                if (hoan.ShowDialog(this) != DialogResult.OK) return;
+                tienHoan = hoan.TienHoan;
+                phuongThucHoan = hoan.PhuongThuc;
             }
 
             // 2) Hỏi xác nhận lần cuối (đổi trạng thái đơn là thao tác quan trọng)
@@ -376,7 +444,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
                            : thaoTac == ThaoTacDatPhong.TraPhong ? "trả phòng"
                            : "hủy phòng";
             string hoi = $"Xác nhận {tenViec}?\n\nĐơn: {maDat}\nKhách: {tenKhach}\nPhòng: {soPhong}";
-            if (thaoTac == ThaoTacDatPhong.HuyPhong) hoi += $"\nLý do: {lyDo}";
+            if (thaoTac == ThaoTacDatPhong.HuyPhong)
+                hoi += $"\nLý do: {lyDo}\nCọc đã thu: {Tien(tienCoc)}\nHoàn khách: {Tien(tienHoan)}\nGiữ lại: {Tien(tienCoc - tienHoan)}\n\nXác nhận khoản hoàn/giữ này đã được xử lý?";
 
             if (MessageBox.Show(hoi, "Xác nhận " + tenViec,
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
@@ -389,7 +458,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 {
                     case ThaoTacDatPhong.NhanPhong: LeTanLuuTruBLL.NhanPhong(maDatPhong); break;
                     case ThaoTacDatPhong.TraPhong: LeTanLuuTruBLL.TraPhong(maDatPhong); break;
-                    case ThaoTacDatPhong.HuyPhong: LeTanLuuTruBLL.HuyPhong(maDatPhong, lyDo); break;
+                    case ThaoTacDatPhong.HuyPhong:
+                        LeTanLuuTruBLL.HuyPhong(maDatPhong, lyDo, tienHoan, tienCoc, phuongThucHoan, Session.MaNhanVien);
+                        break;
                 }
 
                 ThongBao($"Đã {tenViec} thành công.\nĐơn: {maDat}");

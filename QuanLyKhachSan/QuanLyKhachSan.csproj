@@ -10,6 +10,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Verification\**\*.cs" />
+    <EmbeddedResource Remove="Verification\**\*" />
+    <None Remove="Verification\bin\**\*;Verification\obj\**\*" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.1" />
   </ItemGroup>
 

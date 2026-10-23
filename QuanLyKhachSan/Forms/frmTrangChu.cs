@@ -104,10 +104,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void MoKhachHang()
         {
-            if (manHinhKhachHang == null || manHinhKhachHang.IsDisposed)
+            bool daMo = manHinhKhachHang != null && !manHinhKhachHang.IsDisposed;
+            if (!daMo)
                 manHinhKhachHang = new frmKhachHang();
 
             HienThiManHinh(manHinhKhachHang, btnKhachHang, "HỒ SƠ KHÁCH HÀNG");
+            if (daMo) manHinhKhachHang.LamMoiLuuTru();
         }
 
         // Các form khác vẫn gọi qua hàm cũ của trang chủ.

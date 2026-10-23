@@ -36,6 +36,10 @@ namespace Quản_Lý_Khách_Sạn.BLL
         public static void NhanPhong(int maDatPhong)
         {
             DataRow r = LayDonDungTrangThai(maDatPhong, DaDat, "nhận phòng");
+            if (string.IsNullOrWhiteSpace(Convert.ToString(r["CCCD"])))
+                throw new NghiepVuException("Khách chưa có CCCD/hộ chiếu. Hãy cập nhật hồ sơ khách hàng trước khi nhận phòng.");
+            if (Convert.ToString(r["TinhTrang"]) != "Hoạt động")
+                throw new NghiepVuException("Phòng đang ngừng hoạt động/bảo trì, chưa thể nhận phòng.");
 
             DateTime nhan = Convert.ToDateTime(r["NgayNhan"]).Date;
             DateTime tra = Convert.ToDateTime(r["NgayTra"]).Date;
@@ -69,7 +73,14 @@ namespace Quản_Lý_Khách_Sạn.BLL
         }
 
         // ---------------- Hủy phòng ----------------
-        public static void HuyPhong(int maDatPhong, string lyDo)
+        public static void KiemTraHoanCoc(decimal tienHoan, decimal tienCoc)
+        {
+            if (tienHoan < 0 || tienHoan > tienCoc || tienHoan != decimal.Truncate(tienHoan))
+                throw new NghiepVuException("Tiền hoàn phải là số nguyên VNĐ, từ 0 đến số cọc đã thu.");
+        }
+
+        public static void HuyPhong(int maDatPhong, string lyDo, decimal tienHoan,
+            decimal tienCocDaXem, string phuongThuc, int? maNhanVien)
         {
             lyDo = (lyDo ?? "").Trim();
             if (lyDo.Length == 0)
@@ -77,18 +88,23 @@ namespace Quản_Lý_Khách_Sạn.BLL
             if (lyDo.Length > 200)
                 throw new NghiepVuException("Lý do hủy quá dài (tối đa 200 ký tự).");
 
-            LayDonDungTrangThai(maDatPhong, DaDat, "hủy phòng");
+            DataRow don = LayDonDungTrangThai(maDatPhong, DaDat, "hủy phòng");
+            decimal coc = Convert.ToDecimal(don["TienCoc"]);
+            if (coc != tienCocDaXem)
+                throw new NghiepVuException("Số cọc của đơn đã thay đổi. Hãy mở lại đơn trước khi hủy.");
+            KiemTraHoanCoc(tienHoan, coc);
+            LeTanDatPhongBLL.KiemTraPhuongThuc(phuongThuc);
+            if (!maNhanVien.HasValue || maNhanVien.Value <= 0)
+                throw new NghiepVuException("Vui lòng đăng nhập lại để ghi nhận nhân viên xử lý tiền cọc.");
 
-            if (!LeTanLuuTruDAL.HuyPhong(maDatPhong, lyDo))
+            if (!LeTanLuuTruDAL.HuyPhong(maDatPhong, lyDo, tienHoan, coc, phuongThuc, maNhanVien.Value))
                 throw new NghiepVuException("Đơn vừa được người khác thay đổi. Vui lòng mở lại danh sách.");
-            // Chính sách hoàn / giữ tiền đặt cọc khi hủy sẽ làm ở chức năng 9
         }
 
         // ---------------- Dùng chung ----------------
         // Lấy đơn và bảo đảm nó đang ở đúng trạng thái cần cho thao tác
         private static DataRow LayDonDungTrangThai(int maDatPhong, string trangThaiCan, string tenViec)
         {
-            if (maDatPhong <= 0)
             if (maDatPhong <= 0)
                 throw new NghiepVuException("Vui lòng chọn một đơn đặt phòng.");
 

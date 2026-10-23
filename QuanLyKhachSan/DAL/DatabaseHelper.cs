@@ -8,7 +8,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
     public class DatabaseHelper
     {
         private static string connectionString = ConfigurationManager.ConnectionStrings["HotelDB"]?.ConnectionString
-    ?? @"Data Source=LAPTOP-8IL5TIHE\SQLEXPRESS;Initial Catalog=QuanLyKhachSan;Integrated Security=True;TrustServerCertificate=True";
+    ?? @"Data Source=.\SQLEXPRESS;Initial Catalog=QuanLyKhachSan;Integrated Security=True;TrustServerCertificate=True";
         public static SqlConnection GetConnection()
         {
             return new SqlConnection(connectionString);
