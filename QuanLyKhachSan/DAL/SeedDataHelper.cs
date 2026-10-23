@@ -126,9 +126,15 @@ namespace Quản_Lý_Khách_Sạn
                             VALUES ('Apple Pay / Contactless', 'Chạm thanh toán Apple Pay, Google Wallet hoặc thẻ chip qua POS', TRUE);
                         END IF;
 
-                        IF NOT EXISTS (SELECT 1 FROM PhuongThucThanhToan WHERE TenPhuongThuc ILIKE '%VietQR%' OR TenPhuongThuc ILIKE '%Chuyển khoản%') THEN
+                        -- Cập nhật nâng cấp VietQR cũ lên chuẩn VNPAY-QR / EMVCo Quốc tế
+                        UPDATE PhuongThucThanhToan 
+                        SET TenPhuongThuc = 'VNPAY-QR (Chuẩn EMVCo Quốc Tế)',
+                            MoTa = 'Cổng thanh toán Quốc tế & Quốc gia VNPAY-QR chuẩn EMVCo (40+ Ngân hàng, Ví điện tử, Visa, Master)'
+                        WHERE TenPhuongThuc ILIKE '%VietQR%';
+
+                        IF NOT EXISTS (SELECT 1 FROM PhuongThucThanhToan WHERE TenPhuongThuc ILIKE '%VNPAY%' OR TenPhuongThuc ILIKE '%EMVCo%') THEN
                             INSERT INTO PhuongThucThanhToan (TenPhuongThuc, MoTa, KichHoat)
-                            VALUES ('Chuyển khoản VietQR', 'Quét mã VietQR Napas 247 chuyển khoản ngân hàng tự động', TRUE);
+                            VALUES ('VNPAY-QR (Chuẩn EMVCo Quốc Tế)', 'Cổng thanh toán Quốc tế & Quốc gia VNPAY-QR chuẩn EMVCo (40+ Ngân hàng, Ví điện tử, Visa, Master)', TRUE);
                         END IF;
 
                         IF NOT EXISTS (SELECT 1 FROM PhuongThucThanhToan WHERE TenPhuongThuc ILIKE '%Tiền mặt%') THEN

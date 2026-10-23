@@ -352,10 +352,10 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 Font = new Font("Segoe UI", 9.5F)
             };
             cboPTTT.Items.AddRange(new object[] {
-                "📱 Chuyển khoản VietQR Ngân hàng (Tự động tạo mã QR Napas)",
+                "⚡ Cổng thanh toán Quốc tế & Quốc gia VNPAY-QR (Chuẩn EMVCo)",
                 "🟣 Ví điện tử MoMo (Quét mã MoMo QR tức thì)",
                 "🍎 Apple Pay / Google Wallet (Chạm máy POS Contactless)",
-                "💳 OnePay / VNPAY (Thẻ ATM nội địa & Quốc tế Visa/Master)",
+                "💳 OnePay / Thẻ POS (Thẻ ATM nội địa & Quốc tế Visa/Master)",
                 "💵 Tiền mặt tại quầy lễ tân (Thanh toán khi làm thủ tục nhận phòng)"
             });
             cboPTTT.SelectedIndex = 0;
@@ -766,9 +766,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
             string maTam = "DP" + DateTime.Now.ToString("yyMMddHHmm");
             string phuongThucChon = cboPTTT.SelectedItem?.ToString() ?? "";
 
-            if (phuongThucChon.Contains("VietQR"))
+            if (phuongThucChon.Contains("VNPAY") || phuongThucChon.Contains("VietQR") || phuongThucChon.Contains("EMVCo"))
             {
-                using var qr = new frmVietQR(maTam, tongSauGiam, $"DAT PHONG {_soPhong} {hoTen}");
+                using var qr = new frmVNPAYQR(maTam, tongSauGiam, $"DAT PHONG {_soPhong} {hoTen}");
                 if (qr.ShowDialog(this) != DialogResult.OK)
                 {
                     return;

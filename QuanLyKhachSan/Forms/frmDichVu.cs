@@ -1106,7 +1106,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             if (ptttChoice == DialogResult.Yes)
             {
-                using var qr = new frmVietQR(maHD, tongTien, $"DICH VU PHONG {tenPhong.Split('•')[0].Trim()}");
+                using var qr = new frmVNPAYQR(maHD, tongTien, $"DICH VU PHONG {tenPhong.Split('•')[0].Trim()}");
                 if (qr.ShowDialog(this) != DialogResult.OK)
                 {
                     return;

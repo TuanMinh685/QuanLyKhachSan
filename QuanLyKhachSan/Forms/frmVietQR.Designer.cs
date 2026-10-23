@@ -63,7 +63,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             this.lblHeaderTitle.Name = "lblHeaderTitle";
             this.lblHeaderTitle.Size = new System.Drawing.Size(250, 25);
             this.lblHeaderTitle.TabIndex = 0;
-            this.lblHeaderTitle.Text = "💳 THANH TOÁN VIETQR 24/7";
+            this.lblHeaderTitle.Text = "⚡ CỔNG THANH TOÁN VNPAY-QR (EMVCo)";
             // 
             // lblHeaderSubtitle
             // 
@@ -74,7 +74,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             this.lblHeaderSubtitle.Name = "lblHeaderSubtitle";
             this.lblHeaderSubtitle.Size = new System.Drawing.Size(306, 15);
             this.lblHeaderSubtitle.TabIndex = 1;
-            this.lblHeaderSubtitle.Text = "Quét mã bằng app ngân hàng bất kỳ để hoàn tất thanh toán";
+            this.lblHeaderSubtitle.Text = "Chuẩn quốc tế EMVCo • Quét bằng 40+ app Ngân hàng, Ví điện tử & Thẻ quốc tế";
             // 
             // pnlContainer
             // 
@@ -301,7 +301,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             this.Name = "frmVietQR";
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Mã Thanh Toán VietQR";
+            this.Text = "Cổng Thanh Toán VNPAY-QR (Chuẩn EMVCo)";
             this.Load += new System.EventHandler(this.frmVietQR_Load);
             this.pnlHeader.ResumeLayout(false);
             this.pnlHeader.PerformLayout();

@@ -51,7 +51,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             lblSubtitleLeft = new Label
             {
-                Text = "Cấu hình cổng thu ngân: Tiền mặt, Chuyển khoản VietQR, Thẻ POS ngân hàng...",
+                Text = "Cấu hình cổng thu ngân: Tiền mặt, VNPAY-QR chuẩn EMVCo, Ví MoMo, Apple Pay, Thẻ POS...",
                 Font = new Font("Segoe UI", 9f, FontStyle.Regular),
                 ForeColor = UITheme.TextMuted,
                 Location = new Point(0, 26),

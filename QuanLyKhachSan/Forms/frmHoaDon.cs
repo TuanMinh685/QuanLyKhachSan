@@ -746,7 +746,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 return;
             }
 
-            using var qr = new frmVietQR(hd.MaHoaDon, hd.TongTien, $"THANH TOAN {hd.MaHoaDon}");
+            using var qr = new frmVNPAYQR(hd.MaHoaDon, hd.TongTien, $"THANH TOAN {hd.MaHoaDon}");
             qr.ShowDialog(this);
         }
 
@@ -814,17 +814,17 @@ namespace Quản_Lý_Khách_Sạn.Forms
             g.DrawLine(pDash, 10, y, w - 10, y);
             y += 8;
 
-            g.DrawString("QUÉT MÃ THANH TOÁN VIETQR", fBold, b, new RectangleF(0, y, w, 18), sfCenter);
+            g.DrawString("QUÉT MÃ THANH TOÁN VNPAY-QR (EMVCo)", fBold, b, new RectangleF(0, y, w, 18), sfCenter);
             y += 18;
 
-            using (Bitmap qrBmp = frmVietQR.TaoAnhQROffline(100))
+            using (Bitmap qrBmp = frmVNPAYQR.TaoAnhQROffline(100))
             {
                 int qrX = (w - 100) / 2;
                 g.DrawImage(qrBmp, qrX, y, 100, 100);
             }
             y += 105;
 
-            g.DrawString("MB Bank: 0901234567 | KHACH SAN LUXURY", fSmall, b, new RectangleF(0, y, w, 16), sfCenter);
+            g.DrawString("VNPAY-QR / EMVCo Merchant: AN NHIEN HOTEL", fSmall, b, new RectangleF(0, y, w, 16), sfCenter);
             y += 16;
             g.DrawString($"Nội dung: THANH TOAN {txtMaHD.Text}", fSmall, b, new RectangleF(0, y, w, 16), sfCenter);
             y += 20;

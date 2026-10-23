@@ -157,11 +157,11 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             btnVietQR = new Button
             {
-                Text = "📱 VietQR",
-                Size = new Size(105, 40),
+                Text = "⚡ VNPAY-QR",
+                Size = new Size(110, 40),
                 Location = new Point(24, 14),
                 FlatStyle = FlatStyle.Flat,
-                BackColor = UITheme.DarkNavy,
+                BackColor = Color.FromArgb(0, 91, 170),
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                 Cursor = Cursors.Hand
@@ -838,6 +838,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 string ten = (model.TenPhuongThuc ?? "").ToLower();
                 if (ten.Contains("momo")) return "MOMO";
                 if (ten.Contains("apple pay") || ten.Contains("contactless")) return "APPLEPAY";
+                if (ten.Contains("vnpay") || ten.Contains("emvco")) return "VNPAY";
                 if (ten.Contains("chuyển khoản") || ten.Contains("qr")) return "CK";
                 if (ten.Contains("thẻ") || ten.Contains("pos")) return "THE";
                 return "TM";
@@ -850,10 +851,10 @@ namespace Quản_Lý_Khách_Sạn.Forms
             decimal canThu = ParseMoney(lblTongTienHienThi.Text);
             if (canThu <= 0)
             {
-                MessageBox.Show("Số tiền cần thu bằng 0 đ, không cần quét mã VietQR.", "Thông báo");
+                MessageBox.Show("Số tiền cần thu bằng 0 đ, không cần mở cổng VNPAY-QR.", "Thông báo");
                 return;
             }
-            using var qr = new frmVietQR(txtMaHD.Text, canThu, $"THANH TOAN {txtMaHD.Text}");
+            using var qr = new frmVNPAYQR(txtMaHD.Text, canThu, $"THANH TOAN {txtMaHD.Text}");
             qr.ShowDialog(this);
         }
 
@@ -988,9 +989,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
             };
 
             string maPT = LayMaPTTT();
-            if (maPT == "CK")
+            if (maPT == "CK" || maPT == "VNPAY")
             {
-                using var qr = new frmVietQR(hd.MaHoaDon, canThu, $"THANH TOAN {hd.MaHoaDon}");
+                using var qr = new frmVNPAYQR(hd.MaHoaDon, canThu, $"THANH TOAN {hd.MaHoaDon}");
                 if (qr.ShowDialog(this) != DialogResult.OK)
                 {
                     return;
