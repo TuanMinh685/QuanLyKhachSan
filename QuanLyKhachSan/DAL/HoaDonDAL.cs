@@ -95,6 +95,20 @@ namespace Quản_Lý_Khách_Sạn.DAL
                 SqlTransaction trans = conn.BeginTransaction();
                 try
                 {
+                    // Dọn dẹp hóa đơn tạm và chi tiết tạm chưa thanh toán (do thêm dịch vụ tạo trước đó)
+                    string sqlCleanOld = @"
+                        DELETE FROM ChiTietHoaDon 
+                        WHERE MaHoaDon IN (SELECT MaHoaDon FROM HoaDon WHERE (MaDatPhong = @MaDP OR MaDatPhong = @MaDPRaw) AND TrangThai = 'Chưa thanh toán');
+                        DELETE FROM HoaDon 
+                        WHERE (MaDatPhong = @MaDP OR MaDatPhong = @MaDPRaw) AND TrangThai = 'Chưa thanh toán';";
+                    using (SqlCommand cmdClean = new SqlCommand(sqlCleanOld, conn, trans))
+                    {
+                        string safeMaDP = maDatPhong ?? hd.MaDatPhong ?? "";
+                        cmdClean.Parameters.AddWithValue("@MaDP", safeMaDP);
+                        cmdClean.Parameters.AddWithValue("@MaDPRaw", safeMaDP.Replace("DP-", ""));
+                        cmdClean.ExecuteNonQuery();
+                    }
+
                     // 1. Thêm mới Hóa Đơn
                     string sqlHoaDon = @"INSERT INTO HoaDon (MaHoaDon, MaDatPhong, NgayLap, NgayThanhToan, TienPhong, TienDichVu, TienGiamGia, TienDatCoc, TongTien, MaPTTT, MaVoucher, TrangThai)
                                          VALUES (@MaHD, @MaDP, @NgayLap, @NgayTT, @TienPhong, @TienDV, @GiamGia, @DatCoc, @TongTien, @PTTT, @MaVoucher, @TrangThai)";

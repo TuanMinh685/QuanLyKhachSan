@@ -70,6 +70,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private Label lblTongTienTieuDe;
         private Label lblTongTienGiaTri;
         private Label lblTongTienSubtext;
+        private Button btnThanhToanNgay;
+        private Button btnThuTienDichVuRieng;
 
         private DataTable dtPhongDangO;
         private DataTable dtChiTietPhong;
@@ -343,15 +345,14 @@ namespace Quản_Lý_Khách_Sạn.Forms
             pnlHeaderRight.Controls.Add(lblTitleRight);
             pnlHeaderRight.Controls.Add(lblPillDangSuDung);
             pnlHeaderRight.Controls.Add(pnlDividerRight);
-            cardRight.Controls.Add(pnlHeaderRight);
 
             // Thẻ Box Tổng tiền dịch vụ dưới đáy Cột Phải
             pnlTongTienBox = new Panel
             {
                 Dock = DockStyle.Bottom,
-                Height = 72,
+                Height = 110,
                 BackColor = Color.FromArgb(255, 247, 237),
-                Padding = new Padding(16, 10, 16, 10)
+                Padding = new Padding(14, 10, 14, 10)
             };
             pnlTongTienBox.Paint += (s, e) =>
             {
@@ -384,17 +385,48 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             lblTongTienSubtext = new Label
             {
-                Text = "Cộng vào hóa đơn phòng khi làm thủ tục trả phòng",
+                Text = "Cộng vào hóa đơn khi trả phòng hoặc thanh toán ngay",
                 Font = new Font("Segoe UI", 8F, FontStyle.Italic),
                 ForeColor = UITheme.TextMuted,
                 Location = new Point(14, 38),
                 AutoSize = true
             };
 
+            btnThanhToanNgay = new Button
+            {
+                Text = "💳 Thanh toán trả phòng",
+                Size = new Size(190, 36),
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                Location = new Point(pnlTongTienBox.Width - 204, 62),
+                BackColor = UITheme.PrimaryOrange,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnThanhToanNgay.FlatAppearance.BorderSize = 0;
+            btnThanhToanNgay.Click += (_, __) => MoThanhToanPhongDangChon();
+
+            btnThuTienDichVuRieng = new Button
+            {
+                Text = "⚡ Thu riêng dịch vụ",
+                Size = new Size(160, 36),
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                Location = new Point(pnlTongTienBox.Width - 374, 62),
+                BackColor = UITheme.DarkNavy,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 8.8F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnThuTienDichVuRieng.FlatAppearance.BorderSize = 0;
+            btnThuTienDichVuRieng.Click += (_, __) => ThuTienDichVuRiengNgay();
+
             pnlTongTienBox.Controls.Add(lblTongTienTieuDe);
             pnlTongTienBox.Controls.Add(lblTongTienGiaTri);
             pnlTongTienBox.Controls.Add(lblTongTienSubtext);
-            cardRight.Controls.Add(pnlTongTienBox);
+            pnlTongTienBox.Controls.Add(btnThanhToanNgay);
+            pnlTongTienBox.Controls.Add(btnThuTienDichVuRieng);
 
             // Container Form Nhập liệu trên cardRight
             Panel pnlInputsRight = new Panel
@@ -531,13 +563,18 @@ namespace Quản_Lý_Khách_Sạn.Forms
             dgvChiTietPhong.CellContentClick += DgvChiTietPhong_CellContentClick;
             pnlListWrap.Controls.Add(dgvChiTietPhong);
 
+            // Dọn dẹp và gắn control vào cardRight theo đúng thứ tự phân lớp WinForms chuẩn
+            cardRight.Controls.Clear();
             cardRight.Controls.Add(pnlListWrap);
+            cardRight.Controls.Add(pnlInputsRight);
+            cardRight.Controls.Add(pnlTongTienBox);
+            cardRight.Controls.Add(pnlHeaderRight);
 
-            // Thứ tự hiển thị control trên cardRight
-            pnlTongTienBox.BringToFront();
-            pnlListWrap.BringToFront();
-            pnlInputsRight.BringToFront();
-            pnlHeaderRight.BringToFront();
+            // Cố định Z-Index để đảm bảo phân lớp không bao giờ bị đè lấn
+            cardRight.Controls.SetChildIndex(pnlHeaderRight, 3); // Dock Top trên cùng
+            cardRight.Controls.SetChildIndex(pnlTongTienBox, 2); // Dock Bottom dưới cùng
+            cardRight.Controls.SetChildIndex(pnlInputsRight, 1); // Dock Top dưới Header
+            cardRight.Controls.SetChildIndex(pnlListWrap, 0);    // Dock Fill ở giữa hiển thị danh sách món đã gọi
 
             cardRight.Resize += (_, __) =>
             {
@@ -548,6 +585,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 txtThoiDiem.Width = w;
                 btnThemVaoPhieu.Width = w;
                 lblTongTienGiaTri.Location = new Point(pnlTongTienBox.Width - 210, 8);
+                btnThanhToanNgay.Location = new Point(pnlTongTienBox.Width - 204, 62);
+                btnThuTienDichVuRieng.Location = new Point(Math.Max(14, pnlTongTienBox.Width - 374), 62);
             };
         }
 
@@ -901,11 +940,13 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
                 lblBadgeSoMuc.Text = $"{soMuc} mục";
                 lblTongTienGiaTri.Text = $"{tongTien:N0} đ";
+                if (btnThuTienDichVuRieng != null) btnThuTienDichVuRieng.Enabled = (tongTien > 0);
             }
             catch
             {
                 lblBadgeSoMuc.Text = "0 mục";
                 lblTongTienGiaTri.Text = "0 đ";
+                if (btnThuTienDichVuRieng != null) btnThuTienDichVuRieng.Enabled = false;
             }
         }
 
@@ -968,6 +1009,87 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 {
                     TaiChiTietDichVuPhongDangChon();
                 }
+            }
+        }
+
+        private void MoThanhToanPhongDangChon()
+        {
+            if (cboPhongDangO.SelectedValue == null || string.IsNullOrEmpty(cboPhongDangO.SelectedValue.ToString()))
+            {
+                MessageBox.Show("Vui lòng chọn phòng đang lưu trú cần thanh toán.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string maDat = cboPhongDangO.SelectedValue.ToString();
+            using var modal = new frmThanhToanModal(maDat);
+            if (modal.ShowDialog(this) == DialogResult.OK)
+            {
+                TaiDanhSachPhongDangO();
+                TaiDanhSachDichVu();
+            }
+        }
+
+        private void ThuTienDichVuRiengNgay()
+        {
+            if (cboPhongDangO.SelectedValue == null || string.IsNullOrEmpty(cboPhongDangO.SelectedValue.ToString()))
+            {
+                MessageBox.Show("Vui lòng chọn phòng cần thanh toán dịch vụ.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string maDat = cboPhongDangO.SelectedValue.ToString();
+            if (dtChiTietPhong == null || dtChiTietPhong.Rows.Count == 0)
+            {
+                MessageBox.Show("Phòng này chưa có dịch vụ nào cần thanh toán.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            decimal tongTien = 0;
+            foreach (DataRow r in dtChiTietPhong.Rows)
+            {
+                tongTien += Convert.ToDecimal(r["ThanhTien"]);
+            }
+
+            if (tongTien <= 0)
+            {
+                MessageBox.Show("Tổng tiền dịch vụ bằng 0 đ.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            string tenPhong = cboPhongDangO.Text;
+            string msg = $"Khách tại [{tenPhong}] muốn thanh toán riêng dịch vụ phát sinh:\n\n" +
+                         $"• Số lượng dịch vụ: {dtChiTietPhong.Rows.Count} mục\n" +
+                         $"• Tổng tiền cần thu: {tongTien:N0} đ\n\n" +
+                         $"Bạn có muốn tiến hành thu tiền ngay cho các dịch vụ này không?";
+
+            if (MessageBox.Show(msg, "Xác nhận thu tiền dịch vụ", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+                return;
+
+            DialogResult ptttChoice = MessageBox.Show(
+                "Chọn phương thức thanh toán:\n\n[Yes] Chuyển khoản VietQR\n[No] Tiền mặt (TM)",
+                "Hình thức thanh toán",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question);
+
+            if (ptttChoice == DialogResult.Cancel) return;
+
+            string maHD = "HDDV" + DateTime.Now.ToString("yyMMddHHmmss");
+
+            if (ptttChoice == DialogResult.Yes)
+            {
+                using var qr = new frmVietQR(maHD, tongTien, $"DICH VU PHONG {tenPhong.Split('•')[0].Trim()}");
+                if (qr.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+            }
+
+            bool ok = chiTietDAL.ThanhToanDichVuRieng(maHD, maDat, tongTien, ptttChoice == DialogResult.Yes ? "CK" : "TM");
+            if (ok)
+            {
+                MessageBox.Show($"Đã thu tiền dịch vụ thành công cho [{tenPhong}]!\nSố tiền đã thu: {tongTien:N0} đ",
+                    "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                TaiChiTietDichVuPhongDangChon();
             }
         }
 

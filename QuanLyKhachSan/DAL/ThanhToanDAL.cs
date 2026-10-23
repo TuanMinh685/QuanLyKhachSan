@@ -36,9 +36,12 @@ namespace Quản_Lý_Khách_Sạn.DAL
                     FROM DatPhong dp
                     JOIN KhachHang kh ON dp.MaKH = kh.MaKH
                     JOIN Phong p ON dp.MaPhong = p.MaPhong
-                    LEFT JOIN HoaDon hd ON hd.MaDatPhong IN (CAST(dp.MaDatPhong AS TEXT), dp.MaDat)
-                    WHERE hd.MaHoaDon IS NULL
-                      AND dp.TrangThai IN ('Đang ở', 'Đã trả')
+                    WHERE dp.TrangThai IN ('Đang ở', 'Đã trả')
+                      AND NOT EXISTS (
+                          SELECT 1 FROM HoaDon hd 
+                          WHERE (hd.MaDatPhong = CAST(dp.MaDatPhong AS TEXT) OR hd.MaDatPhong = dp.MaDat)
+                            AND hd.TrangThai = 'Đã thanh toán'
+                      )
                     ORDER BY dp.NgayNhan DESC, dp.MaDatPhong DESC";
                 using (var cmd = new SqlCommand(sql, conn))
                 {

@@ -74,7 +74,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private Button btnXacNhan;
         private Button btnHuy;
 
-        public frmThanhToanModal()
+        public frmThanhToanModal(string maDatPhongMacDinh = null)
         {
             InitializeComponentCustom();
             UITheme.ApplyTheme(this);
@@ -82,6 +82,10 @@ namespace Quản_Lý_Khách_Sạn.Forms
             TaiDanhSachPhuongThucTT();
             TaiDanhSachDichVu();
             TaiDanhSachDatPhong();
+            if (!string.IsNullOrEmpty(maDatPhongMacDinh))
+            {
+                ChonDatPhongTheoMa(maDatPhongMacDinh);
+            }
             TinhTongTienTuDong();
         }
 
@@ -571,6 +575,24 @@ namespace Quản_Lý_Khách_Sạn.Forms
             catch { }
         }
 
+        public void ChonDatPhongTheoMa(string maDP)
+        {
+            if (string.IsNullOrWhiteSpace(maDP)) return;
+            string raw = maDP.Replace("DP-", "").Trim();
+            if (cboDatPhong.DataSource is List<ThongTinDatPhongThanhToan> ds)
+            {
+                var found = ds.FirstOrDefault(d =>
+                    d.MaDatPhong.ToString() == maDP ||
+                    d.MaDatPhong.ToString() == raw ||
+                    (!string.IsNullOrEmpty(d.MaDat) && d.MaDat.Equals(maDP, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(d.MaDat) && d.MaDat.Equals(raw, StringComparison.OrdinalIgnoreCase)));
+                if (found != null)
+                {
+                    cboDatPhong.SelectedItem = found;
+                }
+            }
+        }
+
         private void cboDatPhong_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (cboDatPhong.SelectedItem is ThongTinDatPhongThanhToan dp)
@@ -578,11 +600,40 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 btnXacNhan.Enabled = true;
                 txtTienPhong.Text = dp.TienPhong.ToString("N0");
                 txtTienCoc.Text = dp.TienCoc.ToString("N0");
+
+                // Tự động tải tất cả dịch vụ đã phát sinh của phòng này
+                dtChiTietTam.Clear();
+                try
+                {
+                    var dtDaGhi = chiTietDAL.LayChiTietTheoDatPhong(dp.MaDatPhong.ToString());
+                    if (dtDaGhi != null && dtDaGhi.Rows.Count > 0)
+                    {
+                        foreach (DataRow r in dtDaGhi.Rows)
+                        {
+                            string maDV = r["MaDichVu"].ToString();
+                            string tenDV = r["TenDichVu"].ToString();
+                            int sl = Convert.ToInt32(r["SoLuong"]);
+                            decimal dg = Convert.ToDecimal(r["DonGia"]);
+                            decimal tt = Convert.ToDecimal(r["ThanhTien"]);
+                            dtChiTietTam.Rows.Add(maDV, tenDV, sl, dg, tt);
+                        }
+                    }
+                }
+                catch { }
+
+                decimal tongDV = 0;
+                foreach (DataRow r in dtChiTietTam.Rows)
+                {
+                    tongDV += Convert.ToDecimal(r["Thành Tiền"]);
+                }
+                txtTienDV.Text = tongDV.ToString("N0");
             }
             else
             {
                 txtTienPhong.Text = "0";
                 txtTienCoc.Text = "0";
+                txtTienDV.Text = "0";
+                dtChiTietTam.Clear();
                 btnXacNhan.Enabled = false;
             }
             TinhTongTienTuDong();
