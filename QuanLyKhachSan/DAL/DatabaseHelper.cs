@@ -21,6 +21,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
                     ALTER TABLE Phong ADD COLUMN IF NOT EXISTS GhiChu TEXT;
                     ALTER TABLE ChiTietHoaDon ALTER COLUMN SoLuong TYPE NUMERIC(10,2);
                 ");
+                SeedDataHelper.KiemTraVaNapDuLieuMau();
             }
             catch { }
         }
