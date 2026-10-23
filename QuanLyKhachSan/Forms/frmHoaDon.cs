@@ -128,9 +128,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnInHoaDon.BringToFront();
 
             btnVietQR.Parent = cardLeft;
-            btnVietQR.Text = "📱 Xem VietQR";
-            btnVietQR.Size = new Size(125, 40);
-            btnVietQR.Location = new Point(cardLeft.ClientSize.Width - 501, 108);
+            btnVietQR.Text = "🔍 Xem chi tiết";
+            btnVietQR.Size = new Size(130, 40);
+            btnVietQR.Location = new Point(cardLeft.ClientSize.Width - 506, 108);
             btnVietQR.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnVietQR.BackColor = UITheme.DarkNavy;
             btnVietQR.ForeColor = Color.White;
@@ -166,6 +166,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnApDungVoucher.Text = "✓ Áp dụng";
 
             dgvHoaDon.CellFormatting += DgvHoaDon_CellFormatting;
+            dgvHoaDon.CellDoubleClick += (s, e) => { if (e.RowIndex >= 0) MoChiTietHoaDonDangChon(); };
         }
 
         private Label TaoTheThongKe(string text, Color bg, Color fg)
@@ -740,14 +741,19 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void btnVietQR_Click(object sender, EventArgs e)
         {
+            MoChiTietHoaDonDangChon();
+        }
+
+        private void MoChiTietHoaDonDangChon()
+        {
             if (dgvHoaDon.CurrentRow == null || !(dgvHoaDon.CurrentRow.DataBoundItem is HoaDon hd))
             {
-                MessageBox.Show("Vui lòng chọn một dòng hóa đơn trong danh sách bên dưới để xem mã VietQR.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Vui lòng chọn một dòng hóa đơn trong danh sách để xem chi tiết.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            using var qr = new frmVNPAYQR(hd.MaHoaDon, hd.TongTien, $"THANH TOAN {hd.MaHoaDon}");
-            qr.ShowDialog(this);
+            using var modal = new frmChiTietHoaDonModal(hd.MaHoaDon);
+            modal.ShowDialog(this);
         }
 
         private void printDoc_PrintPage(object sender, PrintPageEventArgs e)

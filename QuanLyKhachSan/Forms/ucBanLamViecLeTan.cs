@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
@@ -125,12 +125,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
             // 3. MAIN SECTION: 2 COLUMNS (Left 66%, Right 34%)
             tblMainColumns = new TableLayoutPanel
             {
-                Dock = DockStyle.Top,
-                Height = 390,
+                Dock = DockStyle.Fill,
                 ColumnCount = 2,
                 RowCount = 1,
                 BackColor = Color.Transparent,
-                Margin = new Padding(0, 14, 0, 14)
+                Margin = new Padding(0, 10, 0, 10),
+                Padding = new Padding(0, 6, 0, 6)
             };
             tblMainColumns.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 66F));
             tblMainColumns.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 34F));
@@ -240,7 +240,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 AllowUserToResizeRows = false,
                 ReadOnly = true,
                 SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                MultiSelect = false
+                MultiSelect = false,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
             };
             UITheme.FormatDataGridView(dgvActivities);
             dgvActivities.RowTemplate.Height = 38;
@@ -249,6 +250,10 @@ namespace Quản_Lý_Khách_Sạn.Forms
             cardActivities.Controls.Add(dgvActivities);
             cardActivities.Controls.Add(flowActivityButtons);
             cardActivities.Controls.Add(pnlActHeader);
+
+            pnlActHeader.SendToBack();
+            flowActivityButtons.SendToBack();
+            dgvActivities.BringToFront();
 
             // ==========================================
             // RIGHT CARD: CẦN XỬ LÝ (ALERTS)
@@ -363,8 +368,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnUpdateNote = new Button
             {
                 Anchor = AnchorStyles.Top | AnchorStyles.Right,
-                Text = "✏️ Cập nhật ghi chú",
-                Size = new Size(150, 36),
+                Text = "✏️ Cập nhật",
+                Size = new Size(120, 36),
+                Location = new Point(cardShiftNote.Width - 145, 20),
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.White,
                 ForeColor = UITheme.DarkNavy,
@@ -380,19 +386,20 @@ namespace Quản_Lý_Khách_Sạn.Forms
             cardShiftNote.Controls.Add(btnUpdateNote);
             cardShiftNote.Resize += (_, __) =>
             {
-                btnUpdateNote.Location = new Point(cardShiftNote.Width - 170, 24);
+                btnUpdateNote.Location = new Point(cardShiftNote.Width - 145, 20);
             };
 
-            // Gắn toàn bộ vào UserControl theo thứ tự docking chuẩn
-            Controls.Add(cardShiftNote);
+            // Gắn toàn bộ vào UserControl theo thứ tự docking chuẩn:
+            // pnlHeader (Top) -> tblQuickActions (Top) -> cardShiftNote (Top) -> tblMainColumns (Fill)
             Controls.Add(tblMainColumns);
+            Controls.Add(cardShiftNote);
             Controls.Add(tblQuickActions);
             Controls.Add(pnlHeader);
 
-            pnlHeader.SendToBack();
-            tblQuickActions.SendToBack();
-            tblMainColumns.SendToBack();
             cardShiftNote.SendToBack();
+            tblQuickActions.SendToBack();
+            pnlHeader.SendToBack();
+            tblMainColumns.BringToFront();
         }
 
         private Panel TaoTheQuickAction(string tieuDe, string phimTat, string iconText, bool highlighted, Action onClick = null)
