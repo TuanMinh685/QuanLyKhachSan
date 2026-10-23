@@ -15,6 +15,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private Button btnBanLamViec;
         private Button btnTaiKhoan;
         private Button btnPhuongThucTT;
+        private Button btnKhoaManHinh;
+        private Button btnDoiMK;
 
         public frmTrangChu()
         {
@@ -91,7 +93,78 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 }
             }
 
+            // Thiết lập nút bảo mật trên Header (Khóa màn hình & Đổi MK)
+            KeyPreview = true;
+            KeyDown += frmTrangChu_KeyDown;
+
+            btnKhoaManHinh = new Button
+            {
+                Name = "btnKhoaManHinh",
+                Text = "🔒 Khóa máy (Ctrl+L)",
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                Size = new Size(160, 36),
+                Location = new Point(pnlHeader.Width - 175, 19),
+                BackColor = Color.FromArgb(241, 245, 249),
+                ForeColor = Color.FromArgb(30, 41, 59),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnKhoaManHinh.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnKhoaManHinh.MouseEnter += (s, e) => btnKhoaManHinh.BackColor = Color.FromArgb(226, 232, 240);
+            btnKhoaManHinh.MouseLeave += (s, e) => btnKhoaManHinh.BackColor = Color.FromArgb(241, 245, 249);
+            btnKhoaManHinh.Click += (s, e) => MoKhoaManHinh();
+
+            btnDoiMK = new Button
+            {
+                Name = "btnDoiMK",
+                Text = "🔑 Đổi MK",
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                Size = new Size(100, 36),
+                Location = new Point(pnlHeader.Width - 285, 19),
+                BackColor = Color.FromArgb(241, 245, 249),
+                ForeColor = Color.FromArgb(30, 41, 59),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnDoiMK.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnDoiMK.MouseEnter += (s, e) => btnDoiMK.BackColor = Color.FromArgb(226, 232, 240);
+            btnDoiMK.MouseLeave += (s, e) => btnDoiMK.BackColor = Color.FromArgb(241, 245, 249);
+            btnDoiMK.Click += (s, e) => MoDoiMatKhau();
+
+            lblUserGreeting.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblUserGreeting.Location = new Point(pnlHeader.Width - 690, 22);
+            lblUserGreeting.Size = new Size(395, 30);
+
+            pnlHeader.Controls.Add(btnKhoaManHinh);
+            pnlHeader.Controls.Add(btnDoiMK);
+
             ApDungPhanQuyen();
+        }
+
+        private void frmTrangChu_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.L)
+            {
+                e.SuppressKeyPress = true;
+                MoKhoaManHinh();
+            }
+        }
+
+        private void MoKhoaManHinh()
+        {
+            using var f = new frmKhoaManHinhModal();
+            if (f.ShowDialog(this) == DialogResult.Abort)
+            {
+                Close();
+            }
+        }
+
+        private void MoDoiMatKhau()
+        {
+            using var f = new frmDoiMatKhauModal();
+            f.ShowDialog(this);
         }
 
         private void ApDungPhanQuyen()

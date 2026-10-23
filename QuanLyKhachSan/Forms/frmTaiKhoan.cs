@@ -3,6 +3,7 @@ using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
 using Quản_Lý_Khách_Sạn.DAL;
+using Quản_Lý_Khách_Sạn.BLL;
 using Quản_Lý_Khách_Sạn;
 
 namespace Quản_Lý_Khách_Sạn.Forms
@@ -436,6 +437,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 catch { }
 
                 tx.Commit();
+                BaoMatHelper.GhiNhatKy(Session.TenDangNhap, "XOA_TAI_KHOAN", $"Xóa tài khoản [{user}] của nhân viên [{hoTen}] (Mã TK: {idTK})");
                 MessageBox.Show("Đã xóa tài khoản nhân sự thành công.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoadTaiKhoan();
             }
