@@ -198,18 +198,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
             {
                 manHinhBanLamViec = new ucBanLamViecLeTan();
                 manHinhBanLamViec.YeuCauDatPhong += (_, __) => MoDatPhong();
-                manHinhBanLamViec.YeuCauNhanPhong += (_, __) =>
-                {
-                    using var f = new frmChonDatPhong(ThaoTacDatPhong.NhanPhong);
-                    f.ShowDialog(this);
-                    manHinhBanLamViec.TaiDuLieuHoatDong();
-                };
-                manHinhBanLamViec.YeuCauTraPhong += (_, __) =>
-                {
-                    using var f = new frmChonDatPhong(ThaoTacDatPhong.TraPhong);
-                    f.ShowDialog(this);
-                    manHinhBanLamViec.TaiDuLieuHoatDong();
-                };
+                manHinhBanLamViec.YeuCauNhanPhong += (_, __) => ThucHienNhanPhong();
+                manHinhBanLamViec.YeuCauTraPhong += (_, __) => ThucHienTraPhong();
                 manHinhBanLamViec.YeuCauTraCuuKhach += (_, __) => MoKhachHang();
                 manHinhBanLamViec.YeuCauQuanLyPhong += (_, __) => MoFormCon(new frmDanhSachPhong(), btnPhong, "SƠ ĐỒ & QUẢN LÝ PHÒNG");
             }
@@ -235,6 +225,64 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 manHinhKhachHang = new frmKhachHang();
 
             HienThiManHinh(manHinhKhachHang, btnKhachHang, "HỒ SƠ KHÁCH HÀNG");
+        }
+
+        private void ThucHienNhanPhong()
+        {
+            using var f = new frmChonDatPhong(ThaoTacDatPhong.NhanPhong);
+            if (f.ShowDialog(this) == DialogResult.OK)
+            {
+                string hoi = $"Xác nhận NHẬN PHÒNG (Check-in)?\n\n• Mã đặt: {f.MaDat}\n• Khách hàng: {f.TenKhach}\n• Phòng: {f.SoPhong}";
+                if (MessageBox.Show(hoi, "Xác nhận nhận phòng", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    try
+                    {
+                        LeTanLuuTruBLL.NhanPhong(f.MaDatPhong);
+                        MessageBox.Show($"🎉 Nhận phòng thành công!\nKhách hàng {f.TenKhach} đã nhận phòng {f.SoPhong}.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        manHinhBanLamViec?.TaiDuLieuHoatDong();
+                    }
+                    catch (NghiepVuException ex)
+                    {
+                        MessageBox.Show(ex.Message, "Lưu ý nghiệp vụ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Lỗi khi nhận phòng: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void ThucHienTraPhong()
+        {
+            using var f = new frmChonDatPhong(ThaoTacDatPhong.TraPhong);
+            if (f.ShowDialog(this) == DialogResult.OK)
+            {
+                // Mở cửa sổ thanh toán & lập hóa đơn trả phòng
+                using var fTT = new frmThanhToanModal(f.MaDat);
+                if (fTT.ShowDialog(this) == DialogResult.OK)
+                {
+                    manHinhBanLamViec?.TaiDuLieuHoatDong();
+                }
+                else
+                {
+                    // Nếu chưa thanh toán ngay qua hóa đơn, hỏi xem có muốn ghi nhận trả phòng trước không
+                    var hoi = MessageBox.Show($"Bạn chưa hoàn tất thanh toán hóa đơn.\nBạn có muốn ghi nhận TRẢ PHÒNG (Check-out) cho phòng {f.SoPhong} ({f.TenKhach}) ngay không?", "Xác nhận trả phòng", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (hoi == DialogResult.Yes)
+                    {
+                        try
+                        {
+                            LeTanLuuTruBLL.TraPhong(f.MaDatPhong);
+                            MessageBox.Show($"Đã ghi nhận trả phòng {f.SoPhong}.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            manHinhBanLamViec?.TaiDuLieuHoatDong();
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Lỗi trả phòng: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+            }
         }
 
         // Các form khác vẫn gọi qua hàm cũ của trang chủ.
