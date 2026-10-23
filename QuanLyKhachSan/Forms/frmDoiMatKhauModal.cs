@@ -6,18 +6,11 @@ using Quản_Lý_Khách_Sạn.DAL;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
-    public class frmDoiMatKhauModal : Form
+    public partial class frmDoiMatKhauModal : Form
     {
-        private TextBox txtMatKhauCu;
-        private TextBox txtMatKhauMoi;
-        private TextBox txtXacNhanMoi;
-        private Label lblDoManh;
-        private ProgressBar prgDoManh;
-        private Button btnLuu;
-        private Button btnHuy;
-
         public frmDoiMatKhauModal()
         {
+            InitializeComponent();
             InitializeComponentCustom();
             UITheme.ApplyTheme(this);
         }

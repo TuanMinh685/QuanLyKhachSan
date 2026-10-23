@@ -12,7 +12,7 @@ using Quản_Lý_Khách_Sạn.Models;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
-    public class frmThanhToanModal : Form
+    public partial class frmThanhToanModal : Form
     {
         private HoaDonBLL hoaDonBLL = new HoaDonBLL();
         private ChiTietHoaDonDAL chiTietDAL = new ChiTietHoaDonDAL();
@@ -24,60 +24,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private DataTable dtChiTietTam = new DataTable();
         private int? maVoucherDaApDung = null;
 
-        // UI Controls
-        private Panel pnlHeader;
-        private Label lblTitle;
-        private Label lblSubtitle;
-        private Panel pnlDivider;
-
-        private Label lblMaHD;
-        private TextBox txtMaHD;
-
-        private Label lblDatPhong;
-        private ComboBox cboDatPhong;
-
-        private Label lblTienPhong;
-        private TextBox txtTienPhong;
-
-        private Label lblTienCoc;
-        private TextBox txtTienCoc;
-
-        // Dịch vụ
-        private Label lblDichVuSection;
-        private ComboBox cboDichVu;
-        private NumericUpDown nudSoLuongDV;
-        private Button btnThemDV;
-        private DataGridView dgvChiTietDV;
-        private Label lblTienDV;
-        private TextBox txtTienDV;
-
-        // Voucher
-        private Label lblVoucherSection;
-        private TextBox txtVoucherCode;
-        private Button btnGoiYVoucher;
-        private Button btnApDungVoucher;
-        private ContextMenuStrip cmsVoucher;
-        private TextBox txtTienGiamGia;
-
-        // PTTT & Tổng tiền
-        private Label lblPTTT;
-        private ComboBox cboPTTT;
-
-        private Panel pnlTongTienBox;
-        private Label lblTongTienTieuDe;
-        private Label lblTongTienHienThi;
-
-        // Footer buttons
-        private Panel pnlFooter;
-        private Button btnVietQR;
-        private Button btnMoMo;
-        private Button btnApplePay;
-        private Button btnInHoaDon;
-        private Button btnXacNhan;
-        private Button btnHuy;
-
         public frmThanhToanModal(string maDatPhongMacDinh = null)
         {
+            InitializeComponent();
             InitializeComponentCustom();
             UITheme.ApplyTheme(this);
             KhoiTaoBangChiTietTam();

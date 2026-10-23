@@ -8,25 +8,8 @@ using Quản_Lý_Khách_Sạn;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
-    public class frmTaiKhoanModal : Form
+    public partial class frmTaiKhoanModal : Form
     {
-        private Panel pnlHeader;
-        private Label lblTitle;
-        private Label lblSubtitle;
-        private Panel pnlDivider;
-
-        private TextBox txtHoTen;
-        private ComboBox cboChucVu;
-        private TextBox txtSDT;
-        private TextBox txtTenDangNhap;
-        private TextBox txtMatKhau;
-        private Label lblHintMatKhau;
-        private ComboBox cboVaiTro;
-
-        private Panel pnlFooter;
-        private Button btnLuu;
-        private Button btnHuy;
-
         private int maTaiKhoan = 0;
         private int maNhanVien = 0;
 
@@ -35,6 +18,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             maTaiKhoan = idTK;
             maNhanVien = idNV;
 
+            InitializeComponent();
             InitializeComponentCustom();
             UITheme.ApplyTheme(this);
 

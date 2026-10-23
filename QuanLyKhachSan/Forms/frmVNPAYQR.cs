@@ -9,34 +9,11 @@ using System.Windows.Forms;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
-    public class frmVNPAYQR : Form
+    public partial class frmVNPAYQR : Form
     {
         private readonly string _maHoaDon;
         private readonly decimal _soTien;
         private readonly string _noiDung;
-
-        private Panel pnlHeader;
-        private Label lblHeaderTitle;
-        private Label lblHeaderSubtitle;
-        private Panel pnlBadgeBar;
-
-        private Panel pnlContainer;
-        private PictureBox picQR;
-        private Label lblStatus;
-        private Panel pnlInfo;
-
-        private Label lblMerchantTitle;
-        private Label lblMerchantVal;
-        private Label lblStandardTitle;
-        private Label lblStandardVal;
-        private Label lblTienTitle;
-        private Label lblTienVal;
-        private Label lblMemoTitle;
-        private Label lblMemoVal;
-
-        private Panel pnlButtons;
-        private Button btnXacNhan;
-        private Button btnDong;
 
         private static readonly HttpClient httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(6) };
 
@@ -46,28 +23,17 @@ namespace Quản_Lý_Khách_Sạn.Forms
             _soTien = soTien;
             _noiDung = string.IsNullOrWhiteSpace(noiDung) ? $"THANH TOAN {_maHoaDon}" : noiDung;
 
-            InitializeComponentCustom();
+            InitializeComponent();
+            SetupCustomUI();
         }
 
-        private void InitializeComponentCustom()
+        private void SetupCustomUI()
         {
-            Text = "Cổng thanh toán VNPAY-QR (Chuẩn quốc tế EMVCo)";
-            Size = new Size(520, 720);
-            StartPosition = FormStartPosition.CenterParent;
-            FormBorderStyle = FormBorderStyle.FixedDialog;
-            MaximizeBox = false;
-            MinimizeBox = false;
-            BackColor = Color.FromArgb(248, 250, 252);
-            Font = new Font("Segoe UI", 9.5F);
-
-            // 1. Header VNPAY-QR (Xanh VNPAY #005BAA kết hợp Đỏ #ED1C24)
-            pnlHeader = new Panel
-            {
-                Dock = DockStyle.Top,
-                Height = 88,
-                BackColor = Color.FromArgb(0, 91, 170),
-                Padding = new Padding(24, 16, 24, 12)
-            };
+            // 1. Header VNPAY-QR
+            pnlHeader.Dock = DockStyle.Top;
+            pnlHeader.Height = 88;
+            pnlHeader.BackColor = Color.FromArgb(0, 91, 170);
+            pnlHeader.Padding = new Padding(24, 16, 24, 12);
             pnlHeader.Paint += (s, e) =>
             {
                 using var brush = new LinearGradientBrush(pnlHeader.ClientRectangle,
@@ -77,35 +43,23 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 e.Graphics.FillRectangle(brush, pnlHeader.ClientRectangle);
             };
 
-            lblHeaderTitle = new Label
-            {
-                Text = "⚡ CỔNG THANH TOÁN QUỐC GIA & QUỐC TẾ VNPAY-QR",
-                Font = new Font("Segoe UI", 12.5F, FontStyle.Bold),
-                ForeColor = Color.White,
-                Location = new Point(20, 14),
-                AutoSize = true
-            };
-            pnlHeader.Controls.Add(lblHeaderTitle);
+            lblHeaderTitle.Text = "⚡ CỔNG THANH TOÁN QUỐC GIA & QUỐC TẾ VNPAY-QR";
+            lblHeaderTitle.Font = new Font("Segoe UI", 12.5F, FontStyle.Bold);
+            lblHeaderTitle.ForeColor = Color.White;
+            lblHeaderTitle.Location = new Point(20, 14);
+            lblHeaderTitle.AutoSize = true;
 
-            lblHeaderSubtitle = new Label
-            {
-                Text = "Chuẩn quốc tế EMVCo • Hỗ trợ 40+ Ngân hàng, Ví điện tử, Visa, Mastercard, Apple Pay",
-                Font = new Font("Segoe UI", 8.5F),
-                ForeColor = Color.FromArgb(219, 234, 254),
-                Location = new Point(22, 44),
-                AutoSize = true
-            };
-            pnlHeader.Controls.Add(lblHeaderSubtitle);
-            Controls.Add(pnlHeader);
+            lblHeaderSubtitle.Text = "Chuẩn quốc tế EMVCo • Hỗ trợ 40+ Ngân hàng, Ví điện tử, Visa, Mastercard, Apple Pay";
+            lblHeaderSubtitle.Font = new Font("Segoe UI", 8.5F);
+            lblHeaderSubtitle.ForeColor = Color.FromArgb(219, 234, 254);
+            lblHeaderSubtitle.Location = new Point(22, 44);
+            lblHeaderSubtitle.AutoSize = true;
 
             // Dải biểu tượng đối tác ngân hàng & ví
-            pnlBadgeBar = new Panel
-            {
-                Dock = DockStyle.Top,
-                Height = 32,
-                BackColor = Color.FromArgb(239, 246, 255),
-                Padding = new Padding(20, 6, 20, 6)
-            };
+            pnlBadgeBar.Dock = DockStyle.Top;
+            pnlBadgeBar.Height = 32;
+            pnlBadgeBar.BackColor = Color.FromArgb(239, 246, 255);
+            pnlBadgeBar.Padding = new Padding(20, 6, 20, 6);
             pnlBadgeBar.Paint += (s, e) =>
             {
                 using var pen = new Pen(Color.FromArgb(191, 219, 254), 1f);
@@ -120,48 +74,37 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 Dock = DockStyle.Fill
             };
             pnlBadgeBar.Controls.Add(lblBadges);
-            Controls.Add(pnlBadgeBar);
 
             // 2. Footer Buttons
-            pnlButtons = new Panel
-            {
-                Dock = DockStyle.Bottom,
-                Height = 72,
-                BackColor = Color.White,
-                Padding = new Padding(24, 14, 24, 14)
-            };
+            pnlButtons.Dock = DockStyle.Bottom;
+            pnlButtons.Height = 72;
+            pnlButtons.BackColor = Color.White;
+            pnlButtons.Padding = new Padding(24, 14, 24, 14);
             pnlButtons.Paint += (s, e) =>
             {
                 using var pen = new Pen(Color.FromArgb(226, 232, 240), 1f);
                 e.Graphics.DrawLine(pen, 0, 0, pnlButtons.Width, 0);
             };
 
-            btnDong = new Button
-            {
-                Text = "✕ Đóng",
-                Location = new Point(24, 14),
-                Size = new Size(110, 44),
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.FromArgb(241, 245, 249),
-                ForeColor = Color.FromArgb(71, 85, 105),
-                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
-                Cursor = Cursors.Hand
-            };
+            btnDong.Text = "✕ Đóng";
+            btnDong.Location = new Point(24, 14);
+            btnDong.Size = new Size(110, 44);
+            btnDong.FlatStyle = FlatStyle.Flat;
+            btnDong.BackColor = Color.FromArgb(241, 245, 249);
+            btnDong.ForeColor = Color.FromArgb(71, 85, 105);
+            btnDong.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnDong.Cursor = Cursors.Hand;
             btnDong.FlatAppearance.BorderSize = 0;
             btnDong.Click += (s, e) => { DialogResult = DialogResult.Cancel; Close(); };
-            pnlButtons.Controls.Add(btnDong);
 
-            btnXacNhan = new Button
-            {
-                Text = "✓ ĐÃ NHẬN THANH TOÁN VNPAY-QR",
-                Location = new Point(144, 14),
-                Size = new Size(330, 44),
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.FromArgb(0, 91, 170),
-                ForeColor = Color.White,
-                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
-                Cursor = Cursors.Hand
-            };
+            btnXacNhan.Text = "✓ ĐÃ NHẬN THANH TOÁN VNPAY-QR";
+            btnXacNhan.Location = new Point(144, 14);
+            btnXacNhan.Size = new Size(330, 44);
+            btnXacNhan.FlatStyle = FlatStyle.Flat;
+            btnXacNhan.BackColor = Color.FromArgb(0, 91, 170);
+            btnXacNhan.ForeColor = Color.White;
+            btnXacNhan.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnXacNhan.Cursor = Cursors.Hand;
             btnXacNhan.FlatAppearance.BorderSize = 0;
             btnXacNhan.Click += (s, e) =>
             {
@@ -173,91 +116,95 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 DialogResult = DialogResult.OK;
                 Close();
             };
-            pnlButtons.Controls.Add(btnXacNhan);
-            Controls.Add(pnlButtons);
 
             // 3. Container
-            pnlContainer = new Panel
-            {
-                Dock = DockStyle.Fill,
-                BackColor = Color.FromArgb(248, 250, 252),
-                Padding = new Padding(24, 14, 24, 10)
-            };
-            Controls.Add(pnlContainer);
+            pnlContainer.Dock = DockStyle.Fill;
+            pnlContainer.BackColor = Color.FromArgb(248, 250, 252);
+            pnlContainer.Padding = new Padding(24, 14, 24, 10);
 
             // Khung ảnh QR
-            picQR = new PictureBox
-            {
-                Size = new Size(240, 240),
-                Location = new Point((520 - 240) / 2 - 10, 14),
-                SizeMode = PictureBoxSizeMode.Zoom,
-                BackColor = Color.White,
-                Cursor = Cursors.Hand
-            };
+            picQR.Size = new Size(240, 240);
+            picQR.Location = new Point((520 - 240) / 2 - 10, 14);
+            picQR.SizeMode = PictureBoxSizeMode.Zoom;
+            picQR.BackColor = Color.White;
+            picQR.Cursor = Cursors.Hand;
             picQR.Paint += (s, e) =>
             {
                 using var pen = new Pen(Color.FromArgb(0, 91, 170), 2f);
                 e.Graphics.DrawRectangle(pen, 0, 0, picQR.Width - 1, picQR.Height - 1);
             };
-            pnlContainer.Controls.Add(picQR);
 
-            lblStatus = new Label
-            {
-                Text = "Đang khởi tạo mã thanh toán EMVCo chuẩn quốc tế...",
-                Font = new Font("Segoe UI", 9F, FontStyle.Italic),
-                ForeColor = Color.FromArgb(100, 116, 139),
-                TextAlign = ContentAlignment.MiddleCenter,
-                Location = new Point(20, 260),
-                Size = new Size(460, 20)
-            };
-            pnlContainer.Controls.Add(lblStatus);
+            lblStatus.Text = "Đang khởi tạo mã thanh toán EMVCo chuẩn quốc tế...";
+            lblStatus.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
+            lblStatus.ForeColor = Color.FromArgb(100, 116, 139);
+            lblStatus.TextAlign = ContentAlignment.MiddleCenter;
+            lblStatus.Location = new Point(20, 260);
+            lblStatus.Size = new Size(460, 20);
 
             // Bảng thông tin
-            pnlInfo = new Panel
-            {
-                Location = new Point(24, 286),
-                Size = new Size(456, 190),
-                BackColor = Color.White
-            };
+            pnlInfo.Location = new Point(24, 286);
+            pnlInfo.Size = new Size(456, 190);
+            pnlInfo.BackColor = Color.White;
             pnlInfo.Paint += (s, e) =>
             {
                 using var pen = new Pen(Color.FromArgb(226, 232, 240), 1f);
                 e.Graphics.DrawRectangle(pen, 0, 0, pnlInfo.Width - 1, pnlInfo.Height - 1);
             };
-            pnlContainer.Controls.Add(pnlInfo);
 
             int curY = 12;
+            lblMerchantTitle.Text = "Đơn vị thụ hưởng:";
+            lblMerchantTitle.Location = new Point(14, curY);
+            lblMerchantTitle.Size = new Size(130, 20);
+            lblMerchantTitle.ForeColor = Color.FromArgb(100, 116, 139);
 
-            // Đơn vị chấp nhận thanh toán
-            lblMerchantTitle = new Label { Text = "Đơn vị thụ hưởng:", Location = new Point(14, curY), Size = new Size(130, 20), ForeColor = Color.FromArgb(100, 116, 139) };
-            lblMerchantVal = new Label { Text = "AN NHIÊN HOTEL & RESORT", Location = new Point(146, curY), Size = new Size(295, 20), Font = new Font("Segoe UI", 9.5F, FontStyle.Bold), ForeColor = Color.FromArgb(15, 23, 42) };
-            pnlInfo.Controls.AddRange(new Control[] { lblMerchantTitle, lblMerchantVal });
+            lblMerchantVal.Text = "AN NHIÊN HOTEL & RESORT";
+            lblMerchantVal.Location = new Point(146, curY);
+            lblMerchantVal.Size = new Size(295, 20);
+            lblMerchantVal.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblMerchantVal.ForeColor = Color.FromArgb(15, 23, 42);
             curY += 28;
 
-            // Tiêu chuẩn quốc tế
-            lblStandardTitle = new Label { Text = "Tiêu chuẩn mã:", Location = new Point(14, curY), Size = new Size(130, 20), ForeColor = Color.FromArgb(100, 116, 139) };
-            lblStandardVal = new Label { Text = "EMVCo Merchant-Presented Mode (ISO 18004)", Location = new Point(146, curY), Size = new Size(295, 20), Font = new Font("Segoe UI", 8.5F, FontStyle.Bold), ForeColor = Color.FromArgb(16, 185, 129) };
-            pnlInfo.Controls.AddRange(new Control[] { lblStandardTitle, lblStandardVal });
+            lblStandardTitle.Text = "Tiêu chuẩn mã:";
+            lblStandardTitle.Location = new Point(14, curY);
+            lblStandardTitle.Size = new Size(130, 20);
+            lblStandardTitle.ForeColor = Color.FromArgb(100, 116, 139);
+
+            lblStandardVal.Text = "EMVCo Merchant-Presented Mode (ISO 18004)";
+            lblStandardVal.Location = new Point(146, curY);
+            lblStandardVal.Size = new Size(295, 20);
+            lblStandardVal.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            lblStandardVal.ForeColor = Color.FromArgb(16, 185, 129);
             curY += 28;
 
-            // Số tiền
             decimal usd = Math.Round(_soTien / 25400m, 2);
-            lblTienTitle = new Label { Text = "Số tiền thanh toán:", Location = new Point(14, curY), Size = new Size(130, 20), ForeColor = Color.FromArgb(100, 116, 139) };
-            lblTienVal = new Label { Text = $"{_soTien:N0} VND  (~${usd:N2} USD)", Location = new Point(146, curY), Size = new Size(295, 26), Font = new Font("Segoe UI", 12F, FontStyle.Bold), ForeColor = Color.FromArgb(0, 91, 170) };
-            pnlInfo.Controls.AddRange(new Control[] { lblTienTitle, lblTienVal });
+            lblTienTitle.Text = "Số tiền thanh toán:";
+            lblTienTitle.Location = new Point(14, curY);
+            lblTienTitle.Size = new Size(130, 20);
+            lblTienTitle.ForeColor = Color.FromArgb(100, 116, 139);
+
+            lblTienVal.Text = $"{_soTien:N0} VND  (~${usd:N2} USD)";
+            lblTienVal.Location = new Point(146, curY);
+            lblTienVal.Size = new Size(295, 26);
+            lblTienVal.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            lblTienVal.ForeColor = Color.FromArgb(0, 91, 170);
             curY += 34;
 
-            // Mã hóa đơn / Lời nhắn
-            lblMemoTitle = new Label { Text = "Mã đơn / Nội dung:", Location = new Point(14, curY), Size = new Size(130, 20), ForeColor = Color.FromArgb(100, 116, 139) };
-            lblMemoVal = new Label { Text = _noiDung + "  📋 (Chép)", Location = new Point(146, curY), Size = new Size(295, 22), Font = new Font("Segoe UI", 9.5F, FontStyle.Bold), ForeColor = Color.FromArgb(30, 41, 59), Cursor = Cursors.Hand };
+            lblMemoTitle.Text = "Mã đơn / Nội dung:";
+            lblMemoTitle.Location = new Point(14, curY);
+            lblMemoTitle.Size = new Size(130, 20);
+            lblMemoTitle.ForeColor = Color.FromArgb(100, 116, 139);
+
+            lblMemoVal.Text = _noiDung + "  📋 (Chép)";
+            lblMemoVal.Location = new Point(146, curY);
+            lblMemoVal.Size = new Size(295, 22);
+            lblMemoVal.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblMemoVal.ForeColor = Color.FromArgb(30, 41, 59);
+            lblMemoVal.Cursor = Cursors.Hand;
             lblMemoVal.Click += (s, e) =>
             {
                 Clipboard.SetText(_noiDung);
                 MessageBox.Show($"Đã sao chép nội dung chuyển khoản [{_noiDung}]!", "Sao chép thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
             };
-            pnlInfo.Controls.AddRange(new Control[] { lblMemoTitle, lblMemoVal });
-
-            Load += frmVNPAYQR_Load;
         }
 
         private async void frmVNPAYQR_Load(object sender, EventArgs e)
@@ -272,10 +219,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 lblStatus.Text = "Đang kết nối cổng VNPAY-QR chuẩn EMVCo...";
                 long amount = (long)Math.Max(0, _soTien);
 
-                // Sinh chuỗi mã QR theo đúng đặc tả chuẩn quốc tế EMVCo Merchant-Presented Mode (Tag 00-63)
                 string emvcoString = TaoChuoiEMVCoStandard(amount, _noiDung);
-
-                // Render mã QR độ phân giải cao
                 string url = $"https://api.qrserver.com/v1/create-qr-code/?size=260x260&data={Uri.EscapeDataString(emvcoString)}";
                 byte[] bytes = await httpClient.GetByteArrayAsync(url);
                 using (var ms = new MemoryStream(bytes))
@@ -293,55 +237,36 @@ namespace Quản_Lý_Khách_Sạn.Forms
             }
         }
 
-        /// <summary>
-        /// Tạo chuỗi Payload theo đúng chuẩn quốc tế EMVCo (EMVCo Merchant-Presented Mode)
-        /// Tuân thủ quy định chuẩn QR thanh toán của Ngân hàng Nhà nước Việt Nam & Quốc tế.
-        /// </summary>
         public static string TaoChuoiEMVCoStandard(long amount, string memo)
         {
             var sb = new StringBuilder();
 
-            // Tag 00: Payload Format Indicator ("01")
             ThemTagEMVCo(sb, "00", "01");
-
-            // Tag 01: Point of Initiation Method ("12" = Dynamic QR kèm số tiền)
             ThemTagEMVCo(sb, "01", "12");
 
-            // Tag 26: Merchant Account Information (VNPAY / Napas Global AID)
             var sbMerchant = new StringBuilder();
-            ThemTagEMVCo(sbMerchant, "00", "A000000727");               // Acquirer AID
-            ThemTagEMVCo(sbMerchant, "01", "9704220901234567");         // Bank BIN (MBBank 970422) + STK
-            ThemTagEMVCo(sbMerchant, "02", "QRIBFTTA");                 // Service code
+            ThemTagEMVCo(sbMerchant, "00", "A000000727");
+            ThemTagEMVCo(sbMerchant, "01", "9704220901234567");
+            ThemTagEMVCo(sbMerchant, "02", "QRIBFTTA");
             ThemTagEMVCo(sb, "26", sbMerchant.ToString());
 
-            // Tag 52: Merchant Category Code (7011 = Hotels, Motels, Resorts)
             ThemTagEMVCo(sb, "52", "7011");
-
-            // Tag 53: Transaction Currency (704 = VND)
             ThemTagEMVCo(sb, "53", "704");
 
-            // Tag 54: Transaction Amount
             if (amount > 0)
             {
                 ThemTagEMVCo(sb, "54", amount.ToString());
             }
 
-            // Tag 58: Country Code
             ThemTagEMVCo(sb, "58", "VN");
-
-            // Tag 59: Merchant Name
             ThemTagEMVCo(sb, "59", "AN NHIEN HOTEL");
-
-            // Tag 60: Merchant City
             ThemTagEMVCo(sb, "60", "DA NANG");
 
-            // Tag 62: Additional Data Field Template
             var sbAdditional = new StringBuilder();
             string cleanMemo = (memo ?? "THANH TOAN").ToUpper().Replace(" ", "%20");
             ThemTagEMVCo(sbAdditional, "08", cleanMemo);
             ThemTagEMVCo(sb, "62", sbAdditional.ToString());
 
-            // Tag 63: CRC16 Checksum
             sb.Append("6304");
             string crc = TinhCRC16CCITT(sb.ToString());
             sb.Append(crc);
@@ -357,9 +282,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
             sb.Append(val);
         }
 
-        /// <summary>
-        /// Tính Checksum CRC-16/CCITT-FALSE chuẩn EMVCo
-        /// </summary>
         private static string TinhCRC16CCITT(string data)
         {
             ushort crc = 0xFFFF;
@@ -392,7 +314,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 using (var pen = new Pen(vnpayBlue, Math.Max(2, 6 * scale)))
                 using (var brush = new SolidBrush(vnpayBlue))
                 {
-                    // 3 góc định vị chuẩn QR
                     g.DrawRectangle(pen, 14 * scale, 14 * scale, 50 * scale, 50 * scale);
                     g.FillRectangle(brush, 26 * scale, 26 * scale, 26 * scale, 26 * scale);
 
@@ -402,7 +323,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     g.DrawRectangle(pen, 14 * scale, 176 * scale, 50 * scale, 50 * scale);
                     g.FillRectangle(brush, 26 * scale, 188 * scale, 26 * scale, 26 * scale);
 
-                    // Logo badge VNPAY ở giữa
                     float centerBox = 64 * scale;
                     float cx = (size - centerBox) / 2f;
                     float cy = (size - centerBox) / 2f;

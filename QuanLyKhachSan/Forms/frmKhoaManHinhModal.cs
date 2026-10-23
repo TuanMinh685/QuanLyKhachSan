@@ -6,32 +6,14 @@ using Quản_Lý_Khách_Sạn.DAL;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
-    public class frmKhoaManHinhModal : Form
+    public partial class frmKhoaManHinhModal : Form
     {
-        private Panel pnlCard;
-        private Label lblLogo;
-        private Label lblTieuDe;
-        private Label lblPhuDe;
-        private Panel pnlUserInfo;
-        private Label lblAvatar;
-        private Label lblTenNguoiDung;
-        private Label lblVaiTro;
-        private Label lblThoiGianKhoa;
-
-        private Label lblMatKhau;
-        private Panel pnlInputPass;
-        private TextBox txtMatKhau;
-        private Button btnHienPass;
-        private Label lblLoi;
-        private Button btnMoKhoa;
-        private Button btnDoiTaiKhoan;
-
-        private System.Windows.Forms.Timer tmrKhoa;
         private int giayKhoaConLai = 0;
         private readonly DateTime thoiDiemKhoa = DateTime.Now;
 
         public frmKhoaManHinhModal()
         {
+            InitializeComponent();
             InitializeComponentCustom();
         }
 

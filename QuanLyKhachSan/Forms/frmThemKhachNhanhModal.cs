@@ -7,7 +7,7 @@ using Quản_Lý_Khách_Sạn.Models;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
-    public class frmThemKhachNhanhModal : Form
+    public partial class frmThemKhachNhanhModal : Form
     {
         private readonly KhachHangBLL bll = new KhachHangBLL();
 
@@ -16,29 +16,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
         public string SoDienThoai { get; private set; }
         public string MaKHHienThi { get; private set; }
 
-        private Panel pnlHeader;
-        private Label lblTitle;
-        private Label lblSubtitle;
-        private Panel pnlDivider;
-
-        private Panel pnlBody;
-        private TextBox txtHoTen;
-        private TextBox txtSDT;
-        private TextBox txtCCCD;
-        private ComboBox cboGioiTinh;
-        private DateTimePicker dtpNgaySinh;
-        private TextBox txtQuocTich;
-        private TextBox txtEmail;
-        private TextBox txtDiaChi;
-        private TextBox txtGhiChu;
-        private CheckBox chkDongY;
-
-        private Panel pnlFooter;
-        private Button btnLuu;
-        private Button btnHuy;
-
         public frmThemKhachNhanhModal()
         {
+            InitializeComponent();
             InitializeComponentCustom();
             UITheme.ApplyTheme(this);
         }

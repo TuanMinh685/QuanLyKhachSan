@@ -10,7 +10,7 @@ using Quản_Lý_Khách_Sạn.Models;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
-    public class frmThanhToanTongDatPhongModal : Form
+    public partial class frmThanhToanTongDatPhongModal : Form
     {
         private static readonly CultureInfo Vi = new CultureInfo("vi-VN");
 
@@ -34,43 +34,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private ChiPhiDatPhong _chiPhi;
         private decimal _tienGiamGia = 0;
         private int? _maVoucherDaApDung = null;
-
-        // UI Controls - Header
-        private Panel pnlHeader;
-        private Button btnQuayLai;
-        private Label lblTitle;
-        private Panel pnlHeaderDivider;
-
-        // UI Controls - Main Layout
-        private TableLayoutPanel tblLayout;
-        private Panel pnlLeftScroll;
-        private Panel cardSummaryRight;
-
-        // Left Controls - Khách hàng
-        private ComboBox cboTieuDe;
-        private TextBox txtHo;
-        private TextBox txtTen;
-        private TextBox txtEmail;
-        private TextBox txtEmailXacNhan;
-        private TextBox txtSDT;
-        private ComboBox cboQuocGia;
-        private TextBox txtYeuCauThem;
-
-        // Left Controls - Phương thức TT & Nút đặt
-        private ComboBox cboPTTT;
-        private CheckBox chkDongYDieuKhoan;
-        private Button btnThucHienDatPhong;
-
-        // Right Controls - Summary
-        private Label lblSummaryNhanPhong;
-        private Label lblSummaryTraPhong;
-        private Label lblSummaryThongTinPhong;
-        private Label lblSummaryGiaPhong;
-        private Label lblSummaryTienPhong;
-        private TextBox txtVoucherCode;
-        private Button btnApDungVoucher;
-        private Label lblSummaryGiamGia;
-        private Label lblSummaryTongGia;
 
         public string MaDatPhongTao { get; private set; }
 
@@ -101,6 +64,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             _chiPhi = LeTanDatPhongBLL.TinhChiPhi(_giaMotDem, _ngayNhan, _ngayTra);
 
+            InitializeComponent();
             InitializeComponentCustom(tenKhachMacDinh, sdtMacDinh);
             NapThongTinKhachNeuCo();
             CapNhatTongChiPhi();

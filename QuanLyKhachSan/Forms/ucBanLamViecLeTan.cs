@@ -9,7 +9,7 @@ using Quản_Lý_Khách_Sạn.DAL;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
-    public class ucBanLamViecLeTan : UserControl
+    public partial class ucBanLamViecLeTan : UserControl
     {
         private static readonly CultureInfo Vi = new CultureInfo("vi-VN");
 
@@ -20,40 +20,11 @@ namespace Quản_Lý_Khách_Sạn.Forms
         public event EventHandler YeuCauTraCuuKhach;
         public event EventHandler YeuCauQuanLyPhong;
 
-        // UI Controls
-        private Panel pnlHeader;
-        private Label lblTitle;
-        private Label lblSubtitle;
-        private Label lblDatePill;
-
-        private TableLayoutPanel tblQuickActions;
-        private TableLayoutPanel tblMainColumns;
-
-        private Panel cardActivities;
-        private Label lblActivitiesTitle;
-        private Label lblActivitiesUpdated;
-        private DataGridView dgvActivities;
-        private FlowLayoutPanel flowActivityButtons;
-        private Button btnBottomTaoDat;
-        private Button btnBottomNhanPhong;
-        private Button btnBottomTraPhong;
-
-        private Panel cardAlerts;
-        private Label lblAlertsTitle;
-        private Label lblAlertsBadge;
-        private Panel pnlAlertOverdue;
-        private Panel pnlAlertCleaning;
-        private Panel pnlAlertMaintenance;
-
-        private Panel cardShiftNote;
-        private Label lblShiftNoteTitle;
-        private Label lblShiftNoteText;
-        private Button btnUpdateNote;
-
         private static string GhiChuCaHienTai = "Khách phòng 305 sẽ đến muộn sau 21:00. Phòng 108 yêu cầu xuất hóa đơn công ty khi trả phòng.";
 
         public ucBanLamViecLeTan()
         {
+            InitializeComponent();
             InitializeComponentCustom();
             TaiDuLieuHoatDong();
         }

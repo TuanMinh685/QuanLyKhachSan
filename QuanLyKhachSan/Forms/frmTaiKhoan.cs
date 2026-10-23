@@ -8,32 +8,11 @@ using Quản_Lý_Khách_Sạn;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
-    public class frmTaiKhoan : Form
+    public partial class frmTaiKhoan : Form
     {
-        private Panel cardMain;
-        private Panel pnlHeader;
-        private Label lblTitle;
-        private Label lblSubtitle;
-        private FlowLayoutPanel pnlStatsPills;
-        private Label lblPillTotal;
-        private Label lblPillAdmin;
-        private Label lblPillLeTan;
-
-        private Panel pnlToolbar;
-        private Panel pnlSearch;
-        private Label lblIconSearch;
-        private TextBox txtTim;
-
-        private Button btnThem;
-        private Button btnSua;
-        private Button btnXoa;
-        private Button btnLamMoi;
-
-        private Panel pnlGridWrapper;
-        private DataGridView grid;
-
         public frmTaiKhoan()
         {
+            InitializeComponent();
             Text = "Quản lý nhân sự & Phân quyền";
             Dock = DockStyle.Fill;
             BackColor = UITheme.BackgroundGray;

@@ -7,33 +7,15 @@ using Quản_Lý_Khách_Sạn.Models;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
-    public class frmVoucherModal : Form
+    public partial class frmVoucherModal : Form
     {
         private VoucherBLL bll = new VoucherBLL();
         private Voucher voucherHienTai = null;
 
-        private Panel pnlHeader;
-        private Label lblTitle;
-        private Label lblSubtitle;
-        private Panel pnlDivider;
-
-        private TextBox txtCode;
-        private TextBox txtTen;
-        private ComboBox cboLoaiGiam;
-        private TextBox txtGiaTri;
-        private TextBox txtDonToiThieu;
-        private NumericUpDown nudSoLuong;
-        private DateTimePicker dtpBatDau;
-        private DateTimePicker dtpHetHan;
-        private CheckBox chkTrangThai;
-
-        private Panel pnlFooter;
-        private Button btnLuu;
-        private Button btnHuy;
-
         public frmVoucherModal(Voucher v = null)
         {
             voucherHienTai = v;
+            InitializeComponent();
             InitializeComponentCustom();
             UITheme.ApplyTheme(this);
 
