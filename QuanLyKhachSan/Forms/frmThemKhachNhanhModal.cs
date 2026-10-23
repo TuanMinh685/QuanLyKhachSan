@@ -1,15 +1,15 @@
 using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using Quản_Lý_Khách_Sạn.BLL;
-using Quản_Lý_Khách_Sạn.DAL;
 using Quản_Lý_Khách_Sạn.Models;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
     public class frmThemKhachNhanhModal : Form
     {
-        private KhachHangBLL bll = new KhachHangBLL();
+        private readonly KhachHangBLL bll = new KhachHangBLL();
 
         public int MaKH { get; private set; }
         public string HoTen { get; private set; }
@@ -21,12 +21,17 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private Label lblSubtitle;
         private Panel pnlDivider;
 
+        private Panel pnlBody;
         private TextBox txtHoTen;
         private TextBox txtSDT;
         private TextBox txtCCCD;
         private ComboBox cboGioiTinh;
+        private DateTimePicker dtpNgaySinh;
         private TextBox txtQuocTich;
+        private TextBox txtEmail;
         private TextBox txtDiaChi;
+        private TextBox txtGhiChu;
+        private CheckBox chkDongY;
 
         private Panel pnlFooter;
         private Button btnLuu;
@@ -40,8 +45,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void InitializeComponentCustom()
         {
-            Text = "Thêm khách hàng mới";
-            Size = new Size(540, 520);
+            Text = "Khai báo thông tin khách hàng mới";
+            Size = new Size(620, 680);
             StartPosition = FormStartPosition.CenterParent;
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
@@ -49,11 +54,11 @@ namespace Quản_Lý_Khách_Sạn.Forms
             BackColor = Color.White;
             Font = UITheme.MainFont;
 
-            // Header
+            // 1. HEADER PANEL
             pnlHeader = new Panel
             {
                 Dock = DockStyle.Top,
-                Height = 72,
+                Height = 74,
                 BackColor = Color.White,
                 Padding = new Padding(24, 14, 24, 8)
             };
@@ -69,10 +74,10 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             lblSubtitle = new Label
             {
-                Text = "Thông tin sẽ được lưu vào cơ sở dữ liệu và hiển thị ngay bên Hồ sơ khách hàng",
-                Font = new Font("Segoe UI", 8.5F),
+                Text = "Lưu hồ sơ khách vào hệ thống và tự động chọn cho phòng đang đặt",
+                Font = new Font("Segoe UI", 8.8F),
                 ForeColor = UITheme.TextMuted,
-                Location = new Point(24, 40),
+                Location = new Point(24, 42),
                 AutoSize = true
             };
 
@@ -86,9 +91,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
             pnlHeader.Controls.Add(lblTitle);
             pnlHeader.Controls.Add(lblSubtitle);
             pnlHeader.Controls.Add(pnlDivider);
-            Controls.Add(pnlHeader);
 
-            // Footer
+            // 2. FOOTER PANEL
             pnlFooter = new Panel
             {
                 Dock = DockStyle.Bottom,
@@ -105,8 +109,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnLuu = new Button
             {
                 Text = "💾 Lưu & Chọn khách này",
-                Size = new Size(190, 40),
-                Location = new Point(pnlFooter.Width - 310, 12),
+                Size = new Size(205, 40),
+                Location = new Point(pnlFooter.Width - 325, 12),
                 Anchor = AnchorStyles.Top | AnchorStyles.Right,
                 FlatStyle = FlatStyle.Flat,
                 BackColor = UITheme.PrimaryOrange,
@@ -134,60 +138,160 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             pnlFooter.Controls.Add(btnLuu);
             pnlFooter.Controls.Add(btnHuy);
-            Controls.Add(pnlFooter);
 
-            // Body
-            Panel pnlBody = new Panel
+            // 3. BODY PANEL (Chứa đầy đủ các trường thông tin chuẩn)
+            pnlBody = new Panel
             {
                 Dock = DockStyle.Fill,
                 AutoScroll = true,
-                Padding = new Padding(28, 16, 28, 16),
+                Padding = new Padding(28, 16, 28, 20),
                 BackColor = Color.White
             };
 
             int y = 14;
             int gap = 58;
+            int fullW = 546;
+            int halfW = 265;
+            int col2X = 309;
 
-            // Họ tên
+            // Dòng 1: Họ và tên khách hàng *
             TaoNhan(pnlBody, "Họ và tên khách hàng *", 28, y);
-            var pnlHoTen = TaoBox(pnlBody, 28, y + 20, 468, 36);
-            txtHoTen = new TextBox { BorderStyle = BorderStyle.None, Font = new Font("Segoe UI", 9.5F), Dock = DockStyle.Fill, PlaceholderText = "Ví dụ: Trần Văn Bình" };
+            var pnlHoTen = TaoBox(pnlBody, 28, y + 20, fullW, 36);
+            txtHoTen = new TextBox
+            {
+                BorderStyle = BorderStyle.None,
+                Font = new Font("Segoe UI", 9.8F, FontStyle.Bold),
+                ForeColor = UITheme.DarkNavy,
+                Dock = DockStyle.Fill,
+                PlaceholderText = "Ví dụ: Nguyễn Văn Hùng"
+            };
             pnlHoTen.Controls.Add(txtHoTen);
 
-            // Số điện thoại & CCCD
+            // Dòng 2: Số điện thoại * & Số CCCD / Hộ chiếu *
             y += gap;
             TaoNhan(pnlBody, "Số điện thoại *", 28, y);
-            var pnlSDT = TaoBox(pnlBody, 28, y + 20, 220, 36);
-            txtSDT = new TextBox { BorderStyle = BorderStyle.None, Font = new Font("Segoe UI", 9.5F), Dock = DockStyle.Fill, PlaceholderText = "09xxxxxxxx" };
+            var pnlSDT = TaoBox(pnlBody, 28, y + 20, halfW, 36);
+            txtSDT = new TextBox
+            {
+                BorderStyle = BorderStyle.None,
+                Font = new Font("Segoe UI", 9.5F),
+                Dock = DockStyle.Fill,
+                PlaceholderText = "09xxxxxxxx"
+            };
             pnlSDT.Controls.Add(txtSDT);
 
-            TaoNhan(pnlBody, "Số CCCD / CMND / Hộ chiếu *", 262, y);
-            var pnlCCCD = TaoBox(pnlBody, 262, y + 20, 234, 36);
-            txtCCCD = new TextBox { BorderStyle = BorderStyle.None, Font = new Font("Segoe UI", 9.5F), Dock = DockStyle.Fill, PlaceholderText = "12 số CCCD" };
+            TaoNhan(pnlBody, "Số CCCD / CMND / Hộ chiếu *", col2X, y);
+            var pnlCCCD = TaoBox(pnlBody, col2X, y + 20, halfW, 36);
+            txtCCCD = new TextBox
+            {
+                BorderStyle = BorderStyle.None,
+                Font = new Font("Segoe UI", 9.5F),
+                Dock = DockStyle.Fill,
+                PlaceholderText = "12 số CCCD / Hộ chiếu"
+            };
             pnlCCCD.Controls.Add(txtCCCD);
 
-            // Giới tính & Quốc tịch
+            // Dòng 3: Giới tính & Ngày sinh
             y += gap;
             TaoNhan(pnlBody, "Giới tính", 28, y);
-            var pnlGioiTinh = TaoBox(pnlBody, 28, y + 20, 220, 36);
-            cboGioiTinh = new ComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5F) };
+            var pnlGioiTinh = TaoBox(pnlBody, 28, y + 20, halfW, 36);
+            cboGioiTinh = new ComboBox
+            {
+                Dock = DockStyle.Fill,
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9.5F)
+            };
             cboGioiTinh.Items.AddRange(new object[] { "Nam", "Nữ", "Khác" });
             cboGioiTinh.SelectedIndex = 0;
             pnlGioiTinh.Controls.Add(cboGioiTinh);
 
-            TaoNhan(pnlBody, "Quốc tịch", 262, y);
-            var pnlQuocTich = TaoBox(pnlBody, 262, y + 20, 234, 36);
-            txtQuocTich = new TextBox { BorderStyle = BorderStyle.None, Font = new Font("Segoe UI", 9.5F), Dock = DockStyle.Fill, Text = "Việt Nam" };
+            TaoNhan(pnlBody, "Ngày sinh (tùy chọn)", col2X, y);
+            var pnlNgaySinh = TaoBox(pnlBody, col2X, y + 20, halfW, 36);
+            dtpNgaySinh = new DateTimePicker
+            {
+                Dock = DockStyle.Fill,
+                Format = DateTimePickerFormat.Custom,
+                CustomFormat = "dd/MM/yyyy",
+                ShowCheckBox = true,
+                Checked = false,
+                Font = new Font("Segoe UI", 9.5F)
+            };
+            pnlNgaySinh.Controls.Add(dtpNgaySinh);
+
+            // Dòng 4: Quốc tịch & Email
+            y += gap;
+            TaoNhan(pnlBody, "Quốc tịch", 28, y);
+            var pnlQuocTich = TaoBox(pnlBody, 28, y + 20, halfW, 36);
+            txtQuocTich = new TextBox
+            {
+                BorderStyle = BorderStyle.None,
+                Font = new Font("Segoe UI", 9.5F),
+                Dock = DockStyle.Fill,
+                Text = "Việt Nam"
+            };
             pnlQuocTich.Controls.Add(txtQuocTich);
 
-            // Địa chỉ
+            TaoNhan(pnlBody, "Email liên hệ", col2X, y);
+            var pnlEmail = TaoBox(pnlBody, col2X, y + 20, halfW, 36);
+            txtEmail = new TextBox
+            {
+                BorderStyle = BorderStyle.None,
+                Font = new Font("Segoe UI", 9.5F),
+                Dock = DockStyle.Fill,
+                PlaceholderText = "khachhang@gmail.com"
+            };
+            pnlEmail.Controls.Add(txtEmail);
+
+            // Dòng 5: Địa chỉ thường trú
             y += gap;
             TaoNhan(pnlBody, "Địa chỉ thường trú", 28, y);
-            var pnlDiaChi = TaoBox(pnlBody, 28, y + 20, 468, 36);
-            txtDiaChi = new TextBox { BorderStyle = BorderStyle.None, Font = new Font("Segoe UI", 9.5F), Dock = DockStyle.Fill, PlaceholderText = "Số nhà, tên đường, tỉnh/thành..." };
+            var pnlDiaChi = TaoBox(pnlBody, 28, y + 20, fullW, 36);
+            txtDiaChi = new TextBox
+            {
+                BorderStyle = BorderStyle.None,
+                Font = new Font("Segoe UI", 9.5F),
+                Dock = DockStyle.Fill,
+                PlaceholderText = "Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/TP..."
+            };
             pnlDiaChi.Controls.Add(txtDiaChi);
 
+            // Dòng 6: Ghi chú sở thích phòng
+            y += gap;
+            TaoNhan(pnlBody, "Ghi chú & Yêu cầu lưu trú", 28, y);
+            var pnlGhiChu = TaoBox(pnlBody, 28, y + 20, fullW, 36);
+            txtGhiChu = new TextBox
+            {
+                BorderStyle = BorderStyle.None,
+                Font = new Font("Segoe UI", 9.5F),
+                Dock = DockStyle.Fill,
+                PlaceholderText = "Ví dụ: Khách thích tầng cao, yên tĩnh, không hút thuốc..."
+            };
+            pnlGhiChu.Controls.Add(txtGhiChu);
+
+            // Dòng 7: Checkbox đồng ý
+            y += gap + 8;
+            chkDongY = new CheckBox
+            {
+                Text = "Đồng ý nhận thông tin ưu đãi và chăm sóc thành viên VIP của khách sạn",
+                Location = new Point(28, y),
+                Size = new Size(fullW, 26),
+                Font = new Font("Segoe UI", 9F),
+                ForeColor = UITheme.TextMain,
+                Checked = true
+            };
+            pnlBody.Controls.Add(chkDongY);
+
+            // THỨ TỰ ADD CONTROL CHUẨN ĐỂ KHÔNG BỊ HEADER CHE KHUẤT
             Controls.Add(pnlBody);
+            Controls.Add(pnlHeader);
+            Controls.Add(pnlFooter);
+
+            pnlHeader.SendToBack();
+            pnlFooter.SendToBack();
+            pnlBody.BringToFront();
+
+            Shown += (_, __) => txtHoTen.Focus();
         }
 
         private static Label TaoNhan(Control parent, string text, int x, int y)
@@ -195,8 +299,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
             var lbl = new Label
             {
                 Text = text,
-                Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(71, 85, 105),
+                Font = new Font("Segoe UI", 8.8F, FontStyle.Bold),
+                ForeColor = UITheme.TextMain,
                 Location = new Point(x, y),
                 AutoSize = true
             };
@@ -211,7 +315,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 Location = new Point(x, y),
                 Size = new Size(w, h),
                 BackColor = Color.White,
-                Padding = new Padding(8, 7, 8, 4)
+                Padding = new Padding(10, 8, 10, 6)
             };
             pnl.Paint += (s, e) => UITheme.DrawInputBox(s, e, 6);
             parent.Controls.Add(pnl);
@@ -226,7 +330,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             if (string.IsNullOrWhiteSpace(hoTen))
             {
-                MessageBox.Show("Vui lòng nhập họ tên khách hàng.", "Thiếu thông tin", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng nhập họ và tên khách hàng.", "Thiếu thông tin", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtHoTen.Focus();
                 return;
             }
@@ -244,33 +348,36 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 DienThoai = sdt,
                 SoGiayTo = string.IsNullOrWhiteSpace(cccd) ? null : cccd,
                 GioiTinh = cboGioiTinh.Text,
+                NgaySinh = dtpNgaySinh.Checked ? dtpNgaySinh.Value.Date : (DateTime?)null,
                 QuocTich = string.IsNullOrWhiteSpace(txtQuocTich.Text) ? "Việt Nam" : txtQuocTich.Text.Trim(),
+                Email = string.IsNullOrWhiteSpace(txtEmail.Text) ? null : txtEmail.Text.Trim(),
                 DiaChi = string.IsNullOrWhiteSpace(txtDiaChi.Text) ? null : txtDiaChi.Text.Trim(),
-                DongYNhanUuDai = true
+                GhiChu = string.IsNullOrWhiteSpace(txtGhiChu.Text) ? null : txtGhiChu.Text.Trim(),
+                DongYNhanUuDai = chkDongY.Checked,
+                NhomKhach = "Mới"
             };
 
             var kq = bll.Them(kh);
-            if (!kq.ThanhCong)
+            if (kq.ThanhCong)
             {
-                string msg = kq.ThongBao;
+                MaKH = kq.MaKhachHang;
+                HoTen = kh.HoTen;
+                SoDienThoai = kh.DienThoai;
+                MaKHHienThi = $"KH{kq.MaKhachHang:D6}";
+
+                MessageBox.Show($"Đã tạo hồ sơ khách hàng [{kh.HoTen}] thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+            else
+            {
+                string msg = string.IsNullOrWhiteSpace(kq.ThongBao) ? "Không thể lưu thông tin khách hàng." : kq.ThongBao;
                 if (kq.LoiTheoTruong.Count > 0)
                 {
-                    msg += "\n" + string.Join("\n", kq.LoiTheoTruong.Values);
+                    msg += "\n• " + string.Join("\n• ", kq.LoiTheoTruong.Values);
                 }
-                MessageBox.Show(msg, "Không thể lưu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                MessageBox.Show(msg, "Lỗi kiểm tra", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
-
-            // Lấy lại hồ sơ vừa tạo để có mã hiển thị KH000xxx
-            var khMoi = bll.LayTheoMa(kq.MaKhachHang);
-            MaKH = kq.MaKhachHang;
-            HoTen = khMoi?.HoTen ?? kh.HoTen;
-            SoDienThoai = khMoi?.DienThoai ?? kh.DienThoai;
-            MaKHHienThi = khMoi?.MaKH ?? ("KH" + kq.MaKhachHang.ToString("D6"));
-
-            MessageBox.Show($"Đã tạo mới khách hàng [{HoTen}] ({MaKHHienThi}) thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            DialogResult = DialogResult.OK;
-            Close();
         }
     }
 }
