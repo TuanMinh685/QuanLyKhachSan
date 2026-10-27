@@ -7,30 +7,15 @@ using Quản_Lý_Khách_Sạn.Models;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
-    public class frmDichVuModal : Form
+    public partial class frmDichVuModal : Form
     {
         private DichVuDAL dal = new DichVuDAL();
         private DichVu dichVuHienTai = null;
 
-        private Panel pnlHeader;
-        private Label lblTitle;
-        private Label lblSubtitle;
-        private Panel pnlDivider;
-
-        private TextBox txtMaDV;
-        private TextBox txtTenDV;
-        private ComboBox cboLoaiDV;
-        private ComboBox cboDonViTinh;
-        private TextBox txtDonGia;
-        private CheckBox chkTrangThai;
-
-        private Panel pnlFooter;
-        private Button btnLuu;
-        private Button btnHuy;
-
         public frmDichVuModal(DichVu dv = null)
         {
             dichVuHienTai = dv;
+            InitializeComponent();
             InitializeComponentCustom();
             UITheme.ApplyTheme(this);
 

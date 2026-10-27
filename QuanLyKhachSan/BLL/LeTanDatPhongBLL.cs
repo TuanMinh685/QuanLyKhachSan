@@ -86,6 +86,19 @@ namespace Quản_Lý_Khách_Sạn.BLL
                 throw new NghiepVuException("Vui lòng chọn phương thức thu/hoàn tiền.");
         }
 
+        public static string PhuongThucGhiSoCoc(string phuongThuc)
+        {
+            // Các cổng thanh toán mới dùng chung nhóm chuyển khoản/thẻ của sổ cọc.
+            string nhom = phuongThuc switch
+            {
+                "VNPAY" or "MOMO" => "CK",
+                "APPLEPAY" or "THE" => "POS",
+                _ => phuongThuc
+            };
+            KiemTraPhuongThuc(nhom);
+            return nhom;
+        }
+
         private static void KiemTraSoNguoi(int nguoiLon, int treEm)
         {
             if (nguoiLon < 1 || treEm < 0 || (long)nguoiLon + treEm > int.MaxValue)

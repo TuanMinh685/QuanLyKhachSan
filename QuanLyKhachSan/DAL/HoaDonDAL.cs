@@ -112,7 +112,8 @@ WHERE MaDat = @Ma OR CAST(MaDatPhong AS text) = @Ma FOR UPDATE", conn, trans))
                         if (hd.TienDatCoc != Convert.ToDecimal(reader["TienCoc"]) || hd.TienPhong != Convert.ToDecimal(reader["TongTien"]))
                             throw new BLL.NghiepVuException("Tiền phòng/cọc không khớp đơn đã lưu. Hãy chọn lại đơn để tải số tiền mới nhất.");
                     }
-                    using (var duplicate = new NpgsqlCommand("SELECT COUNT(*) FROM HoaDon WHERE MaDatPhong IN (@Id, @Ma)", conn, trans))
+                    using (var duplicate = new NpgsqlCommand(@"SELECT COUNT(*) FROM HoaDon
+WHERE MaDatPhong IN (@Id, @Ma) AND TrangThai = 'Đã thanh toán'", conn, trans))
                     {
                         duplicate.Parameters.AddWithValue("@Id", id.ToString());
                         duplicate.Parameters.AddWithValue("@Ma", maDat);
@@ -120,6 +121,17 @@ WHERE MaDat = @Ma OR CAST(MaDatPhong AS text) = @Ma FOR UPDATE", conn, trans))
                             throw new BLL.NghiepVuException("Đơn này đã được thanh toán. Vui lòng làm mới danh sách.");
                     }
                     hd.MaDatPhong = maDat;
+                    // Module dịch vụ của nhóm tạo hóa đơn tạm. Thay bằng hóa đơn chốt
+                    // trong cùng transaction để lỗi lưu chi tiết sẽ khôi phục cả dữ liệu tạm.
+                    using (var clean = new NpgsqlCommand(@"
+DELETE FROM ChiTietHoaDon WHERE MaHoaDon IN
+    (SELECT MaHoaDon FROM HoaDon WHERE MaDatPhong IN (@Id, @Ma) AND TrangThai = 'Chưa thanh toán');
+DELETE FROM HoaDon WHERE MaDatPhong IN (@Id, @Ma) AND TrangThai = 'Chưa thanh toán';", conn, trans))
+                    {
+                        clean.Parameters.AddWithValue("@Id", id.ToString());
+                        clean.Parameters.AddWithValue("@Ma", maDat);
+                        clean.ExecuteNonQuery();
+                    }
                     // 1. Thêm mới Hóa Đơn
                     string sqlHoaDon = @"INSERT INTO HoaDon (MaHoaDon, MaDatPhong, NgayLap, NgayThanhToan, TienPhong, TienDichVu, TienGiamGia, TienDatCoc, TongTien, MaPTTT, MaVoucher, TrangThai)
                                          VALUES (@MaHD, @MaDP, @NgayLap, @NgayTT, @TienPhong, @TienDV, @GiamGia, @DatCoc, @TongTien, @PTTT, @MaVoucher, @TrangThai)";
@@ -171,8 +183,8 @@ VALUES (@HD, @DV, @SL, @Gia, @Tien)", conn, trans);
 
                     decimal hoanDu = hd.TienDatCoc - (hd.TienPhong + hd.TienDichVu - hd.TienGiamGia);
                     if (hoanDu > 0)
-                        PhieuDatCocDAL.GhiPhieu(conn, trans, id, "Hoan", hoanDu, hd.MaPTTT,
-                            maNhanVien.Value, "Hoàn cọc dư khi thanh toán " + hd.MaHoaDon);
+                        PhieuDatCocDAL.GhiPhieu(conn, trans, id, "Hoan", hoanDu, BLL.LeTanDatPhongBLL.PhuongThucGhiSoCoc(hd.MaPTTT),
+                            maNhanVien.Value, "Hoàn cọc dư khi thanh toán " + hd.MaHoaDon + " qua " + hd.MaPTTT);
                     trans.Commit();
                     return true;
                 }

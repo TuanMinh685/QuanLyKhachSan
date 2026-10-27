@@ -1,27 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Quản_Lý_Khách_Sạn.Models;
 
 namespace Quản_Lý_Khách_Sạn.DAL
 { 
-    internal class ThongTinDatPhongThanhToan
-    {
-        public int MaDatPhong { get; set; }
-        public string MaDat { get; set; } = string.Empty;
-        public string TenKhachHang { get; set; } = string.Empty;
-        public string SoPhong { get; set; } = string.Empty;
-        public DateTime NgayNhanDuKien { get; set; }
-        public DateTime NgayTraDuKien { get; set; }
-        public decimal GiaPhongMoiDem { get; set; }
-        public decimal TongTienDatPhong { get; set; }
-        public decimal TienCoc { get; set; }
-        public int SoDem => Math.Max(1, (NgayTraDuKien.Date - NgayNhanDuKien.Date).Days);
-        public decimal TienPhong => TongTienDatPhong > 0 ? TongTienDatPhong : (SoDem * GiaPhongMoiDem);
-        public string MaHienThi => string.IsNullOrWhiteSpace(MaDat) ? MaDatPhong.ToString() : MaDat;
-
-        public override string ToString() => $"{MaHienThi} - Phòng {SoPhong} ({TenKhachHang})";
-    }
-
-    internal class ThanhToanDAL
+    public class ThanhToanDAL
     {
         // Lấy danh sách các lượt đặt phòng CHƯA có hóa đơn (cần thanh toán) từ Supabase
         public static List<ThongTinDatPhongThanhToan> GetDanhSachChuaThanhToan()
@@ -36,9 +19,12 @@ namespace Quản_Lý_Khách_Sạn.DAL
                     FROM DatPhong dp
                     JOIN KhachHang kh ON dp.MaKH = kh.MaKH
                     JOIN Phong p ON dp.MaPhong = p.MaPhong
-                    LEFT JOIN HoaDon hd ON hd.MaDatPhong IN (CAST(dp.MaDatPhong AS TEXT), dp.MaDat)
-                    WHERE hd.MaHoaDon IS NULL
-                      AND dp.TrangThai IN ('Đang ở', 'Đã trả')
+                    WHERE dp.TrangThai IN ('Đang ở', 'Đã trả')
+                      AND NOT EXISTS (
+                          SELECT 1 FROM HoaDon hd 
+                          WHERE (hd.MaDatPhong = CAST(dp.MaDatPhong AS TEXT) OR hd.MaDatPhong = dp.MaDat)
+                            AND hd.TrangThai = 'Đã thanh toán'
+                      )
                     ORDER BY dp.NgayNhan DESC, dp.MaDatPhong DESC";
                 using (var cmd = new SqlCommand(sql, conn))
                 {

@@ -128,9 +128,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnInHoaDon.BringToFront();
 
             btnVietQR.Parent = cardLeft;
-            btnVietQR.Text = "📱 Xem VietQR";
-            btnVietQR.Size = new Size(125, 40);
-            btnVietQR.Location = new Point(cardLeft.ClientSize.Width - 501, 108);
+            btnVietQR.Text = "🔍 Xem chi tiết";
+            btnVietQR.Size = new Size(130, 40);
+            btnVietQR.Location = new Point(cardLeft.ClientSize.Width - 506, 108);
             btnVietQR.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnVietQR.BackColor = UITheme.DarkNavy;
             btnVietQR.ForeColor = Color.White;
@@ -166,6 +166,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnApDungVoucher.Text = "✓ Áp dụng";
 
             dgvHoaDon.CellFormatting += DgvHoaDon_CellFormatting;
+            dgvHoaDon.CellDoubleClick += (s, e) => { if (e.RowIndex >= 0) MoChiTietHoaDonDangChon(); };
         }
 
         private Label TaoTheThongKe(string text, Color bg, Color fg)
@@ -740,14 +741,19 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void btnVietQR_Click(object sender, EventArgs e)
         {
+            MoChiTietHoaDonDangChon();
+        }
+
+        private void MoChiTietHoaDonDangChon()
+        {
             if (dgvHoaDon.CurrentRow == null || !(dgvHoaDon.CurrentRow.DataBoundItem is HoaDon hd))
             {
-                MessageBox.Show("Vui lòng chọn một dòng hóa đơn trong danh sách bên dưới để xem mã VietQR.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Vui lòng chọn một dòng hóa đơn trong danh sách để xem chi tiết.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            using var qr = new frmVietQR(hd.MaHoaDon, hd.TongTien, $"THANH TOAN {hd.MaHoaDon}");
-            qr.ShowDialog(this);
+            using var modal = new frmChiTietHoaDonModal(hd.MaHoaDon);
+            modal.ShowDialog(this);
         }
 
         private void printDoc_PrintPage(object sender, PrintPageEventArgs e)
@@ -814,17 +820,17 @@ namespace Quản_Lý_Khách_Sạn.Forms
             g.DrawLine(pDash, 10, y, w - 10, y);
             y += 8;
 
-            g.DrawString("QUÉT MÃ THANH TOÁN VIETQR", fBold, b, new RectangleF(0, y, w, 18), sfCenter);
+            g.DrawString("QUÉT MÃ THANH TOÁN VNPAY-QR (EMVCo)", fBold, b, new RectangleF(0, y, w, 18), sfCenter);
             y += 18;
 
-            using (Bitmap qrBmp = frmVietQR.TaoAnhQROffline(100))
+            using (Bitmap qrBmp = frmVNPAYQR.TaoAnhQROffline(100))
             {
                 int qrX = (w - 100) / 2;
                 g.DrawImage(qrBmp, qrX, y, 100, 100);
             }
             y += 105;
 
-            g.DrawString("MB Bank: 0901234567 | KHACH SAN LUXURY", fSmall, b, new RectangleF(0, y, w, 16), sfCenter);
+            g.DrawString("VNPAY-QR / EMVCo Merchant: AN NHIEN HOTEL", fSmall, b, new RectangleF(0, y, w, 16), sfCenter);
             y += 16;
             g.DrawString($"Nội dung: THANH TOAN {txtMaHD.Text}", fSmall, b, new RectangleF(0, y, w, 16), sfCenter);
             y += 20;

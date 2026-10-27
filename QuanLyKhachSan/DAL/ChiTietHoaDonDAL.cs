@@ -65,8 +65,11 @@ namespace Quản_Lý_Khách_Sạn.DAL
                 FROM ChiTietHoaDon ct
                 JOIN DichVu dv ON ct.MaDichVu = dv.MaDichVu
                 JOIN HoaDon hd ON ct.MaHoaDon = hd.MaHoaDon
-                WHERE (hd.MaDatPhong = @MaDP OR hd.MaDatPhong = @MaDPRaw)
-                  AND hd.TrangThai != 'Đã hủy'
+                WHERE (hd.MaDatPhong = @MaDP OR hd.MaDatPhong = @MaDPRaw
+                    OR EXISTS (SELECT 1 FROM DatPhong dp
+                        WHERE (dp.MaDat = @MaDP OR CAST(dp.MaDatPhong AS TEXT) = @MaDP)
+                          AND hd.MaDatPhong IN (dp.MaDat, CAST(dp.MaDatPhong AS TEXT))))
+                  AND hd.TrangThai = 'Chưa thanh toán'
                 ORDER BY ct.MaCTHD DESC";
 
             string raw = maDatPhong.Replace("DP-", "");
@@ -173,6 +176,39 @@ namespace Quản_Lý_Khách_Sạn.DAL
             }
             catch
             {
+                return false;
+            }
+        }
+
+        public bool ThanhToanDichVuRieng(string maHD, string maDatPhong, decimal tongTien, string maPTTT)
+        {
+            try
+            {
+                string raw = maDatPhong.Replace("DP-", "");
+                string sql = @"
+                    UPDATE HoaDon 
+                    SET TrangThai = 'Đã thanh toán',
+                        NgayThanhToan = CURRENT_TIMESTAMP,
+                        TongTien = @TongTien,
+                        TienDichVu = @TongTien,
+                        TienPhong = 0,
+                        TienDatCoc = 0,
+                        TienGiamGia = 0,
+                        MaPTTT = @PTTT
+                    WHERE (MaDatPhong = @MaDP OR MaDatPhong = @MaDPRaw) 
+                      AND TrangThai = 'Chưa thanh toán'";
+
+                DatabaseHelper.ExecuteNonQuery(sql, new[] {
+                    new SqlParameter("@TongTien", tongTien),
+                    new SqlParameter("@PTTT", maPTTT),
+                    new SqlParameter("@MaDP", maDatPhong),
+                    new SqlParameter("@MaDPRaw", raw)
+                });
+                return true;
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Lỗi thu tiền dịch vụ: " + ex.Message);
                 return false;
             }
         }

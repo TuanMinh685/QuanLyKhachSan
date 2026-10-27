@@ -5,27 +5,15 @@ using Quản_Lý_Khách_Sạn.DAL;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
-    public class frmPhuongThucTTModal : Form
+    public partial class frmPhuongThucTTModal : Form
     {
         private PhuongThucThanhToanDAL dal = new PhuongThucThanhToanDAL();
         private PhuongThucThanhToanModel modelHienTai = null;
 
-        private Panel pnlHeader;
-        private Label lblTitle;
-        private Label lblSubtitle;
-        private Panel pnlDivider;
-
-        private TextBox txtTen;
-        private TextBox txtMoTa;
-        private CheckBox chkKichHoat;
-
-        private Panel pnlFooter;
-        private Button btnLuu;
-        private Button btnHuy;
-
         public frmPhuongThucTTModal(PhuongThucThanhToanModel model = null)
         {
             modelHienTai = model;
+            InitializeComponent();
             InitializeComponentCustom();
             UITheme.ApplyTheme(this);
 

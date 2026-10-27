@@ -81,7 +81,7 @@ namespace Quản_Lý_Khách_Sạn.BLL
             {
                 if (!maNhanVien.HasValue || maNhanVien <= 0)
                     throw new NghiepVuException("Vui lòng đăng nhập lại để ghi nhận nhân viên hoàn cọc dư.");
-                LeTanDatPhongBLL.KiemTraPhuongThuc(hd.MaPTTT);
+                LeTanDatPhongBLL.PhuongThucGhiSoCoc(hd.MaPTTT);
             }
             return dal.LuuHoaDonVaCheckOut(hd, maPhong, chiTiet, maNhanVien);
         }

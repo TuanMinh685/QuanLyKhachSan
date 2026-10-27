@@ -10,39 +10,16 @@ using Quản_Lý_Khách_Sạn.DAL;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
-    public class frmChiTietPhongModal : Form
+    public partial class frmChiTietPhongModal : Form
     {
         private int _maPhong;
         private DataRow _phongData;
-
-        private Panel pnlHeader;
-        private Label lblTitle;
-        private Label lblSubtitle;
-        private Panel pnlDivider;
-
-        private PictureBox picHinhAnh;
-        private Label lblLoadingHinhAnh;
-
-        private Label lblTenPhong;
-        private Label lblGiaPhong;
-        private Panel pnlBadges;
-
-        private Label lblTienNghiTieuDe;
-        private FlowLayoutPanel pnlTienNghiChips;
-
-        private Label lblMoTaTieuDe;
-        private Label lblMoTaGiuong;
-        private Label lblGhiChu;
-
-        private Panel pnlFooter;
-        private Button btnSua;
-        private Button btnDong;
-
         private static readonly HttpClient httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
 
         public frmChiTietPhongModal(int maPhong)
         {
             _maPhong = maPhong;
+            InitializeComponent();
             InitializeComponentCustom();
             UITheme.ApplyTheme(this);
             TaiThongTinPhong();

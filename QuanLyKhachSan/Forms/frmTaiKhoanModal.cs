@@ -3,29 +3,13 @@ using System.Drawing;
 using System.Security.Cryptography;
 using System.Windows.Forms;
 using Quản_Lý_Khách_Sạn.DAL;
+using Quản_Lý_Khách_Sạn.BLL;
 using Quản_Lý_Khách_Sạn;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
-    public class frmTaiKhoanModal : Form
+    public partial class frmTaiKhoanModal : Form
     {
-        private Panel pnlHeader;
-        private Label lblTitle;
-        private Label lblSubtitle;
-        private Panel pnlDivider;
-
-        private TextBox txtHoTen;
-        private ComboBox cboChucVu;
-        private TextBox txtSDT;
-        private TextBox txtTenDangNhap;
-        private TextBox txtMatKhau;
-        private Label lblHintMatKhau;
-        private ComboBox cboVaiTro;
-
-        private Panel pnlFooter;
-        private Button btnLuu;
-        private Button btnHuy;
-
         private int maTaiKhoan = 0;
         private int maNhanVien = 0;
 
@@ -34,6 +18,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             maTaiKhoan = idTK;
             maNhanVien = idNV;
 
+            InitializeComponent();
             InitializeComponentCustom();
             UITheme.ApplyTheme(this);
 
@@ -282,9 +267,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private static string HashPassword(string password)
         {
-            byte[] salt = RandomNumberGenerator.GetBytes(16);
-            byte[] hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, 210000, HashAlgorithmName.SHA256, 32);
-            return "PBKDF2-SHA256$210000$" + Convert.ToBase64String(salt) + "$" + Convert.ToBase64String(hash);
+            return BaoMatHelper.BamMatKhau(password);
         }
 
         private void LuuDuLieu()
@@ -312,9 +295,10 @@ namespace Quản_Lý_Khách_Sạn.Forms
             if (maTaiKhoan == 0)
             {
                 // TẠO MỚI
-                if (string.IsNullOrWhiteSpace(txtMatKhau.Text) || txtMatKhau.Text.Length < 8)
+                var ktDoManh = BaoMatHelper.KiemTraDoManhMatKhau(txtMatKhau.Text);
+                if (!ktDoManh.HopLe)
                 {
-                    MessageBox.Show("Vui lòng nhập mật khẩu ban đầu (ít nhất 8 ký tự).", "Mật khẩu không hợp lệ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(ktDoManh.ThongBao, "Chính sách mật khẩu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     txtMatKhau.Focus();
                     return;
                 }
@@ -346,6 +330,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     }
 
                     tx.Commit();
+                    BaoMatHelper.GhiNhatKy(Session.TenDangNhap, "TAO_TAI_KHOAN", $"Tạo mới tài khoản [{user}] cho nhân sự [{hoTen}], chức vụ [{chucVu}], vai trò [{vaiTro}]");
                     MessageBox.Show($"Tạo mới nhân viên & tài khoản [{user}] thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     DialogResult = DialogResult.OK;
                     Close();
@@ -358,6 +343,17 @@ namespace Quản_Lý_Khách_Sạn.Forms
             else
             {
                 // CẬP NHẬT
+                if (!string.IsNullOrWhiteSpace(txtMatKhau.Text))
+                {
+                    var ktDoManh = BaoMatHelper.KiemTraDoManhMatKhau(txtMatKhau.Text);
+                    if (!ktDoManh.HopLe)
+                    {
+                        MessageBox.Show(ktDoManh.ThongBao, "Chính sách mật khẩu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        txtMatKhau.Focus();
+                        return;
+                    }
+                }
+
                 try
                 {
                     using var conn = DatabaseHelper.GetConnection();
@@ -377,7 +373,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     string sqlTK;
                     if (!string.IsNullOrWhiteSpace(txtMatKhau.Text))
                     {
-                        if (txtMatKhau.Text.Length < 8) throw new Exception("Mật khẩu mới phải có ít nhất 8 ký tự.");
                         sqlTK = "UPDATE TaiKhoan SET TenDangNhap = @user, VaiTro = @role, MatKhau = @pass WHERE MaTaiKhoan = @id";
                     }
                     else
@@ -398,6 +393,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     }
 
                     tx.Commit();
+                    BaoMatHelper.GhiNhatKy(Session.TenDangNhap, "CAP_NHAT_TAI_KHOAN", $"Cập nhật tài khoản [{user}], đổi mật khẩu: {!string.IsNullOrWhiteSpace(txtMatKhau.Text)}");
                     MessageBox.Show($"Cập nhật nhân viên [{hoTen}] thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     DialogResult = DialogResult.OK;
                     Close();

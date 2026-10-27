@@ -6,33 +6,14 @@ using Quản_Lý_Khách_Sạn.DAL;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
-    public class frmPhongModal : Form
+    public partial class frmPhongModal : Form
     {
         private int _maPhong;
-
-        private Panel pnlHeader;
-        private Label lblTitle;
-        private Label lblSubtitle;
-        private Panel pnlDivider;
-
-        private TextBox txtSoPhong;
-        private TextBox txtTang;
-        private ComboBox cboLoai;
-        private ComboBox cboTinhTrang;
-        private TextBox txtMoTa;
-        private TextBox txtDienTich;
-        private TextBox txtHinhAnh;
-        private Button btnChonAnh;
-        private TextBox txtTienNghi;
-        private TextBox txtGhiChu;
-
-        private Panel pnlFooter;
-        private Button btnLuu;
-        private Button btnHuy;
 
         public frmPhongModal(int maPhong = 0)
         {
             _maPhong = maPhong;
+            InitializeComponent();
             InitializeComponentCustom();
             UITheme.ApplyTheme(this);
             LoadLoaiPhong();

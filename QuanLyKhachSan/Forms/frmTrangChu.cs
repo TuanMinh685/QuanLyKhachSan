@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using Quản_Lý_Khách_Sạn.BLL;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
@@ -9,13 +10,38 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private Control manHinhHienTai;
         private ucDatPhong manHinhDatPhong;
         private frmKhachHang manHinhKhachHang;
+        private ucBanLamViecLeTan manHinhBanLamViec;
         private Button nutDangChon = null;
+        private Button btnBanLamViec;
         private Button btnTaiKhoan;
         private Button btnPhuongThucTT;
+        private Button btnKhoaManHinh;
+        private Button btnDoiMK;
 
         public frmTrangChu()
         {
             InitializeComponent();
+
+            btnBanLamViec = new Button
+            {
+                Name = "btnBanLamViec",
+                Text = "⊞ Bàn làm việc lễ tân",
+                Dock = DockStyle.Top,
+                Height = 52,
+                Cursor = Cursors.Hand,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                ForeColor = Color.FromArgb(226, 232, 240),
+                BackColor = Color.FromArgb(15, 37, 55),
+                TextAlign = ContentAlignment.MiddleLeft,
+                Padding = new Padding(24, 0, 0, 0),
+                UseMnemonic = false
+            };
+            btnBanLamViec.FlatAppearance.BorderSize = 0;
+            btnBanLamViec.Click += (_, __) => MoBanLamViec();
+            pnlSidebar.Controls.Add(btnBanLamViec);
+            pnlSidebar.Controls.SetChildIndex(btnBanLamViec, pnlSidebar.Controls.IndexOf(btnPhong));
+
             btnTaiKhoan = new Button
             {
                 Name = "btnTaiKhoan",
@@ -52,7 +78,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 UseMnemonic = false
             };
             btnPhuongThucTT.FlatAppearance.BorderSize = 0;
-            btnPhuongThucTT.Click += (_, __) => { if (YeuCauAdmin()) MoFormCon(new PhuongThucThanhToan(), btnPhuongThucTT, "QUẢN LÝ PHƯƠNG THỨC THANH TOÁN"); };
+            btnPhuongThucTT.Click += (_, __) => { if (YeuCauAdmin()) MoFormCon(new frmPhuongThucThanhToan(), btnPhuongThucTT, "QUẢN LÝ PHƯƠNG THỨC THANH TOÁN"); };
             pnlSidebar.Controls.Add(btnPhuongThucTT);
             pnlSidebar.Controls.SetChildIndex(btnPhuongThucTT, 2);
 
@@ -67,7 +93,78 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 }
             }
 
+            // Thiết lập nút bảo mật trên Header (Khóa màn hình & Đổi MK)
+            KeyPreview = true;
+            KeyDown += frmTrangChu_KeyDown;
+
+            btnKhoaManHinh = new Button
+            {
+                Name = "btnKhoaManHinh",
+                Text = "🔒 Khóa máy (Ctrl+L)",
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                Size = new Size(160, 36),
+                Location = new Point(pnlHeader.Width - 175, 19),
+                BackColor = Color.FromArgb(241, 245, 249),
+                ForeColor = Color.FromArgb(30, 41, 59),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnKhoaManHinh.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnKhoaManHinh.MouseEnter += (s, e) => btnKhoaManHinh.BackColor = Color.FromArgb(226, 232, 240);
+            btnKhoaManHinh.MouseLeave += (s, e) => btnKhoaManHinh.BackColor = Color.FromArgb(241, 245, 249);
+            btnKhoaManHinh.Click += (s, e) => MoKhoaManHinh();
+
+            btnDoiMK = new Button
+            {
+                Name = "btnDoiMK",
+                Text = "🔑 Đổi MK",
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                Size = new Size(100, 36),
+                Location = new Point(pnlHeader.Width - 285, 19),
+                BackColor = Color.FromArgb(241, 245, 249),
+                ForeColor = Color.FromArgb(30, 41, 59),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnDoiMK.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnDoiMK.MouseEnter += (s, e) => btnDoiMK.BackColor = Color.FromArgb(226, 232, 240);
+            btnDoiMK.MouseLeave += (s, e) => btnDoiMK.BackColor = Color.FromArgb(241, 245, 249);
+            btnDoiMK.Click += (s, e) => MoDoiMatKhau();
+
+            lblUserGreeting.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblUserGreeting.Location = new Point(pnlHeader.Width - 690, 22);
+            lblUserGreeting.Size = new Size(395, 30);
+
+            pnlHeader.Controls.Add(btnKhoaManHinh);
+            pnlHeader.Controls.Add(btnDoiMK);
+
             ApDungPhanQuyen();
+        }
+
+        private void frmTrangChu_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.L)
+            {
+                e.SuppressKeyPress = true;
+                MoKhoaManHinh();
+            }
+        }
+
+        private void MoKhoaManHinh()
+        {
+            using var f = new frmKhoaManHinhModal();
+            if (f.ShowDialog(this) == DialogResult.Abort)
+            {
+                Close();
+            }
+        }
+
+        private void MoDoiMatKhau()
+        {
+            using var f = new frmDoiMatKhauModal();
+            f.ShowDialog(this);
         }
 
         private void ApDungPhanQuyen()
@@ -92,7 +189,26 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void frmTrangChu_Load(object sender, EventArgs e)
         {
-            MoDatPhong();
+            MoBanLamViec();
+        }
+
+        private void MoBanLamViec()
+        {
+            if (manHinhBanLamViec == null || manHinhBanLamViec.IsDisposed)
+            {
+                manHinhBanLamViec = new ucBanLamViecLeTan();
+                manHinhBanLamViec.YeuCauDatPhong += (_, __) => MoDatPhong();
+                manHinhBanLamViec.YeuCauNhanPhong += (_, __) => ThucHienNhanPhong();
+                manHinhBanLamViec.YeuCauTraPhong += (_, __) => ThucHienTraPhong();
+                manHinhBanLamViec.YeuCauTraCuuKhach += (_, __) => MoKhachHang();
+                manHinhBanLamViec.YeuCauQuanLyPhong += (_, __) => MoFormCon(new frmDanhSachPhong(), btnPhong, "SƠ ĐỒ & QUẢN LÝ PHÒNG");
+            }
+            else
+            {
+                manHinhBanLamViec.TaiDuLieuHoatDong();
+            }
+
+            HienThiManHinh(manHinhBanLamViec, btnBanLamViec, "BÀN LÀM VIỆC LỄ TÂN");
         }
 
         private void MoDatPhong()
@@ -111,6 +227,64 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             HienThiManHinh(manHinhKhachHang, btnKhachHang, "HỒ SƠ KHÁCH HÀNG");
             if (daMo) manHinhKhachHang.LamMoiLuuTru();
+        }
+
+        private void ThucHienNhanPhong()
+        {
+            using var f = new frmChonDatPhong(ThaoTacDatPhong.NhanPhong);
+            if (f.ShowDialog(this) == DialogResult.OK)
+            {
+                string hoi = $"Xác nhận NHẬN PHÒNG (Check-in)?\n\n• Mã đặt: {f.MaDat}\n• Khách hàng: {f.TenKhach}\n• Phòng: {f.SoPhong}";
+                if (MessageBox.Show(hoi, "Xác nhận nhận phòng", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    try
+                    {
+                        LeTanLuuTruBLL.NhanPhong(f.MaDatPhong);
+                        MessageBox.Show($"🎉 Nhận phòng thành công!\nKhách hàng {f.TenKhach} đã nhận phòng {f.SoPhong}.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        manHinhBanLamViec?.TaiDuLieuHoatDong();
+                    }
+                    catch (NghiepVuException ex)
+                    {
+                        MessageBox.Show(ex.Message, "Lưu ý nghiệp vụ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Lỗi khi nhận phòng: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void ThucHienTraPhong()
+        {
+            using var f = new frmChonDatPhong(ThaoTacDatPhong.TraPhong);
+            if (f.ShowDialog(this) == DialogResult.OK)
+            {
+                // Mở cửa sổ thanh toán & lập hóa đơn trả phòng
+                using var fTT = new frmThanhToanModal(f.MaDat);
+                if (fTT.ShowDialog(this) == DialogResult.OK)
+                {
+                    manHinhBanLamViec?.TaiDuLieuHoatDong();
+                }
+                else
+                {
+                    // Nếu chưa thanh toán ngay qua hóa đơn, hỏi xem có muốn ghi nhận trả phòng trước không
+                    var hoi = MessageBox.Show($"Bạn chưa hoàn tất thanh toán hóa đơn.\nBạn có muốn ghi nhận TRẢ PHÒNG (Check-out) cho phòng {f.SoPhong} ({f.TenKhach}) ngay không?", "Xác nhận trả phòng", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (hoi == DialogResult.Yes)
+                    {
+                        try
+                        {
+                            LeTanLuuTruBLL.TraPhong(f.MaDatPhong);
+                            MessageBox.Show($"Đã ghi nhận trả phòng {f.SoPhong}.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            manHinhBanLamViec?.TaiDuLieuHoatDong();
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Lỗi trả phòng: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+            }
         }
 
         // Các form khác vẫn gọi qua hàm cũ của trang chủ.
@@ -147,9 +321,10 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
                 if (manHinhCu != null && !manHinhCu.IsDisposed)
                 {
-                    // Giữ dữ liệu chưa lưu của hai chức năng được phân công.
+                    // Giữ dữ liệu chưa lưu của các màn hình chính
                     if (ReferenceEquals(manHinhCu, manHinhDatPhong)
-                        || ReferenceEquals(manHinhCu, manHinhKhachHang))
+                        || ReferenceEquals(manHinhCu, manHinhKhachHang)
+                        || ReferenceEquals(manHinhCu, manHinhBanLamViec))
                     {
                         manHinhCu.Hide();
                     }

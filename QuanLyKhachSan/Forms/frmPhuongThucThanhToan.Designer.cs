@@ -1,6 +1,6 @@
 namespace Quản_Lý_Khách_Sạn.Forms
 {
-    partial class PhuongThucThanhToan
+    partial class frmPhuongThucThanhToan
     {
         private System.ComponentModel.IContainer components = null;
 
@@ -404,11 +404,11 @@ namespace Quản_Lý_Khách_Sạn.Forms
             this.Controls.Add(this.tblLayout);
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Name = "PhuongThucThanhToan";
+            this.Name = "frmPhuongThucThanhToan";
             this.Padding = new System.Windows.Forms.Padding(20);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Phương Thức Thanh Toán";
-            this.Load += new System.EventHandler(this.PhuongThucThanhToan_Load);
+            this.Load += new System.EventHandler(this.frmPhuongThucThanhToan_Load);
             this.tblLayout.ResumeLayout(false);
             this.cardLeft.ResumeLayout(false);
             this.pnlSearch.ResumeLayout(false);

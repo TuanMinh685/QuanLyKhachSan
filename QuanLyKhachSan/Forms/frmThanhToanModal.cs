@@ -12,7 +12,7 @@ using Quản_Lý_Khách_Sạn.Models;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
-    public class frmThanhToanModal : Form
+    public partial class frmThanhToanModal : Form
     {
         private HoaDonBLL hoaDonBLL = new HoaDonBLL();
         private ChiTietHoaDonDAL chiTietDAL = new ChiTietHoaDonDAL();
@@ -24,64 +24,19 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private DataTable dtChiTietTam = new DataTable();
         private int? maVoucherDaApDung = null;
 
-        // UI Controls
-        private Panel pnlHeader;
-        private Label lblTitle;
-        private Label lblSubtitle;
-        private Panel pnlDivider;
-
-        private Label lblMaHD;
-        private TextBox txtMaHD;
-
-        private Label lblDatPhong;
-        private ComboBox cboDatPhong;
-
-        private Label lblTienPhong;
-        private TextBox txtTienPhong;
-
-        private Label lblTienCoc;
-        private TextBox txtTienCoc;
-
-        // Dịch vụ
-        private Label lblDichVuSection;
-        private ComboBox cboDichVu;
-        private NumericUpDown nudSoLuongDV;
-        private Button btnThemDV;
-        private DataGridView dgvChiTietDV;
-        private Label lblTienDV;
-        private TextBox txtTienDV;
-
-        // Voucher
-        private Label lblVoucherSection;
-        private TextBox txtVoucherCode;
-        private Button btnGoiYVoucher;
-        private Button btnApDungVoucher;
-        private ContextMenuStrip cmsVoucher;
-        private TextBox txtTienGiamGia;
-
-        // PTTT & Tổng tiền
-        private Label lblPTTT;
-        private ComboBox cboPTTT;
-
-        private Panel pnlTongTienBox;
-        private Label lblTongTienTieuDe;
-        private Label lblTongTienHienThi;
-
-        // Footer buttons
-        private Panel pnlFooter;
-        private Button btnVietQR;
-        private Button btnInHoaDon;
-        private Button btnXacNhan;
-        private Button btnHuy;
-
-        public frmThanhToanModal()
+        public frmThanhToanModal(string maDatPhongMacDinh = null)
         {
+            InitializeComponent();
             InitializeComponentCustom();
             UITheme.ApplyTheme(this);
             KhoiTaoBangChiTietTam();
             TaiDanhSachPhuongThucTT();
             TaiDanhSachDichVu();
             TaiDanhSachDatPhong();
+            if (!string.IsNullOrEmpty(maDatPhongMacDinh))
+            {
+                ChonDatPhongTheoMa(maDatPhongMacDinh);
+            }
             TinhTongTienTuDong();
         }
 
@@ -149,29 +104,57 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 e.Graphics.DrawLine(p, 0, 0, pnlFooter.Width, 0);
             };
 
-            btnVietQR = new Button
+            btnVNPAYQR = new Button
             {
-                Text = "📱 Mã VietQR",
-                Size = new Size(125, 40),
+                Text = "⚡ VNPAY-QR",
+                Size = new Size(110, 40),
                 Location = new Point(24, 14),
                 FlatStyle = FlatStyle.Flat,
-                BackColor = UITheme.DarkNavy,
+                BackColor = Color.FromArgb(0, 91, 170),
                 ForeColor = Color.White,
-                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                 Cursor = Cursors.Hand
             };
-            btnVietQR.FlatAppearance.BorderSize = 0;
-            btnVietQR.Click += btnVietQR_Click;
+            btnVNPAYQR.FlatAppearance.BorderSize = 0;
+            btnVNPAYQR.Click += btnVNPAYQR_Click;
+
+            btnMoMo = new Button
+            {
+                Text = "🟣 MoMo",
+                Size = new Size(95, 40),
+                Location = new Point(135, 14),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.FromArgb(165, 0, 100),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnMoMo.FlatAppearance.BorderSize = 0;
+            btnMoMo.Click += btnMoMo_Click;
+
+            btnApplePay = new Button
+            {
+                Text = "🍎 Apple Pay",
+                Size = new Size(110, 40),
+                Location = new Point(236, 14),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.FromArgb(28, 28, 30),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnApplePay.FlatAppearance.BorderSize = 0;
+            btnApplePay.Click += btnApplePay_Click;
 
             btnInHoaDon = new Button
             {
                 Text = "🖨️ In biên lai",
-                Size = new Size(115, 40),
-                Location = new Point(155, 14),
+                Size = new Size(110, 40),
+                Location = new Point(352, 14),
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.White,
                 ForeColor = UITheme.DarkNavy,
-                Font = new Font("Segoe UI", 9.5F),
+                Font = new Font("Segoe UI", 9F),
                 Cursor = Cursors.Hand
             };
             btnInHoaDon.FlatAppearance.BorderColor = UITheme.BorderColor;
@@ -207,7 +190,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnHuy.FlatAppearance.BorderColor = UITheme.BorderColor;
             btnHuy.Click += (_, __) => Close();
 
-            pnlFooter.Controls.Add(btnVietQR);
+            pnlFooter.Controls.Add(btnVNPAYQR);
+            pnlFooter.Controls.Add(btnMoMo);
+            pnlFooter.Controls.Add(btnApplePay);
             pnlFooter.Controls.Add(btnInHoaDon);
             pnlFooter.Controls.Add(btnXacNhan);
             pnlFooter.Controls.Add(btnHuy);
@@ -518,7 +503,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             dtChiTietTam = new DataTable();
             dtChiTietTam.Columns.Add("Mã DV", typeof(string));
             dtChiTietTam.Columns.Add("Tên Dịch Vụ", typeof(string));
-            dtChiTietTam.Columns.Add("SL", typeof(int));
+            dtChiTietTam.Columns.Add("SL", typeof(decimal));
             dtChiTietTam.Columns.Add("Đơn Giá", typeof(decimal));
             dtChiTietTam.Columns.Add("Thành Tiền", typeof(decimal));
             dgvChiTietDV.DataSource = dtChiTietTam;
@@ -571,6 +556,24 @@ namespace Quản_Lý_Khách_Sạn.Forms
             catch { }
         }
 
+        public void ChonDatPhongTheoMa(string maDP)
+        {
+            if (string.IsNullOrWhiteSpace(maDP)) return;
+            string raw = maDP.Replace("DP-", "").Trim();
+            if (cboDatPhong.DataSource is List<ThongTinDatPhongThanhToan> ds)
+            {
+                var found = ds.FirstOrDefault(d =>
+                    d.MaDatPhong.ToString() == maDP ||
+                    d.MaDatPhong.ToString() == raw ||
+                    (!string.IsNullOrEmpty(d.MaDat) && d.MaDat.Equals(maDP, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(d.MaDat) && d.MaDat.Equals(raw, StringComparison.OrdinalIgnoreCase)));
+                if (found != null)
+                {
+                    cboDatPhong.SelectedItem = found;
+                }
+            }
+        }
+
         private void cboDatPhong_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (cboDatPhong.SelectedItem is ThongTinDatPhongThanhToan dp)
@@ -578,11 +581,46 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 btnXacNhan.Enabled = true;
                 txtTienPhong.Text = dp.TienPhong.ToString("N0");
                 txtTienCoc.Text = dp.TienCoc.ToString("N0");
+
+                // Tự động tải tất cả dịch vụ đã phát sinh của phòng này
+                dtChiTietTam.Clear();
+                try
+                {
+                    var dtDaGhi = chiTietDAL.LayChiTietTheoDatPhong(dp.MaDatPhong.ToString());
+                    if (dtDaGhi != null && dtDaGhi.Rows.Count > 0)
+                    {
+                        foreach (DataRow r in dtDaGhi.Rows)
+                        {
+                            string maDV = r["MaDichVu"].ToString();
+                            string tenDV = r["TenDichVu"].ToString();
+                            decimal sl = Convert.ToDecimal(r["SoLuong"]);
+                            decimal dg = Convert.ToDecimal(r["DonGia"]);
+                            decimal tt = Convert.ToDecimal(r["ThanhTien"]);
+                            dtChiTietTam.Rows.Add(maDV, tenDV, sl, dg, tt);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    btnXacNhan.Enabled = false;
+                    MessageBox.Show(this, "Chưa tải được dịch vụ của đơn. Hãy chọn lại đơn trước khi thanh toán.\n" + ex.Message,
+                        "Không thể tải dịch vụ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                decimal tongDV = 0;
+                foreach (DataRow r in dtChiTietTam.Rows)
+                {
+                    tongDV += Convert.ToDecimal(r["Thành Tiền"]);
+                }
+                txtTienDV.Text = tongDV.ToString("N0");
             }
             else
             {
                 txtTienPhong.Text = "0";
                 txtTienCoc.Text = "0";
+                txtTienDV.Text = "0";
+                dtChiTietTam.Clear();
                 btnXacNhan.Enabled = false;
             }
             TinhTongTienTuDong();
@@ -591,7 +629,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private void btnThemDV_Click(object sender, EventArgs e)
         {
             if (cboDichVu.SelectedItem is not DichVu dv) return;
-            int sl = (int)nudSoLuongDV.Value;
+            decimal sl = nudSoLuongDV.Value;
             if (sl <= 0) return;
 
             decimal donGia = dv.DonGia;
@@ -609,7 +647,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             if (existing != null)
             {
-                int currentSl = Convert.ToInt32(existing["SL"]);
+                decimal currentSl = Convert.ToDecimal(existing["SL"]);
                 existing["SL"] = currentSl + sl;
                 existing["Thành Tiền"] = (currentSl + sl) * donGia;
             }
@@ -750,7 +788,10 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             if (cboPTTT.SelectedItem is PhuongThucThanhToanModel model)
             {
-                string ten = model.TenPhuongThuc.ToLower();
+                string ten = (model.TenPhuongThuc ?? "").ToLower();
+                if (ten.Contains("momo")) return "MOMO";
+                if (ten.Contains("apple pay") || ten.Contains("contactless")) return "APPLEPAY";
+                if (ten.Contains("vnpay") || ten.Contains("emvco")) return "VNPAY";
                 if (ten.Contains("chuyển khoản") || ten.Contains("qr")) return "CK";
                 if (ten.Contains("thẻ") || ten.Contains("pos")) return "POS";
                 return "TM";
@@ -758,16 +799,40 @@ namespace Quản_Lý_Khách_Sạn.Forms
             return "TM";
         }
 
-        private void btnVietQR_Click(object sender, EventArgs e)
+        private void btnVNPAYQR_Click(object sender, EventArgs e)
         {
             decimal canThu = Math.Max(0, ParseMoney(txtTienPhong.Text) + ParseMoney(txtTienDV.Text) - ParseMoney(txtTienGiamGia.Text) - ParseMoney(txtTienCoc.Text));
             if (canThu <= 0)
             {
-                MessageBox.Show("Số tiền cần thu bằng 0 đ, không cần quét mã VietQR.", "Thông báo");
+                MessageBox.Show("Số tiền cần thu bằng 0 đ, không cần mở cổng VNPAY-QR.", "Thông báo");
                 return;
             }
-            using var qr = new frmVietQR(txtMaHD.Text, canThu, $"THANH TOAN {txtMaHD.Text}");
+            using var qr = new frmVNPAYQR(txtMaHD.Text, canThu, $"THANH TOAN {txtMaHD.Text}");
             qr.ShowDialog(this);
+        }
+
+        private void btnMoMo_Click(object sender, EventArgs e)
+        {
+            decimal canThu = Math.Max(0, ParseMoney(txtTienPhong.Text) + ParseMoney(txtTienDV.Text) - ParseMoney(txtTienGiamGia.Text) - ParseMoney(txtTienCoc.Text));
+            if (canThu <= 0)
+            {
+                MessageBox.Show("Số tiền cần thu bằng 0 đ, không cần quét mã MoMo.", "Thông báo");
+                return;
+            }
+            using var mm = new frmMoMoQR(txtMaHD.Text, canThu, $"THANH TOAN {txtMaHD.Text}");
+            mm.ShowDialog(this);
+        }
+
+        private void btnApplePay_Click(object sender, EventArgs e)
+        {
+            decimal canThu = Math.Max(0, ParseMoney(txtTienPhong.Text) + ParseMoney(txtTienDV.Text) - ParseMoney(txtTienGiamGia.Text) - ParseMoney(txtTienCoc.Text));
+            if (canThu <= 0)
+            {
+                MessageBox.Show("Số tiền cần thu bằng 0 đ, không cần chạm POS Apple Pay.", "Thông báo");
+                return;
+            }
+            using var ap = new frmApplePayModal(txtMaHD.Text, canThu, $"THANH TOAN {txtMaHD.Text}");
+            ap.ShowDialog(this);
         }
 
         private void btnInHoaDon_Click(object sender, EventArgs e)
@@ -859,7 +924,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 return;
             }
 
-            decimal canThu = ParseMoney(lblTongTienHienThi.Text);
+            decimal canThu = Math.Max(0, ParseMoney(txtTienPhong.Text) + ParseMoney(txtTienDV.Text) - ParseMoney(txtTienGiamGia.Text) - ParseMoney(txtTienCoc.Text));
             HoaDon hd = new HoaDon
             {
                 MaHoaDon = txtMaHD.Text.Trim(),
@@ -881,7 +946,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 btnXacNhan.Enabled = false;
                 var chiTiet = dtChiTietTam.AsEnumerable().Select(r => new ChiTietHoaDon
                 {
-                    MaDichVu = r["Mã DV"].ToString(), SoLuong = Convert.ToInt32(r["SL"]),
+                    MaDichVu = r["Mã DV"].ToString(), SoLuong = Convert.ToDecimal(r["SL"]),
                     DonGia = Convert.ToDecimal(r["Đơn Giá"])
                 }).ToList();
                 decimal hoanDu = Math.Max(0, hd.TienDatCoc - (hd.TienPhong + chiTiet.Sum(x => x.ThanhTien) - hd.TienGiamGia));
@@ -889,10 +954,20 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     ? $"Xác nhận đã hoàn khách {hoanDu:N0} đ bằng phương thức đang chọn?"
                     : $"Xác nhận thu {canThu:N0} đ, đã trừ cọc {hd.TienDatCoc:N0} đ?";
                 if (MessageBox.Show(this, hoi, "Xác nhận thanh toán", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
-                if (hd.MaPTTT == "CK" && canThu > 0)
+                if ((hd.MaPTTT == "CK" || hd.MaPTTT == "VNPAY") && canThu > 0)
                 {
-                    using var qr = new frmVietQR(hd.MaHoaDon, canThu, $"THANH TOAN {hd.MaHoaDon}");
+                    using var qr = new frmVNPAYQR(hd.MaHoaDon, canThu, $"THANH TOAN {hd.MaHoaDon}");
                     if (qr.ShowDialog(this) != DialogResult.OK) return;
+                }
+                else if (hd.MaPTTT == "MOMO" && canThu > 0)
+                {
+                    using var qr = new frmMoMoQR(hd.MaHoaDon, canThu, $"MOMO {hd.MaHoaDon}");
+                    if (qr.ShowDialog(this) != DialogResult.OK) return;
+                }
+                else if (hd.MaPTTT == "APPLEPAY" && canThu > 0)
+                {
+                    using var pos = new frmApplePayModal(hd.MaHoaDon, canThu, $"APPLE PAY {hd.MaHoaDon}");
+                    if (pos.ShowDialog(this) != DialogResult.OK) return;
                 }
                 if (!hoaDonBLL.ThanhToanVaTraPhong(hd, dp.MaDatPhong.ToString(), chiTiet, Session.MaNhanVien)) return;
                 // Giữ thao tác giảm lượt voucher của module thanh toán hiện có.

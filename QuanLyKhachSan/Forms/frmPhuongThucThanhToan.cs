@@ -8,7 +8,7 @@ using Quản_Lý_Khách_Sạn.DAL;
 
 namespace Quản_Lý_Khách_Sạn.Forms
 {
-    public partial class PhuongThucThanhToan : Form
+    public partial class frmPhuongThucThanhToan : Form
     {
         private PhuongThucThanhToanDAL dal = new PhuongThucThanhToanDAL();
         private List<PhuongThucThanhToanModel> danhSachGoc = new List<PhuongThucThanhToanModel>();
@@ -23,7 +23,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private Label lblPillActive;
         private Label lblPillInactive;
 
-        public PhuongThucThanhToan()
+        public frmPhuongThucThanhToan()
         {
             InitializeComponent();
             UITheme.ApplyTheme(this);
@@ -51,7 +51,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             lblSubtitleLeft = new Label
             {
-                Text = "Cấu hình cổng thu ngân: Tiền mặt, Chuyển khoản VietQR, Thẻ POS ngân hàng...",
+                Text = "Cấu hình cổng thu ngân: Tiền mặt, VNPAY-QR chuẩn EMVCo, Ví MoMo, Apple Pay, Thẻ POS...",
                 Font = new Font("Segoe UI", 9f, FontStyle.Regular),
                 ForeColor = UITheme.TextMuted,
                 Location = new Point(0, 26),
@@ -220,7 +220,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             }
         }
 
-        private void PhuongThucThanhToan_Load(object sender, EventArgs e)
+        private void frmPhuongThucThanhToan_Load(object sender, EventArgs e)
         {
             UITheme.StyleModernGrid(dgvPTTT);
             TaiDanhSach();
