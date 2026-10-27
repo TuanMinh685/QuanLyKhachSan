@@ -35,6 +35,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             InitializeComponent();
             _thaoTac = thaoTac;
+            ThietKeChonDatPhong();
 
             AcceptButton = btnTim;      // Enter = Tìm
             CancelButton = btnDong;     // Esc   = Đóng
@@ -78,16 +79,15 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     Text = "Hủy phòng";
                     lblTieuDe.Text = "Chọn đơn đặt phòng cần hủy";
                     btnXacNhan.Text = "Hủy đơn";
-                    btnXacNhan.BackColor = Color.FromArgb(229, 72, 77);   // nút đỏ cho thao tác nguy hiểm
+                    btnXacNhan.BackColor = UITheme.DangerRed;
                     btnXacNhan.ForeColor = Color.White;
                     break;
             }
 
-            // Ô lý do chỉ cần khi hủy; thao tác khác thì ẩn và nới rộng lưới cho đỡ trống
+            // Ô lý do chỉ có trong bố cục hủy; các thao tác khác dùng toàn vùng bảng.
             bool huy = _thaoTac == ThaoTacDatPhong.HuyPhong;
             lblLyDo.Visible = huy;
             txtLyDo.Visible = huy;
-            if (!huy) dgvDatPhong.Height += 56;
         }
 
         private void CauHinhLuoi()
@@ -95,19 +95,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             if (dgvDatPhong.Columns.Count > 0) return;      // đã cấu hình rồi
 
             dgvDatPhong.AutoGenerateColumns = false;        // chỉ hiện cột mình khai báo
-            dgvDatPhong.ReadOnly = true;
-            dgvDatPhong.AllowUserToAddRows = false;
-            dgvDatPhong.AllowUserToDeleteRows = false;
-            dgvDatPhong.RowHeadersVisible = false;
-            dgvDatPhong.MultiSelect = false;
-            dgvDatPhong.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvDatPhong.BackgroundColor = Color.White;
-            dgvDatPhong.BorderStyle = BorderStyle.None;
-            dgvDatPhong.EnableHeadersVisualStyles = false;
-            dgvDatPhong.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#F3F6F9");
-            dgvDatPhong.ColumnHeadersDefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#647487");
-            dgvDatPhong.DefaultCellStyle.SelectionBackColor = ColorTranslator.FromHtml("#E3EEF9");
-            dgvDatPhong.DefaultCellStyle.SelectionForeColor = Color.Black;
+            LeTanUi.Grid(dgvDatPhong);
 
             ThemCot("MaDat", "Mã đặt", 115, false, null);
             ThemCot("HoTen", "Khách", 0, true, null);
@@ -117,6 +105,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
             ThemCot("NgayTra", "Trả", 90, false, "dd/MM/yyyy");
             ThemCot("TongTien", "Tổng tiền (đ)", 110, false, "#,##0");
             ThemCot("TienCoc", "Đã cọc (đ)", 110, false, "#,##0");
+            foreach (DataGridViewColumn column in dgvDatPhong.Columns)
+            {
+                column.MinimumWidth = column.DataPropertyName == "HoTen" ? 170 :
+                    column.DataPropertyName == "SoPhong" ? 80 : 118;
+                column.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            }
         }
 
         private void ThemCot(string prop, string tieuDe, int rong, bool fill, string dinhDang)

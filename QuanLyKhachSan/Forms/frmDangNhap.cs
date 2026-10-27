@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Security.Cryptography;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
+// using Microsoft.Data.SqlClient; // migrated to Supabase Npgsql
 using Quản_Lý_Khách_Sạn.DAL;
 using Quản_Lý_Khách_Sạn;
 

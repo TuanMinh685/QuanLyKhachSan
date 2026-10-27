@@ -208,3 +208,81 @@ INSERT INTO DichVu (MaDichVu, TenDichVu, LoaiDichVu, DonGia, DonViTinh) VALUES
  (N'DV002', N'Giặt ủi', N'Tiện ích', 50000, N'Kg'),
  (N'DV003', N'Đưa đón sân bay', N'Di chuyển', 300000, N'Lượt');
 GO
+
+
+/* ---------- 11. Bổ sung phòng mẫu ---------- */
+INSERT INTO Phong (SoPhong, Tang, MaLoai, MoTaGiuong, DienTich) VALUES
+ (N'P103', 1, 1, N'1 giường đôi', 22),
+ (N'P104', 1, 1, N'2 giường đơn', 22),
+ (N'P203', 2, 2, N'1 giường king', 30),
+ (N'P204', 2, 2, N'2 giường đôi', 32),
+ (N'P302', 3, 3, N'1 giường king view biển', 48);
+
+/* ---------- 12. Bổ sung dịch vụ mẫu ---------- */
+INSERT INTO DichVu (MaDichVu, TenDichVu, LoaiDichVu, DonGia, DonViTinh) VALUES
+ (N'DV004', N'Nước suối khoáng', N'Đồ uống', 15000, N'Chai'),
+ (N'DV005', N'Bia Tiger lon', N'Đồ uống', 35000, N'Lon'),
+ (N'DV006', N'Spa massage trị liệu', N'Thư giãn', 350000, N'Suất'),
+ (N'DV007', N'Thuê xe máy Honda', N'Di chuyển', 150000, N'Ngày'),
+ (N'DV008', N'Phụ thu check-out muộn', N'Phụ thu', 200000, N'Giờ');
+
+/* ---------- 13. Voucher khuyến mãi ---------- */
+INSERT INTO Voucher (Code, TenChuongTrinh, LoaiGiam, GiaTri, DonToiThieu, NgayBatDau, NgayHetHan, SoLuong, TrangThai) VALUES
+ (N'SUMMER2026', N'Mùa hè rực rỡ', N'PhanTram', 10, 1000000, '2026-01-01', '2026-12-31', 100, 1),
+ (N'VIPGUEST', N'Tri ân khách VIP', N'PhanTram', 15, 2000000, '2026-01-01', '2026-12-31', 50, 1),
+ (N'GIAM100K', N'Ưu đãi đặt sớm', N'SoTien', 100000, 500000, '2026-01-01', '2026-12-31', 200, 1);
+
+/* ---------- 14. Khách hàng mẫu ---------- */
+INSERT INTO KhachHang (HoTen, SoDienThoai, GioiTinh, NgaySinh, QuocTich, Email, DiaChi, CCCD, DongYNhanUuDai) VALUES
+ (N'Nguyễn Văn Hùng', '0912345678', N'Nam', '1988-05-12', N'Việt Nam', 'hung.nguyen@gmail.com', N'Ba Đình, Hà Nội', '001088012345', 1),
+ (N'Đỗ Thu Trang', '0987654321', N'Nữ', '1993-09-20', N'Việt Nam', 'trang.dothu@gmail.com', N'Quận 1, TP. Hồ Chí Minh', '079193005678', 1),
+ (N'Phạm Minh Tuấn', '0903112233', N'Nam', '1985-11-04', N'Việt Nam', 'tuan.pham@outlook.com', N'Hải Châu, Đà Nẵng', '048085009876', 0),
+ (N'Lê Hoàng Yến', '0934556677', N'Nữ', '1996-03-15', N'Việt Nam', 'yen.le@gmail.com', N'Ninh Kiều, Cần Thơ', '092196001234', 1),
+ (N'Trần Bảo Long', '0978998877', N'Nam', '1980-08-28', N'Việt Nam', 'long.tran@corp.vn', N'Ngô Quyền, Hải Phòng', '031080004567', 1),
+ (N'Vũ Thanh Thảo', '0945667788', N'Nữ', '1999-12-01', N'Việt Nam', 'thao.vu@gmail.com', N'Nha Trang, Khánh Hòa', '056199003456', 0);
+
+/* ---------- 15. Đặt phòng mẫu ---------- */
+-- 3 đơn ĐANG Ở (sẵn sàng chờ thanh toán trên màn hình Hóa đơn)
+INSERT INTO DatPhong (MaDat, MaKH, MaPhong, NgayNhan, NgayTra, SoNguoiLon, SoTreEm, GiaMotDem, TongTien, TienCoc, TrangThai, NgayTao) VALUES
+ (N'DP-261020-001', 1, 1, '2026-10-20', '2026-10-24', 2, 0, 500000, 2000000, 500000, N'Đang ở', '2026-10-20 09:00:00'),
+ (N'DP-261021-002', 2, 3, '2026-10-21', '2026-10-25', 2, 1, 800000, 3200000, 1000000, N'Đang ở', '2026-10-21 14:00:00'),
+ (N'DP-261022-003', 3, 5, '2026-10-22', '2026-10-26', 2, 2, 1500000, 6000000, 2000000, N'Đang ở', '2026-10-22 10:30:00');
+
+-- 6 đơn ĐÃ TRẢ & ĐÃ HOÀN TẤT THANH TOÁN (cho Báo cáo Doanh thu & Thống kê)
+INSERT INTO DatPhong (MaDat, MaKH, MaPhong, NgayNhan, NgayTra, SoNguoiLon, SoTreEm, GiaMotDem, TongTien, TienCoc, TrangThai, NgayTao) VALUES
+ (N'DP-261001-004', 1, 3, '2026-10-01', '2026-10-03', 2, 0, 800000, 1600000, 500000, N'Đã trả', '2026-10-01 08:00:00'),
+ (N'DP-261005-005', 4, 1, '2026-10-05', '2026-10-07', 1, 0, 500000, 1000000, 300000, N'Đã trả', '2026-10-05 11:00:00'),
+ (N'DP-261008-006', 5, 5, '2026-10-08', '2026-10-11', 2, 0, 1500000, 4500000, 1500000, N'Đã trả', '2026-10-08 15:00:00'),
+ (N'DP-261012-007', 2, 2, '2026-10-12', '2026-10-14', 2, 0, 500000, 1000000, 300000, N'Đã trả', '2026-10-12 12:00:00'),
+ (N'DP-261015-008', 3, 4, '2026-10-15', '2026-10-17', 2, 1, 800000, 1600000, 500000, N'Đã trả', '2026-10-15 09:30:00'),
+ (N'DP-261018-009', 5, 5, '2026-10-18', '2026-10-20', 3, 0, 1500000, 3000000, 1000000, N'Đã trả', '2026-10-18 16:00:00');
+
+-- 2 đơn HỦY
+INSERT INTO DatPhong (MaDat, MaKH, MaPhong, NgayNhan, NgayTra, SoNguoiLon, SoTreEm, GiaMotDem, TongTien, TienCoc, TrangThai, NgayTao) VALUES
+ (N'DP-261010-010', 6, 2, '2026-10-10', '2026-10-12', 1, 0, 500000, 1000000, 0, N'Đã hủy', '2026-10-09 10:00:00'),
+ (N'DP-261016-011', 4, 3, '2026-10-16', '2026-10-18', 2, 0, 800000, 1600000, 0, N'Đã hủy', '2026-10-14 08:00:00');
+
+/* ---------- 16. Hóa đơn mẫu tương ứng các đơn Đã trả ---------- */
+INSERT INTO HoaDon (MaHoaDon, MaDatPhong, NgayLap, NgayThanhToan, TienPhong, TienDichVu, TienGiamGia, TienDatCoc, TongTien, MaPTTT, TrangThai) VALUES
+ (N'HD26100301', N'DP-261001-004', '2026-10-03 12:00:00', '2026-10-03 12:00:00', 1600000, 540000, 0, 500000, 1640000, N'TM', N'Đã thanh toán'),
+ (N'HD26100702', N'DP-261005-005', '2026-10-07 11:30:00', '2026-10-07 11:30:00', 1000000, 100000, 0, 300000, 800000, N'CK', N'Đã thanh toán'),
+ (N'HD26101103', N'DP-261008-006', '2026-10-11 12:15:00', '2026-10-11 12:15:00', 4500000, 1050000, 200000, 1500000, 3850000, N'CK', N'Đã thanh toán'),
+ (N'HD26101404', N'DP-261012-007', '2026-10-14 10:00:00', '2026-10-14 10:00:00', 1000000, 240000, 0, 300000, 940000, N'TM', N'Đã thanh toán'),
+ (N'HD26101705', N'DP-261015-008', '2026-10-17 12:30:00', '2026-10-17 12:30:00', 1600000, 470000, 100000, 500000, 1470000, N'POS', N'Đã thanh toán'),
+ (N'HD26102006', N'DP-261018-009', '2026-10-20 11:45:00', '2026-10-20 11:45:00', 3000000, 650000, 0, 1000000, 2650000, N'CK', N'Đã thanh toán');
+
+/* ---------- 17. Chi tiết hóa đơn (Dịch vụ sử dụng) ---------- */
+INSERT INTO ChiTietHoaDon (MaHoaDon, MaDichVu, SoLuong, DonGia, ThanhTien) VALUES
+ (N'HD26100301', N'DV001', 2, 120000, 240000),
+ (N'HD26100301', N'DV003', 1, 300000, 300000),
+ (N'HD26100702', N'DV002', 2, 50000, 100000),
+ (N'HD26101103', N'DV006', 2, 350000, 700000),
+ (N'HD26101103', N'DV007', 1, 150000, 150000),
+ (N'HD26101103', N'DV008', 1, 200000, 200000),
+ (N'HD26101404', N'DV001', 2, 120000, 240000),
+ (N'HD26101705', N'DV004', 4, 15000, 60000),
+ (N'HD26101705', N'DV005', 4, 35000, 140000),
+ (N'HD26101705', N'DV006', 1, 270000, 270000),
+ (N'HD26102006', N'DV003', 1, 300000, 300000),
+ (N'HD26102006', N'DV006', 1, 350000, 350000);
+GO

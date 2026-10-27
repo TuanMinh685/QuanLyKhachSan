@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+// using Microsoft.Data.SqlClient; // migrated to Supabase Npgsql
 using Quản_Lý_Khách_Sạn.Models;
 
 namespace Quản_Lý_Khách_Sạn.DAL
@@ -36,7 +36,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
         // Bổ sung hàm GetById(int)
         public Voucher GetById(int id)
         {
-            string sql = "SELECT TOP 1 * FROM Voucher WHERE MaVoucher = @Id";
+            string sql = "SELECT * FROM Voucher WHERE MaVoucher = @Id LIMIT 1";
             try
             {
                 using (SqlConnection conn = DatabaseHelper.GetConnection())
@@ -64,11 +64,27 @@ namespace Quản_Lý_Khách_Sạn.DAL
             return GetById(id.Value);
         }
 
+        public bool GiamSoLuong(int maVoucher)
+        {
+            string sql = "UPDATE Voucher SET SoLuong = SoLuong - 1 WHERE MaVoucher = @Ma AND SoLuong > 0";
+            try
+            {
+                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Ma", maVoucher);
+                    conn.Open();
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+            catch { return false; }
+        }
+
         public Voucher GetByCode(string code)
         {
             if (string.IsNullOrWhiteSpace(code)) return null;
 
-            string sql = "SELECT TOP 1 * FROM Voucher WHERE Code = @code";
+            string sql = "SELECT * FROM Voucher WHERE Code = @code LIMIT 1";
             try
             {
                 using (SqlConnection conn = DatabaseHelper.GetConnection())
@@ -189,8 +205,16 @@ namespace Quản_Lý_Khách_Sạn.DAL
                 else if (col == "giatri") v.GiaTri = Convert.ToDecimal(val);
                 else if (col == "loaigiam") v.LoaiGiam = val.ToString() ?? "PhanTram";
                 else if (col == "dontoithieu") v.DonToiThieu = Convert.ToDecimal(val);
-                else if (col == "ngaybatdau") v.NgayBatDau = Convert.ToDateTime(val);
-                else if (col == "ngayhethan") v.NgayHetHan = Convert.ToDateTime(val);
+                else if (col == "ngaybatdau")
+                {
+                    if (val is DateOnly d) v.NgayBatDau = d.ToDateTime(TimeOnly.MinValue);
+                    else v.NgayBatDau = Convert.ToDateTime(val);
+                }
+                else if (col == "ngayhethan")
+                {
+                    if (val is DateOnly d) v.NgayHetHan = d.ToDateTime(TimeOnly.MinValue);
+                    else v.NgayHetHan = Convert.ToDateTime(val);
+                }
                 else if (col == "soluong") v.SoLuong = Convert.ToInt32(val);
                 else if (col == "trangthai") v.TrangThai = Convert.ToBoolean(val);
             }

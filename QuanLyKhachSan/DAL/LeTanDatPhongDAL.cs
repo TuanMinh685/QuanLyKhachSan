@@ -1,6 +1,6 @@
-﻿using System;
+using NpgsqlTypes;
+using System;
 using System.Data;
-using Microsoft.Data.SqlClient;    // Nếu DatabaseHelper.cs của nhóm dùng System.Data.SqlClient thì đổi dòng này cho giống
 
 namespace Quản_Lý_Khách_Sạn.DAL
 {
@@ -12,17 +12,17 @@ namespace Quản_Lý_Khách_Sạn.DAL
     public static class LeTanDatPhongDAL
     {
 
-        internal static SqlConnection TaoKetNoi()
+        internal static NpgsqlConnection TaoKetNoi()
         {
             return DatabaseHelper.GetConnection();
         }
 
         // Chạy SELECT, trả về DataTable (Fill tự mở và đóng kết nối)
-        internal static DataTable LayBang(string sql, params SqlParameter[] ps)
+        internal static DataTable LayBang(string sql, params NpgsqlParameter[] ps)
         {
             using (var conn = TaoKetNoi())
-            using (var cmd = new SqlCommand(sql, conn))
-            using (var da = new SqlDataAdapter(cmd))
+            using (var cmd = new NpgsqlCommand(sql, conn))
+            using (var da = new NpgsqlDataAdapter(cmd))
             {
                 if (ps != null) cmd.Parameters.AddRange(ps);
                 var dt = new DataTable();
@@ -45,21 +45,21 @@ SELECT p.MaPhong, p.SoPhong, lp.MaLoai, lp.TenLoai, p.MoTaGiuong, p.DienTich, p.
        COUNT(*) OVER (PARTITION BY lp.MaLoai) AS SoPhongConLai
 FROM Phong p
 JOIN LoaiPhong lp ON lp.MaLoai = p.MaLoai
-WHERE p.TinhTrang = N'Hoạt động'
+WHERE p.TinhTrang = 'Hoạt động'
   AND lp.SoNguoiToiDa >= @TongNguoi
   AND (@MaLoai IS NULL OR lp.MaLoai = @MaLoai)
   AND NOT EXISTS (
         SELECT 1 FROM DatPhong d
         WHERE d.MaPhong = p.MaPhong
-          AND d.TrangThai IN (N'Đã đặt', N'Đang ở')
+          AND d.TrangThai IN ('Đã đặt', 'Đang ở')
           AND ((d.NgayNhan < @Tra AND d.NgayTra > @Nhan)
-               OR (d.TrangThai = N'Đang ở' AND @Nhan <= CAST(GETDATE() AS date))))
+               OR (d.TrangThai = 'Đang ở' AND @Nhan <= CAST(CURRENT_TIMESTAMP AS date))))
 ORDER BY p.SoPhong";
 
-            var pNhan = new SqlParameter("@Nhan", SqlDbType.Date) { Value = nhan.Date };
-            var pTra = new SqlParameter("@Tra", SqlDbType.Date) { Value = tra.Date };
-            var pNguoi = new SqlParameter("@TongNguoi", SqlDbType.Int) { Value = tongNguoi };
-            var pLoai = new SqlParameter("@MaLoai", SqlDbType.Int) { Value = (object)maLoai ?? DBNull.Value };
+            var pNhan = new NpgsqlParameter("@Nhan", NpgsqlDbType.Date) { Value = nhan.Date };
+            var pTra = new NpgsqlParameter("@Tra", NpgsqlDbType.Date) { Value = tra.Date };
+            var pNguoi = new NpgsqlParameter("@TongNguoi", NpgsqlDbType.Integer) { Value = tongNguoi };
+            var pLoai = new NpgsqlParameter("@MaLoai", NpgsqlDbType.Integer) { Value = (object)maLoai ?? DBNull.Value };
 
             return LayBang(sql, pNhan, pTra, pNguoi, pLoai);
         }
@@ -71,7 +71,7 @@ SELECT MaKH, MaKHHienThi, HoTen, SoDienThoai
 FROM KhachHang
 WHERE HoTen LIKE @k OR SoDienThoai LIKE @k OR MaKHHienThi LIKE @k
 ORDER BY HoTen";
-            return LayBang(sql, new SqlParameter("@k", "%" + tuKhoa + "%"));
+            return LayBang(sql, new NpgsqlParameter("@k", "%" + tuKhoa + "%"));
         }
 
         // Giá/đêm của phòng; null nếu phòng không tồn tại hoặc đang bảo trì
@@ -80,12 +80,12 @@ ORDER BY HoTen";
             const string sql = @"
 SELECT lp.GiaMotDem
 FROM Phong p JOIN LoaiPhong lp ON lp.MaLoai = p.MaLoai
-WHERE p.MaPhong = @MaPhong AND p.TinhTrang = N'Hoạt động'";
+WHERE p.MaPhong = @MaPhong AND p.TinhTrang = 'Hoạt động'";
 
             using (var conn = TaoKetNoi())
-            using (var cmd = new SqlCommand(sql, conn))
+            using (var cmd = new NpgsqlCommand(sql, conn))
             {
-                cmd.Parameters.Add("@MaPhong", SqlDbType.Int).Value = maPhong;
+                cmd.Parameters.Add("@MaPhong", NpgsqlDbType.Integer).Value = maPhong;
                 conn.Open();
                 object kq = cmd.ExecuteScalar();
                 if (kq == null || kq == DBNull.Value) return null;
@@ -104,19 +104,19 @@ WHERE p.MaPhong = @MaPhong AND p.TinhTrang = N'Hoạt động'";
             using (var conn = TaoKetNoi())
             {
                 conn.Open();
-                // Serializable: hai người cùng đặt một phòng không thể cùng vượt qua bước kiểm tra trùng
-                using (var tran = conn.BeginTransaction(IsolationLevel.Serializable))
+                // ReadCommitted đọc được đơn vừa commit sau khi chờ khóa giao dịch dùng chung.
+                using (var tran = conn.BeginTransaction(IsolationLevel.ReadCommitted))
                 {
                     try
                     {
                         // Cùng khóa với nhận/hủy phòng để tuần tự hóa thay đổi đặt phòng.
                         KhoaDatPhong(conn, tran);
-                        using (var check = new SqlCommand(@"
-SELECT lp.GiaMotDem, lp.SoNguoiToiDa FROM Phong p WITH (UPDLOCK, HOLDLOCK)
-JOIN LoaiPhong lp WITH (HOLDLOCK) ON lp.MaLoai = p.MaLoai
-WHERE p.MaPhong = @Phong AND p.TinhTrang = N'Hoạt động'", conn, tran))
+                        using (var check = new NpgsqlCommand(@"
+SELECT lp.GiaMotDem, lp.SoNguoiToiDa FROM Phong p
+JOIN LoaiPhong lp ON lp.MaLoai = p.MaLoai
+WHERE p.MaPhong = @Phong AND p.TinhTrang = 'Hoạt động' FOR SHARE OF p, lp", conn, tran))
                         {
-                            check.Parameters.Add("@Phong", SqlDbType.Int).Value = maPhong;
+                            check.Parameters.Add("@Phong", NpgsqlDbType.Integer).Value = maPhong;
                             using var reader = check.ExecuteReader();
                             if (!reader.Read())
                                 throw new BLL.NghiepVuException("Phòng đã ngừng hoạt động. Hãy tìm lại phòng.");
@@ -127,15 +127,15 @@ WHERE p.MaPhong = @Phong AND p.TinhTrang = N'Hoạt động'", conn, tran))
                         }
                         // 1) Kiểm tra trùng lịch NGAY TRONG transaction
                         int soDonTrung;
-                        using (var cmd = new SqlCommand(@"
+                        using (var cmd = new NpgsqlCommand(@"
 SELECT COUNT(*) FROM DatPhong
-WHERE MaPhong = @MaPhong AND TrangThai IN (N'Đã đặt', N'Đang ở')
+WHERE MaPhong = @MaPhong AND TrangThai IN ('Đã đặt', 'Đang ở')
   AND ((NgayNhan < @Tra AND NgayTra > @Nhan)
-       OR (TrangThai = N'Đang ở' AND @Nhan <= CAST(GETDATE() AS date)))", conn, tran))
+       OR (TrangThai = 'Đang ở' AND @Nhan <= CAST(CURRENT_TIMESTAMP AS date)))", conn, tran))
                         {
-                            cmd.Parameters.Add("@MaPhong", SqlDbType.Int).Value = maPhong;
-                            cmd.Parameters.Add("@Nhan", SqlDbType.Date).Value = nhan.Date;
-                            cmd.Parameters.Add("@Tra", SqlDbType.Date).Value = tra.Date;
+                            cmd.Parameters.Add("@MaPhong", NpgsqlDbType.Integer).Value = maPhong;
+                            cmd.Parameters.Add("@Nhan", NpgsqlDbType.Date).Value = nhan.Date;
+                            cmd.Parameters.Add("@Tra", NpgsqlDbType.Date).Value = tra.Date;
                             soDonTrung = Convert.ToInt32(cmd.ExecuteScalar());
                         }
                         if (soDonTrung > 0)
@@ -144,44 +144,43 @@ WHERE MaPhong = @MaPhong AND TrangThai IN (N'Đã đặt', N'Đang ở')
                             return null;   // báo cho BLL biết là trùng lịch
                         }
 
-                        // Dùng ngày của SQL Server và số lớn nhất để không tái sử dụng mã khi xóa đơn.
+                        // Dùng ngày của khách sạn và số lớn nhất để không tái sử dụng mã khi xóa đơn.
                         string prefix;
-                        using (var clock = new SqlCommand("SELECT 'DP-' + CONVERT(char(6), GETDATE(), 12) + '-'", conn, tran))
+                        using (var clock = new NpgsqlCommand("SELECT 'DP-' || to_char(CURRENT_DATE, 'YYMMDD') || '-'", conn, tran))
                             prefix = Convert.ToString(clock.ExecuteScalar());
                         int stt;
-                        using (var cmd = new SqlCommand(@"
-SELECT ISNULL(MAX(TRY_CONVERT(int, SUBSTRING(MaDat, 11, 10))), 0) + 1
-FROM DatPhong WHERE MaDat LIKE @Prefix + '%'", conn, tran))
+                        using (var cmd = new NpgsqlCommand(@"
+SELECT COALESCE(MAX(CASE WHEN substring(MaDat from 11) ~ '^[0-9]{1,9}$' THEN substring(MaDat from 11)::integer END), 0) + 1
+FROM DatPhong WHERE MaDat LIKE @Prefix || '%'", conn, tran))
                         {
-                            cmd.Parameters.Add("@Prefix", SqlDbType.NVarChar, 10).Value = prefix;
+                            cmd.Parameters.Add("@Prefix", NpgsqlDbType.Varchar, 10).Value = prefix;
                             stt = Convert.ToInt32(cmd.ExecuteScalar());
                         }
                         string maDat = prefix + stt.ToString("000");
 
                         // 3) Ghi đơn
                         int maDatPhong;
-                        using (var cmd = new SqlCommand(@"
+                        using (var cmd = new NpgsqlCommand(@"
 INSERT INTO DatPhong (MaDat, MaKH, MaPhong, NgayNhan, NgayTra, SoNguoiLon, SoTreEm,
                       GiaMotDem, PhuThu, ThueVaPhi, TongTien, TienCoc, TrangThai, MaNhanVien)
-OUTPUT INSERTED.MaDatPhong
 VALUES (@MaDat, @MaKH, @MaPhong, @Nhan, @Tra, @NguoiLon, @TreEm,
-        @Gia, @PhuThu, @Thue, @Tong, @Coc, N'Đã đặt', @MaNV)", conn, tran))
+        @Gia, @PhuThu, @Thue, @Tong, @Coc, 'Đã đặt', @MaNV) RETURNING MaDatPhong", conn, tran))
                         {
-                            cmd.Parameters.Add("@MaDat", SqlDbType.NVarChar, 20).Value = maDat;
-                            cmd.Parameters.Add("@MaKH", SqlDbType.Int).Value = maKH;
-                            cmd.Parameters.Add("@MaPhong", SqlDbType.Int).Value = maPhong;
-                            cmd.Parameters.Add("@Nhan", SqlDbType.Date).Value = nhan.Date;
-                            cmd.Parameters.Add("@Tra", SqlDbType.Date).Value = tra.Date;
-                            cmd.Parameters.Add("@NguoiLon", SqlDbType.Int).Value = nguoiLon;
-                            cmd.Parameters.Add("@TreEm", SqlDbType.Int).Value = treEm;
-                            cmd.Parameters.Add("@Gia", SqlDbType.Decimal).Value = giaMotDem;
-                            cmd.Parameters.Add("@PhuThu", SqlDbType.Decimal).Value = phuThu;
-                            cmd.Parameters.Add("@Thue", SqlDbType.Decimal).Value = thueVaPhi;
-                            cmd.Parameters.Add("@Tong", SqlDbType.Decimal).Value = tongTien;
-                            cmd.Parameters.Add("@Coc", SqlDbType.Decimal).Value = tienCoc;
-                            cmd.Parameters.Add("@MaNV", SqlDbType.Int).Value = maNhanVien;
-                            foreach (SqlParameter parameter in cmd.Parameters)
-                                if (parameter.SqlDbType == SqlDbType.Decimal) { parameter.Precision = 18; parameter.Scale = 2; }
+                            cmd.Parameters.Add("@MaDat", NpgsqlDbType.Varchar, 20).Value = maDat;
+                            cmd.Parameters.Add("@MaKH", NpgsqlDbType.Integer).Value = maKH;
+                            cmd.Parameters.Add("@MaPhong", NpgsqlDbType.Integer).Value = maPhong;
+                            cmd.Parameters.Add("@Nhan", NpgsqlDbType.Date).Value = nhan.Date;
+                            cmd.Parameters.Add("@Tra", NpgsqlDbType.Date).Value = tra.Date;
+                            cmd.Parameters.Add("@NguoiLon", NpgsqlDbType.Integer).Value = nguoiLon;
+                            cmd.Parameters.Add("@TreEm", NpgsqlDbType.Integer).Value = treEm;
+                            cmd.Parameters.Add("@Gia", NpgsqlDbType.Numeric).Value = giaMotDem;
+                            cmd.Parameters.Add("@PhuThu", NpgsqlDbType.Numeric).Value = phuThu;
+                            cmd.Parameters.Add("@Thue", NpgsqlDbType.Numeric).Value = thueVaPhi;
+                            cmd.Parameters.Add("@Tong", NpgsqlDbType.Numeric).Value = tongTien;
+                            cmd.Parameters.Add("@Coc", NpgsqlDbType.Numeric).Value = tienCoc;
+                            cmd.Parameters.Add("@MaNV", NpgsqlDbType.Integer).Value = maNhanVien;
+                            foreach (NpgsqlParameter parameter in cmd.Parameters)
+                                if (parameter.NpgsqlDbType == NpgsqlDbType.Numeric) { parameter.Precision = 18; parameter.Scale = 2; }
                             maDatPhong = Convert.ToInt32(cmd.ExecuteScalar());
                         }
 
@@ -200,15 +199,14 @@ VALUES (@MaDat, @MaKH, @MaPhong, @Nhan, @Tra, @NguoiLon, @TreEm,
             }
         }
 
-        internal static void KhoaDatPhong(SqlConnection conn, SqlTransaction tran)
+        internal static void KhoaDatPhong(NpgsqlConnection conn, NpgsqlTransaction tran)
         {
-            using var cmd = new SqlCommand(@"
-DECLARE @Result int;
-EXEC @Result = sys.sp_getapplock @Resource=N'Hotel:DatPhong',
-     @LockMode='Exclusive', @LockOwner='Transaction', @LockTimeout=10000;
-SELECT @Result;", conn, tran);
-            if (Convert.ToInt32(cmd.ExecuteScalar()) < 0)
-                throw new BLL.NghiepVuException("Có thao tác đặt phòng khác đang xử lý. Vui lòng thử lại.");
+            using var cmd = new NpgsqlCommand(@"
+SET LOCAL lock_timeout = '10s';
+SELECT pg_advisory_xact_lock(20261023, 1);", conn, tran);
+            try { cmd.ExecuteNonQuery(); }
+            catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.LockNotAvailable)
+            { throw new BLL.NghiepVuException("Có thao tác đặt phòng khác đang xử lý. Vui lòng thử lại."); }
         }
     }
 }

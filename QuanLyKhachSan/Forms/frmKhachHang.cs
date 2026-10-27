@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -40,6 +40,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 Name = "colLsThucTe", DataPropertyName = "ThucTeHienThi", HeaderText = "Nhận / trả thực tế",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells
             });
+            ThietKeGiaoDienKhachHang();
         }
 
         // ==================================================================
@@ -49,23 +50,15 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             if (DesignMode) return;
 
-            // Bảo đảm vùng thông tin khách hàng có thanh cuộn dọc trên màn hình DPI cao
-            // hoặc khi form được nhúng vào vùng làm việc có chiều cao hạn chế.
-            pnlThongTin.AutoScroll = true;
-            // Tính vùng cuộn từ vị trí thực tế sau khi WinForms đã áp dụng DPI scaling.
-            // Không dùng Anchor.Bottom cho nút trong nội dung cuộn vì chúng sẽ bị ghim vào đáy viewport.
-            btnHuy.Anchor = AnchorStyles.Top | AnchorStyles.Left;
-            btnCapNhat.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            pnlThongTin.PerformLayout();
-            int contentBottom = 0;
-            foreach (Control control in pnlThongTin.Controls)
+            VisibleChanged += (s, ev) =>
             {
-                if (control.Visible)
-                    contentBottom = Math.Max(contentBottom, control.Bottom);
-            }
-            pnlThongTin.AutoScrollMinSize = new Size(0, contentBottom + 24);
-            pnlThongTin.VerticalScroll.Visible = true;
-            pnlThongTin.PerformLayout();
+                if (Visible && !DesignMode)
+                {
+                    TaiDanhSach();
+                }
+            };
+
+            // Các trường tự bố trí trong vùng cuộn; nút lưu luôn ở chân thẻ hồ sơ.
 
             lblNgayHienTai.Text = DateTime.Today.ToString("dddd, dd/MM/yyyy", Vi);
 
@@ -274,17 +267,17 @@ namespace Quản_Lý_Khách_Sạn.Forms
             {
                 dgvLichSu.DataSource = null;
                 dgvCoc.DataSource = null;
-                tpCoc.Text = "Thu / hoàn cọc (0)";
-                tpLichSu.Text = "Lịch sử lưu trú (0)";
+                tpCoc.Text = "Thu / hoàn (0)";
+                tpLichSu.Text = "Lưu trú (0)";
                 return;
             }
 
             List<LichSuLuuTru> ls = bll.LayLichSu(maKhachHang.Value);
             dgvLichSu.DataSource = ls;
-            tpLichSu.Text = "Lịch sử lưu trú (" + ls.Count + ")";
+            tpLichSu.Text = "Lưu trú (" + ls.Count + ")";
             var giaoDich = bll.LayGiaoDichCoc(maKhachHang.Value);
             dgvCoc.DataSource = giaoDich;
-            tpCoc.Text = $"Thu / hoàn cọc ({giaoDich.Rows.Count})";
+            tpCoc.Text = $"Thu / hoàn ({giaoDich.Rows.Count})";
             dgvCoc.Columns["Số tiền"].DefaultCellStyle.Format = "N0";
             dgvCoc.Columns["Số tiền"].DefaultCellStyle.FormatProvider = Vi;
             dgvCoc.Columns["Thời điểm"].DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
@@ -508,7 +501,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             MessageBox.Show(
                 tieuDe + ".\n\nChi tiết: " + ex.Message +
-                "\n\nHãy kiểm tra SQL Server LocalDB đã chạy script SQL và chuỗi kết nối trong DatabaseHelper.cs.",
+                "\n\nVui lòng kiểm tra kết nối Internet rồi thử lại.",
                 "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
@@ -560,7 +553,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             if (e.RowIndex < 0 || e.ColumnIndex != colLsTrangThai.Index) return;
             string tt = Convert.ToString(e.Value);
-            if (tt == "Đang lưu trú") VeNhan(e, tt, Color.FromArgb(254, 226, 226), Color.FromArgb(185, 28, 28));
+            if (tt == "Đang lưu trú") VeNhan(e, tt, Color.FromArgb(220, 252, 231), UITheme.SuccessGreen);
             else VeNhan(e, tt, Color.FromArgb(226, 232, 240), Color.FromArgb(71, 85, 105));
         }
 

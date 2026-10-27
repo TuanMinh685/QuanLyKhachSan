@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
 using Quản_Lý_Khách_Sạn.Models;
 
 namespace Quản_Lý_Khách_Sạn.DAL
@@ -13,11 +12,11 @@ namespace Quản_Lý_Khách_Sạn.DAL
             string sql = "SELECT * FROM HoaDon ORDER BY NgayThanhToan DESC";
             try
             {
-                using (SqlConnection conn = DatabaseHelper.GetConnection())
-                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                using (NpgsqlConnection conn = DatabaseHelper.GetConnection())
+                using (NpgsqlCommand cmd = new NpgsqlCommand(sql, conn))
                 {
                     conn.Open();
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    using (NpgsqlDataReader reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
                         {
@@ -30,8 +29,8 @@ namespace Quản_Lý_Khách_Sạn.DAL
 
                                 if (col == "mahoadon") hd.MaHoaDon = val.ToString() ?? "";
                                 else if (col == "madatphong") hd.MaDatPhong = val.ToString() ?? "";
-                                else if (col == "ngaylap") hd.NgayLap = Convert.ToDateTime(val);
-                                else if (col == "ngaythanhtoan") hd.NgayThanhToan = Convert.ToDateTime(val);
+                                else if (col == "ngaylap") hd.NgayLap = val is DateOnly dl ? dl.ToDateTime(TimeOnly.MinValue) : ToDateTime(val);
+                                else if (col == "ngaythanhtoan") hd.NgayThanhToan = val is DateOnly dt ? dt.ToDateTime(TimeOnly.MinValue) : ToDateTime(val);
                                 else if (col == "tienphong") hd.TienPhong = Convert.ToDecimal(val);
                                 else if (col == "tiendichvu") hd.TienDichVu = Convert.ToDecimal(val);
                                 else if (col == "tiengiamgia") hd.TienGiamGia = Convert.ToDecimal(val);
@@ -59,8 +58,8 @@ namespace Quản_Lý_Khách_Sạn.DAL
                            VALUES (@MaHD, @MaDP, @NgayLap, @NgayTT, @TienPhong, @TienDV, @GiamGia, @DatCoc, @TongTien, @PTTT, @MaVoucher, @TrangThai)";
             try
             {
-                using (SqlConnection conn = DatabaseHelper.GetConnection())
-                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                using (NpgsqlConnection conn = DatabaseHelper.GetConnection())
+                using (NpgsqlCommand cmd = new NpgsqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@MaHD", hd.MaHoaDon);
                     cmd.Parameters.AddWithValue("@MaDP", hd.MaDatPhong ?? (object)DBNull.Value);
@@ -89,18 +88,18 @@ namespace Quản_Lý_Khách_Sạn.DAL
         // --- HÀM NÂNG CẤP ĐÃ ĐƯỢC THÊM VÀO ĐÂY ---
         public bool LuuHoaDonVaCheckOut(HoaDon hd, string maDatPhong, IReadOnlyList<ChiTietHoaDon> chiTiet, int? maNhanVien)
         {
-            using (SqlConnection conn = DatabaseHelper.GetConnection())
+            using (NpgsqlConnection conn = DatabaseHelper.GetConnection())
             {
                 conn.Open();
-                using SqlTransaction trans = conn.BeginTransaction();
+                using NpgsqlTransaction trans = conn.BeginTransaction();
                 try
                 {
                     LeTanDatPhongDAL.KhoaDatPhong(conn, trans);
                     int id;
                     string maDat;
-                    using (var don = new SqlCommand(@"
-SELECT MaDatPhong, MaDat, TienCoc, TongTien, TrangThai FROM DatPhong WITH (UPDLOCK, HOLDLOCK)
-WHERE MaDat = @Ma OR CONVERT(nvarchar(30), MaDatPhong) = @Ma", conn, trans))
+                    using (var don = new NpgsqlCommand(@"
+SELECT MaDatPhong, MaDat, TienCoc, TongTien, TrangThai FROM DatPhong
+WHERE MaDat = @Ma OR CAST(MaDatPhong AS text) = @Ma FOR UPDATE", conn, trans))
                     {
                         don.Parameters.AddWithValue("@Ma", maDatPhong);
                         using var reader = don.ExecuteReader();
@@ -113,7 +112,7 @@ WHERE MaDat = @Ma OR CONVERT(nvarchar(30), MaDatPhong) = @Ma", conn, trans))
                         if (hd.TienDatCoc != Convert.ToDecimal(reader["TienCoc"]) || hd.TienPhong != Convert.ToDecimal(reader["TongTien"]))
                             throw new BLL.NghiepVuException("Tiền phòng/cọc không khớp đơn đã lưu. Hãy chọn lại đơn để tải số tiền mới nhất.");
                     }
-                    using (var duplicate = new SqlCommand("SELECT COUNT(*) FROM HoaDon WHERE MaDatPhong IN (@Id, @Ma)", conn, trans))
+                    using (var duplicate = new NpgsqlCommand("SELECT COUNT(*) FROM HoaDon WHERE MaDatPhong IN (@Id, @Ma)", conn, trans))
                     {
                         duplicate.Parameters.AddWithValue("@Id", id.ToString());
                         duplicate.Parameters.AddWithValue("@Ma", maDat);
@@ -124,7 +123,7 @@ WHERE MaDat = @Ma OR CONVERT(nvarchar(30), MaDatPhong) = @Ma", conn, trans))
                     // 1. Thêm mới Hóa Đơn
                     string sqlHoaDon = @"INSERT INTO HoaDon (MaHoaDon, MaDatPhong, NgayLap, NgayThanhToan, TienPhong, TienDichVu, TienGiamGia, TienDatCoc, TongTien, MaPTTT, MaVoucher, TrangThai)
                                          VALUES (@MaHD, @MaDP, @NgayLap, @NgayTT, @TienPhong, @TienDV, @GiamGia, @DatCoc, @TongTien, @PTTT, @MaVoucher, @TrangThai)";
-                    using (SqlCommand cmd = new SqlCommand(sqlHoaDon, conn, trans))
+                    using (NpgsqlCommand cmd = new NpgsqlCommand(sqlHoaDon, conn, trans))
                     {
                         cmd.Parameters.AddWithValue("@MaHD", hd.MaHoaDon);
                         cmd.Parameters.AddWithValue("@MaDP", hd.MaDatPhong ?? (object)DBNull.Value);
@@ -144,7 +143,7 @@ WHERE MaDat = @Ma OR CONVERT(nvarchar(30), MaDatPhong) = @Ma", conn, trans))
                     // Chi tiết dịch vụ cùng transaction với hóa đơn và trả phòng.
                     foreach (var ct in chiTiet)
                     {
-                        using var detail = new SqlCommand(@"
+                        using var detail = new NpgsqlCommand(@"
 INSERT INTO ChiTietHoaDon (MaHoaDon, MaDichVu, SoLuong, DonGia, ThanhTien)
 VALUES (@HD, @DV, @SL, @Gia, @Tien)", conn, trans);
                         detail.Parameters.AddWithValue("@HD", hd.MaHoaDon);
@@ -159,10 +158,10 @@ VALUES (@HD, @DV, @SL, @Gia, @Tien)", conn, trans);
                     if (!string.IsNullOrWhiteSpace(maDatPhong))
                     {
                         string sqlDatPhong = @"UPDATE DatPhong
-                                               SET TrangThai = N'Đã trả',
-                                                   GioTraThucTe = ISNULL(GioTraThucTe, GETDATE())
-                                               WHERE MaDatPhong = @MaDP AND TrangThai IN (N'Đang ở', N'Đã trả')";
-                        using (SqlCommand cmdDP = new SqlCommand(sqlDatPhong, conn, trans))
+                                               SET TrangThai = 'Đã trả',
+                                                   GioTraThucTe = COALESCE(GioTraThucTe, CURRENT_TIMESTAMP)
+                                               WHERE MaDatPhong = @MaDP AND TrangThai IN ('Đang ở', 'Đã trả')";
+                        using (NpgsqlCommand cmdDP = new NpgsqlCommand(sqlDatPhong, conn, trans))
                         {
                             cmdDP.Parameters.AddWithValue("@MaDP", id);
                             if (cmdDP.ExecuteNonQuery() != 1)

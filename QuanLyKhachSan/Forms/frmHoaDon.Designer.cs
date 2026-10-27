@@ -53,6 +53,8 @@
             this.pnlVoucherWrap = new System.Windows.Forms.Panel();
             this.txtVoucherCode = new System.Windows.Forms.TextBox();
             this.btnApDungVoucher = new System.Windows.Forms.Button();
+            this.btnGoiYVoucher = new System.Windows.Forms.Button();
+            this.cmsVoucher = new System.Windows.Forms.ContextMenuStrip();
             this.tbl2ColMoney2 = new System.Windows.Forms.TableLayoutPanel();
             this.pnlColGiamGia = new System.Windows.Forms.Panel();
             this.lblGiamGia = new System.Windows.Forms.Label();
@@ -70,6 +72,7 @@
             this.lblTongTienValue = new System.Windows.Forms.Label();
             this.pnlBottomButtons = new System.Windows.Forms.Panel();
             this.btnThanhToan = new System.Windows.Forms.Button();
+            this.btnVietQR = new System.Windows.Forms.Button();
             this.btnLamMoi = new System.Windows.Forms.Button();
             this.btnInHoaDon = new System.Windows.Forms.Button();
             this.printDoc = new System.Drawing.Printing.PrintDocument();
@@ -403,7 +406,7 @@
             this.btnThemDV.Name = "btnThemDV";
             this.btnThemDV.Size = new System.Drawing.Size(90, 30);
             this.btnThemDV.TabIndex = 2;
-            this.btnThemDV.Text = "+ Gọi món";
+            this.btnThemDV.Text = "Th\u00EAm DV";
             this.btnThemDV.UseVisualStyleBackColor = false;
             this.btnThemDV.Click += new System.EventHandler(this.btnThemDV_Click);
             // 
@@ -557,6 +560,7 @@
             this.pnlVoucherWrap.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pnlVoucherWrap.Controls.Add(this.btnApDungVoucher);
+            this.pnlVoucherWrap.Controls.Add(this.btnGoiYVoucher);
             this.pnlVoucherWrap.Controls.Add(this.txtVoucherCode);
             this.pnlVoucherWrap.Location = new System.Drawing.Point(20, 458);
             this.pnlVoucherWrap.Name = "pnlVoucherWrap";
@@ -572,8 +576,26 @@
             this.txtVoucherCode.Location = new System.Drawing.Point(0, 2);
             this.txtVoucherCode.Name = "txtVoucherCode";
             this.txtVoucherCode.PlaceholderText = "Nhập mã voucher (VD: CHAOHET2026)";
-            this.txtVoucherCode.Size = new System.Drawing.Size(415, 29);
+            this.txtVoucherCode.Size = new System.Drawing.Size(320, 29);
             this.txtVoucherCode.TabIndex = 0;
+                        // 
+            // btnGoiYVoucher
+            // 
+            this.btnGoiYVoucher.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnGoiYVoucher.BackColor = System.Drawing.Color.White;
+            this.btnGoiYVoucher.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnGoiYVoucher.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(234)))), ((int)(((byte)(88)))), ((int)(((byte)(12)))));
+            this.btnGoiYVoucher.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnGoiYVoucher.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold);
+            this.btnGoiYVoucher.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(234)))), ((int)(((byte)(88)))), ((int)(((byte)(12)))));
+            this.btnGoiYVoucher.Location = new System.Drawing.Point(330, 1);
+            this.btnGoiYVoucher.Name = "btnGoiYVoucher";
+            this.btnGoiYVoucher.Size = new System.Drawing.Size(90, 31);
+            this.btnGoiYVoucher.TabIndex = 2;
+            this.btnGoiYVoucher.Text = "G\u1EE3i \u00FD";
+            this.btnGoiYVoucher.UseVisualStyleBackColor = false;
+            this.btnGoiYVoucher.Click += new System.EventHandler(this.btnGoiYVoucher_Click);
+            this.btnGoiYVoucher.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawPillBorder);
             // 
             // btnApDungVoucher
             // 
@@ -588,7 +610,7 @@
             this.btnApDungVoucher.Name = "btnApDungVoucher";
             this.btnApDungVoucher.Size = new System.Drawing.Size(90, 31);
             this.btnApDungVoucher.TabIndex = 1;
-            this.btnApDungVoucher.Text = "Áp dụng";
+            this.btnApDungVoucher.Text = "\u00C1p d\u1EE5ng";
             this.btnApDungVoucher.UseVisualStyleBackColor = false;
             this.btnApDungVoucher.Click += new System.EventHandler(this.btnApDungVoucher_Click);
             // 
@@ -790,10 +812,28 @@
             this.pnlBottomButtons.Controls.Add(this.btnInHoaDon);
             this.pnlBottomButtons.Controls.Add(this.btnLamMoi);
             this.pnlBottomButtons.Controls.Add(this.btnThanhToan);
+            this.pnlBottomButtons.Controls.Add(this.btnVietQR);
             this.pnlBottomButtons.Location = new System.Drawing.Point(20, 690);
             this.pnlBottomButtons.Name = "pnlBottomButtons";
             this.pnlBottomButtons.Size = new System.Drawing.Size(515, 42);
             this.pnlBottomButtons.TabIndex = 17;
+                        // 
+            // btnVietQR
+            // 
+            this.btnVietQR.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(2)))), ((int)(((byte)(132)))), ((int)(((byte)(199)))));
+            this.btnVietQR.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnVietQR.FlatAppearance.BorderSize = 0;
+            this.btnVietQR.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnVietQR.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnVietQR.ForeColor = System.Drawing.Color.White;
+            this.btnVietQR.Location = new System.Drawing.Point(108, 0);
+            this.btnVietQR.Name = "btnVietQR";
+            this.btnVietQR.Size = new System.Drawing.Size(115, 40);
+            this.btnVietQR.TabIndex = 3;
+            this.btnVietQR.Text = "M\u00E3 VietQR";
+            this.btnVietQR.UseVisualStyleBackColor = false;
+            this.btnVietQR.Click += new System.EventHandler(this.btnVietQR_Click);
+            this.btnVietQR.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawPillBorder);
             // 
             // btnThanhToan
             // 
@@ -804,9 +844,9 @@
             this.btnThanhToan.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnThanhToan.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
             this.btnThanhToan.ForeColor = System.Drawing.Color.White;
-            this.btnThanhToan.Location = new System.Drawing.Point(375, 0);
+            this.btnThanhToan.Location = new System.Drawing.Point(336, 0);
             this.btnThanhToan.Name = "btnThanhToan";
-            this.btnThanhToan.Size = new System.Drawing.Size(140, 40);
+            this.btnThanhToan.Size = new System.Drawing.Size(179, 40);
             this.btnThanhToan.TabIndex = 2;
             this.btnThanhToan.Text = "Xác nhận thu";
             this.btnThanhToan.UseVisualStyleBackColor = false;
@@ -822,9 +862,9 @@
             this.btnLamMoi.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnLamMoi.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.btnLamMoi.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(85)))), ((int)(((byte)(105)))));
-            this.btnLamMoi.Location = new System.Drawing.Point(275, 0);
+            this.btnLamMoi.Location = new System.Drawing.Point(230, 0);
             this.btnLamMoi.Name = "btnLamMoi";
-            this.btnLamMoi.Size = new System.Drawing.Size(92, 40);
+            this.btnLamMoi.Size = new System.Drawing.Size(98, 40);
             this.btnLamMoi.TabIndex = 1;
             this.btnLamMoi.Text = "Làm mới";
             this.btnLamMoi.UseVisualStyleBackColor = false;
@@ -842,7 +882,7 @@
             this.btnInHoaDon.Name = "btnInHoaDon";
             this.btnInHoaDon.Size = new System.Drawing.Size(100, 40);
             this.btnInHoaDon.TabIndex = 0;
-            this.btnInHoaDon.Text = "🖨️ In bill";
+            this.btnInHoaDon.Text = "In bill";
             this.btnInHoaDon.UseVisualStyleBackColor = false;
             this.btnInHoaDon.Click += new System.EventHandler(this.btnInHoaDon_Click);
             // 
@@ -954,6 +994,8 @@
         private System.Windows.Forms.Panel pnlVoucherWrap;
         private System.Windows.Forms.TextBox txtVoucherCode;
         private System.Windows.Forms.Button btnApDungVoucher;
+        private System.Windows.Forms.Button btnGoiYVoucher;
+        private System.Windows.Forms.ContextMenuStrip cmsVoucher;
         private System.Windows.Forms.TableLayoutPanel tbl2ColMoney2;
         private System.Windows.Forms.Panel pnlColGiamGia;
         private System.Windows.Forms.Label lblGiamGia;
@@ -971,6 +1013,7 @@
         private System.Windows.Forms.Label lblTongTienValue;
         private System.Windows.Forms.Panel pnlBottomButtons;
         private System.Windows.Forms.Button btnThanhToan;
+        private System.Windows.Forms.Button btnVietQR;
         private System.Windows.Forms.Button btnLamMoi;
         private System.Windows.Forms.Button btnInHoaDon;
         private System.Drawing.Printing.PrintDocument printDoc;

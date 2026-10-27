@@ -19,36 +19,52 @@ namespace Quản_Lý_Khách_Sạn.Forms
             StartPosition = FormStartPosition.CenterParent;
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = MinimizeBox = false;
-            ClientSize = new Size(480, 340);
-            Font = new Font("Segoe UI", 10);
+            ClientSize = new Size(560, 540);
+            Font = UITheme.MainFont;
+            BackColor = UITheme.BackgroundGray;
+            ShowInTaskbar = false;
             AutoScaleMode = AutoScaleMode.Dpi;
-            var root = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(20), ColumnCount = 1, RowCount = 8 };
-            int[] heights = { 34, 28, 34, 28, 34, 38, 50, 40 };
-            foreach (int height in heights) root.RowStyles.Add(new RowStyle(SizeType.Absolute, height));
+            var root = LeTanUi.Table();
             Controls.Add(root);
-            root.Controls.Add(new Label { Dock = DockStyle.Fill, Text = $"Cọc đã thu: {coc.ToString("N0", CultureInfo.GetCultureInfo("vi-VN"))} đ" });
-            root.Controls.Add(new Label { Dock = DockStyle.Fill, Text = "Số tiền hoàn cho khách (VNĐ)" });
-            root.Controls.Add(txtHoan);
-            root.Controls.Add(new Label { Dock = DockStyle.Fill, Text = "Phương thức hoàn" });
+            LeTanUi.Row(root, LeTanUi.Header(LeTanUi.Caption("XỬ LÝ CỌC KHI HỦY PHÒNG"),
+                LeTanUi.Caption("Đơn " + maDat + " · Xác định khoản hoàn và số tiền giữ lại")), 88);
+            var body = new Panel { Padding = new Padding(24, 16, 24, 16), AutoScroll = true };
+            var card = new LeTanCard { Dock = DockStyle.Top, Height = 352, Padding = new Padding(16) };
+            var fields = LeTanUi.Table();
+            var deposit = LeTanUi.Caption($"Cọc đã thu   {coc.ToString("N0", CultureInfo.GetCultureInfo("vi-VN"))} đ", true);
+            deposit.BackColor = LeTanUi.OrangeLight; deposit.ForeColor = UITheme.PrimaryOrange;
+            deposit.Font = new Font("Segoe UI", 14F, FontStyle.Bold); deposit.Padding = new Padding(12, 0, 12, 0);
+            LeTanUi.Row(fields, deposit, 60);
+            LeTanUi.Row(fields, LeTanUi.Field("Số tiền hoàn cho khách (VNĐ)", txtHoan), 76);
+            txtHoan.TextAlign = HorizontalAlignment.Right;
             cboPhuongThuc.Items.AddRange(new object[] { "Tiền mặt", "Chuyển khoản", "Thẻ" });
             cboPhuongThuc.SelectedIndex = 0;
-            root.Controls.Add(cboPhuongThuc);
-            root.Controls.Add(lblGiu);
-            root.Controls.Add(new Label { Dock = DockStyle.Fill, Text = "Bước tiếp theo sẽ xác nhận hủy đơn và khoản hoàn/giữ. Chỉ xác nhận khoản tiền đã thực tế xử lý." });
-            var buttons = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft };
-            var ok = new Button { Text = "Tiếp tục", AutoSize = true };
-            var cancel = new Button { Text = "Quay lại", DialogResult = DialogResult.Cancel, AutoSize = true };
-            buttons.Controls.Add(ok); buttons.Controls.Add(cancel); root.Controls.Add(buttons);
+            LeTanUi.Row(fields, LeTanUi.Field("Phương thức hoàn", cboPhuongThuc), 76);
+            lblGiu.Text = "Nhập số tiền hoàn để xem khoản giữ lại.";
+            lblGiu.Font = UITheme.BoldFont; lblGiu.ForeColor = UITheme.TextMuted;
+            lblGiu.TextAlign = ContentAlignment.MiddleLeft;
+            LeTanUi.Row(fields, lblGiu, 44);
+            var note = LeTanUi.Caption("Nhập 0 nếu giữ toàn bộ cọc. Bước tiếp theo sẽ xác nhận hủy đơn và khoản tiền đã thực tế xử lý.");
+            note.AutoEllipsis = false; note.Font = new Font("Segoe UI", 9F);
+            LeTanUi.Row(fields, note);
+            card.Controls.Add(fields); body.Controls.Add(card); LeTanUi.Row(root, body);
+            var ok = new Button { Text = "Tiếp tục xác nhận", Width = 176 };
+            var cancel = new Button { Text = "Quay lại", DialogResult = DialogResult.Cancel, Width = 112 };
+            LeTanUi.Button(ok, UITheme.PrimaryOrange, true); LeTanUi.Button(cancel);
+            var buttons = LeTanUi.Actions(ok, cancel);
+            buttons.BackColor = Color.White; buttons.Padding = new Padding(24, 14, 24, 14);
+            LeTanUi.Row(root, buttons, 68);
             CancelButton = cancel; AcceptButton = ok;
             txtHoan.TextChanged += (_, __) =>
             {
                 try
                 {
                     decimal value = DocTienHoan();
+                    lblGiu.ForeColor = UITheme.DarkNavy;
                     lblGiu.Text = "Số tiền giữ lại: " + (tienCoc - value).ToString("N0", CultureInfo.GetCultureInfo("vi-VN")) + " đ";
                     cboPhuongThuc.Enabled = value > 0;
                 }
-                catch (NghiepVuException ex) { lblGiu.Text = ex.Message; }
+                catch (NghiepVuException ex) { lblGiu.ForeColor = UITheme.DangerRed; lblGiu.Text = ex.Message; }
             };
             ok.Click += (_, __) =>
             {

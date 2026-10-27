@@ -1,7 +1,7 @@
-﻿using System;
+using NpgsqlTypes;
+using System;
 using System.Collections.Generic;
 using System.Data;
-using Microsoft.Data.SqlClient;
 using Quản_Lý_Khách_Sạn.Models;
 
 namespace Quản_Lý_Khách_Sạn.DAL
@@ -9,7 +9,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
     /// <summary>
     /// Tầng truy cập dữ liệu (DAL) của Khách hàng.
     /// Quy tắc: CHỈ làm việc với SQL, không kiểm tra nghiệp vụ, không đụng tới giao diện.
-    /// Mọi giá trị đưa vào câu lệnh đều đi qua SqlParameter -> chống SQL Injection.
+    /// Mọi giá trị đưa vào câu lệnh đều đi qua NpgsqlParameter -> chống SQL Injection.
     /// </summary>
     public class KhachHangDAL
     {
@@ -26,23 +26,24 @@ namespace Quản_Lý_Khách_Sạn.DAL
 
             // COLLATE Vietnamese_CI_AI: không phân biệt hoa/thường và dấu => gõ "hung" vẫn ra "Hùng"
             const string sql = @"
-                SELECT TOP (@Top) *
-                FROM dbo.vw_LeTanKhachHangTongQuan
-                WHERE ( @TuKhoa = N''
-                        OR HoTen COLLATE Vietnamese_CI_AI LIKE @Like ESCAPE '\'
+                SELECT *
+                FROM vw_LeTanKhachHangTongQuan
+                WHERE ( @TuKhoa = ''
+                        OR HoTen ILIKE @Like ESCAPE '\'
                         OR DienThoai LIKE @LikeSo ESCAPE '\'
                         OR SoGiayTo  LIKE @LikeSo ESCAPE '\'
                         OR MaKH      LIKE @LikeSo ESCAPE '\' )
-                  AND ( @Nhom = N'' OR NhomKhach = @Nhom )
-                ORDER BY ISNULL(CAST(LanLuuTruGanNhat AS DATETIME), NgayTao) DESC, MaKhachHang DESC";
+                  AND ( @Nhom = '' OR NhomKhach = @Nhom )
+                ORDER BY COALESCE(LanLuuTruGanNhat, NgayTao) DESC, MaKhachHang DESC
+                LIMIT @Top";
 
-            SqlParameter[] p =
+            NpgsqlParameter[] p =
             {
-                new SqlParameter("@Top", SqlDbType.Int) { Value = top },
-                new SqlParameter("@TuKhoa", SqlDbType.NVarChar, 100) { Value = kw },
-                new SqlParameter("@Like", SqlDbType.NVarChar, 120) { Value = "%" + EscapeLike(kw) + "%" },
-                new SqlParameter("@LikeSo", SqlDbType.VarChar, 120) { Value = "%" + EscapeLike(kwSo) + "%" },
-                new SqlParameter("@Nhom", SqlDbType.NVarChar, 20) { Value = nhom ?? "" }
+                new NpgsqlParameter("@Top", NpgsqlDbType.Integer) { Value = top },
+                new NpgsqlParameter("@TuKhoa", NpgsqlDbType.Varchar, 100) { Value = kw },
+                new NpgsqlParameter("@Like", NpgsqlDbType.Varchar, 120) { Value = "%" + EscapeLike(kw) + "%" },
+                new NpgsqlParameter("@LikeSo", NpgsqlDbType.Varchar, 120) { Value = "%" + EscapeLike(kwSo) + "%" },
+                new NpgsqlParameter("@Nhom", NpgsqlDbType.Varchar, 20) { Value = nhom ?? "" }
             };
 
             var list = new List<KhachHang>();
@@ -58,7 +59,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
         // ------------------------------------------------------------------
         public int DemHoSo()
         {
-            using (DataTable dt = LeTanDatPhongDAL.LayBang("SELECT COUNT(*) FROM dbo.KhachHang"))
+            using (DataTable dt = LeTanDatPhongDAL.LayBang("SELECT COUNT(*) FROM KhachHang"))
             {
                 return Convert.ToInt32(dt.Rows[0][0]);
             }
@@ -69,8 +70,8 @@ namespace Quản_Lý_Khách_Sạn.DAL
         // ------------------------------------------------------------------
         public KhachHang LayTheoMa(int maKhachHang)
         {
-            const string sql = "SELECT * FROM dbo.vw_LeTanKhachHangTongQuan WHERE MaKhachHang = @Ma";
-            using (DataTable dt = LeTanDatPhongDAL.LayBang(sql, new[] { new SqlParameter("@Ma", SqlDbType.Int) { Value = maKhachHang } }))
+            const string sql = "SELECT * FROM vw_LeTanKhachHangTongQuan WHERE MaKhachHang = @Ma";
+            using (DataTable dt = LeTanDatPhongDAL.LayBang(sql, new[] { new NpgsqlParameter("@Ma", NpgsqlDbType.Integer) { Value = maKhachHang } }))
             {
                 return dt.Rows.Count == 0 ? null : MapRow(dt.Rows[0]);
             }
@@ -84,12 +85,12 @@ namespace Quản_Lý_Khách_Sạn.DAL
         {
             if (string.IsNullOrEmpty(soGiayTo)) return false;
 
-            const string sql = @"SELECT COUNT(1) FROM dbo.KhachHang
+            const string sql = @"SELECT COUNT(1) FROM KhachHang
                                  WHERE CCCD = @So AND (@MaTru IS NULL OR MaKH <> @MaTru)";
-            SqlParameter[] p =
+            NpgsqlParameter[] p =
             {
-                new SqlParameter("@So", SqlDbType.VarChar, 30) { Value = soGiayTo },
-                new SqlParameter("@MaTru", SqlDbType.Int) { Value = (object)maLoaiTru ?? DBNull.Value }
+                new NpgsqlParameter("@So", NpgsqlDbType.Varchar, 30) { Value = soGiayTo },
+                new NpgsqlParameter("@MaTru", NpgsqlDbType.Integer) { Value = (object)maLoaiTru ?? DBNull.Value }
             };
             using (DataTable dt = LeTanDatPhongDAL.LayBang(sql, p))
             {
@@ -99,17 +100,15 @@ namespace Quản_Lý_Khách_Sạn.DAL
 
         // ------------------------------------------------------------------
         // 5. THÊM MỚI – trả về MaKhachHang vừa sinh
-        //    OUTPUT INSERTED.MaKH: lấy khóa tự tăng ngay trong 1 câu lệnh,
-        //    an toàn hơn SELECT MAX(...) (không bị lẫn khi 2 lễ tân thêm cùng lúc).
         // ------------------------------------------------------------------
         public int Them(KhachHang kh)
         {
             const string sql = @"
-                INSERT INTO dbo.KhachHang
+                INSERT INTO KhachHang
                     (HoTen, SoDienThoai, GioiTinh, NgaySinh, QuocTich, Email, DiaChi, CCCD, GhiChu, DongYNhanUuDai)
-                OUTPUT INSERTED.MaKH
                 VALUES
-                    (@HoTen, @DienThoai, @GioiTinh, @NgaySinh, @QuocTich, @Email, @DiaChi, @SoGiayTo, @GhiChu, @DongY)";
+                    (@HoTen, @DienThoai, @GioiTinh, @NgaySinh, @QuocTich, @Email, @DiaChi, @SoGiayTo, @GhiChu, @DongY)
+                RETURNING MaKH";
 
             using (DataTable dt = LeTanDatPhongDAL.LayBang(sql, ThamSoGhi(kh)))
             {
@@ -123,15 +122,15 @@ namespace Quản_Lý_Khách_Sạn.DAL
         public bool CapNhat(KhachHang kh)
         {
             const string sql = @"
-                UPDATE dbo.KhachHang
+                UPDATE KhachHang
                 SET HoTen = @HoTen, SoDienThoai = @DienThoai, GioiTinh = @GioiTinh, NgaySinh = @NgaySinh,
                     QuocTich = @QuocTich, Email = @Email, DiaChi = @DiaChi, CCCD = @SoGiayTo,
-                    GhiChu = @GhiChu, DongYNhanUuDai = @DongY, NgayCapNhat = GETDATE()
+                    GhiChu = @GhiChu, DongYNhanUuDai = @DongY, NgayCapNhat = CURRENT_TIMESTAMP
                 WHERE MaKH = @Ma";
 
-            var p = new List<SqlParameter>(ThamSoGhi(kh))
+            var p = new List<NpgsqlParameter>(ThamSoGhi(kh))
             {
-                new SqlParameter("@Ma", SqlDbType.Int) { Value = kh.MaKhachHang }
+                new NpgsqlParameter("@Ma", NpgsqlDbType.Integer) { Value = kh.MaKhachHang }
             };
             return ChayCapNhat(sql, p.ToArray()) > 0;
         }
@@ -146,17 +145,17 @@ namespace Quản_Lý_Khách_Sạn.DAL
                 SELECT dp.MaDatPhong, p.SoPhong, lp.TenLoai AS TenLoaiPhong,
                        dp.NgayNhan AS NgayNhanDuKien, dp.NgayTra AS NgayTraDuKien,
                        dp.SoDem, dp.GioNhanThucTe, dp.GioTraThucTe,
-                       CASE WHEN dp.TrangThai = N'Đang ở' THEN N'Đang lưu trú'
-                            ELSE N'Đã trả phòng' END AS TrangThai,
+                       CASE WHEN dp.TrangThai = 'Đang ở' THEN 'Đang lưu trú'
+                            ELSE 'Đã trả phòng' END AS TrangThai,
                        dp.TongTien
-                FROM dbo.DatPhong dp
-                JOIN dbo.Phong p ON p.MaPhong = dp.MaPhong
-                JOIN dbo.LoaiPhong lp ON lp.MaLoai = p.MaLoai
-                WHERE dp.MaKH = @Ma AND dp.TrangThai IN (N'Đang ở', N'Đã trả')
+                FROM DatPhong dp
+                JOIN Phong p ON p.MaPhong = dp.MaPhong
+                JOIN LoaiPhong lp ON lp.MaLoai = p.MaLoai
+                WHERE dp.MaKH = @Ma AND dp.TrangThai IN ('Đang ở', 'Đã trả')
                 ORDER BY dp.NgayNhan DESC, dp.MaDatPhong DESC";
 
             var list = new List<LichSuLuuTru>();
-            using (DataTable dt = LeTanDatPhongDAL.LayBang(sql, new[] { new SqlParameter("@Ma", SqlDbType.Int) { Value = maKhachHang } }))
+            using (DataTable dt = LeTanDatPhongDAL.LayBang(sql, new[] { new NpgsqlParameter("@Ma", NpgsqlDbType.Integer) { Value = maKhachHang } }))
             {
                 foreach (DataRow r in dt.Rows)
                 {
@@ -165,10 +164,10 @@ namespace Quản_Lý_Khách_Sạn.DAL
                         MaDatPhong = Convert.ToInt32(r["MaDatPhong"]),
                         SoPhong = Convert.ToString(r["SoPhong"]),
                         TenLoaiPhong = Convert.ToString(r["TenLoaiPhong"]),
-                        NgayNhan = Convert.ToDateTime(r["NgayNhanDuKien"]),
-                        NgayTra = Convert.ToDateTime(r["NgayTraDuKien"]),
-                        GioNhanThucTe = r["GioNhanThucTe"] == DBNull.Value ? null : Convert.ToDateTime(r["GioNhanThucTe"]),
-                        GioTraThucTe = r["GioTraThucTe"] == DBNull.Value ? null : Convert.ToDateTime(r["GioTraThucTe"]),
+                        NgayNhan = ToDateTime(r["NgayNhanDuKien"]),
+                        NgayTra = ToDateTime(r["NgayTraDuKien"]),
+                        GioNhanThucTe = r["GioNhanThucTe"] == DBNull.Value ? null : ToDateTime(r["GioNhanThucTe"]),
+                        GioTraThucTe = r["GioTraThucTe"] == DBNull.Value ? null : ToDateTime(r["GioTraThucTe"]),
                         SoDem = Convert.ToInt32(r["SoDem"]),
                         TrangThai = Convert.ToString(r["TrangThai"]),
                         TongTien = Convert.ToDecimal(r["TongTien"])
@@ -183,20 +182,20 @@ namespace Quản_Lý_Khách_Sạn.DAL
         // ==================================================================
 
         /// <summary>Tham số dùng chung cho INSERT và UPDATE (tránh viết trùng 2 lần).</summary>
-        private static SqlParameter[] ThamSoGhi(KhachHang kh)
+        private static NpgsqlParameter[] ThamSoGhi(KhachHang kh)
         {
             return new[]
             {
-                new SqlParameter("@HoTen",     SqlDbType.NVarChar, 100) { Value = kh.HoTen },
-                new SqlParameter("@DienThoai", SqlDbType.VarChar,  20)  { Value = kh.DienThoai },
-                new SqlParameter("@GioiTinh",  SqlDbType.NVarChar, 10)  { Value = (object)kh.GioiTinh ?? DBNull.Value },
-                new SqlParameter("@NgaySinh",  SqlDbType.Date)          { Value = (object)kh.NgaySinh ?? DBNull.Value },
-                new SqlParameter("@QuocTich",  SqlDbType.NVarChar, 50)  { Value = kh.QuocTich },
-                new SqlParameter("@Email",     SqlDbType.VarChar,  100) { Value = (object)kh.Email ?? DBNull.Value },
-                new SqlParameter("@DiaChi",    SqlDbType.NVarChar, 255) { Value = (object)kh.DiaChi ?? DBNull.Value },
-                new SqlParameter("@SoGiayTo",  SqlDbType.VarChar,  30)  { Value = (object)kh.SoGiayTo ?? DBNull.Value },
-                new SqlParameter("@GhiChu",    SqlDbType.NVarChar, 500) { Value = (object)kh.GhiChu ?? DBNull.Value },
-                new SqlParameter("@DongY",     SqlDbType.Bit)           { Value = kh.DongYNhanUuDai }
+                new NpgsqlParameter("@HoTen",     NpgsqlDbType.Varchar, 100) { Value = kh.HoTen },
+                new NpgsqlParameter("@DienThoai", NpgsqlDbType.Varchar,  20)  { Value = kh.DienThoai },
+                new NpgsqlParameter("@GioiTinh",  NpgsqlDbType.Varchar, 10)  { Value = (object)kh.GioiTinh ?? DBNull.Value },
+                new NpgsqlParameter("@NgaySinh",  NpgsqlDbType.Date)          { Value = (object)kh.NgaySinh ?? DBNull.Value },
+                new NpgsqlParameter("@QuocTich",  NpgsqlDbType.Varchar, 50)  { Value = kh.QuocTich },
+                new NpgsqlParameter("@Email",     NpgsqlDbType.Varchar,  100) { Value = (object)kh.Email ?? DBNull.Value },
+                new NpgsqlParameter("@DiaChi",    NpgsqlDbType.Varchar, 255) { Value = (object)kh.DiaChi ?? DBNull.Value },
+                new NpgsqlParameter("@SoGiayTo",  NpgsqlDbType.Varchar,  30)  { Value = (object)kh.SoGiayTo ?? DBNull.Value },
+                new NpgsqlParameter("@GhiChu",    NpgsqlDbType.Varchar, 500) { Value = (object)kh.GhiChu ?? DBNull.Value },
+                new NpgsqlParameter("@DongY",     NpgsqlDbType.Boolean)           { Value = kh.DongYNhanUuDai }
             };
         }
 
@@ -210,26 +209,26 @@ namespace Quản_Lý_Khách_Sạn.DAL
                 HoTen = Convert.ToString(r["HoTen"]),
                 DienThoai = Convert.ToString(r["DienThoai"]),
                 GioiTinh = r["GioiTinh"] as string,
-                NgaySinh = r["NgaySinh"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["NgaySinh"]),
+                NgaySinh = ToDateTimeNullable(r["NgaySinh"]),
                 QuocTich = Convert.ToString(r["QuocTich"]),
                 Email = r["Email"] as string,
                 DiaChi = r["DiaChi"] as string,
                 SoGiayTo = r["SoGiayTo"] as string,
                 GhiChu = r["GhiChu"] as string,
                 DongYNhanUuDai = Convert.ToBoolean(r["DongYNhanUuDai"]),
-                NgayTao = Convert.ToDateTime(r["NgayTao"]),
-                NgayCapNhat = r["NgayCapNhat"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["NgayCapNhat"]),
+                NgayTao = ToDateTime(r["NgayTao"]),
+                NgayCapNhat = ToDateTimeNullable(r["NgayCapNhat"]),
                 SoLanLuuTru = Convert.ToInt32(r["SoLanLuuTru"]),
-                LanLuuTruGanNhat = r["LanLuuTruGanNhat"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["LanLuuTruGanNhat"]),
+                LanLuuTruGanNhat = ToDateTimeNullable(r["LanLuuTruGanNhat"]),
                 NhomKhach = Convert.ToString(r["NhomKhach"])
             };
         }
 
         /// <summary>Vô hiệu hóa ký tự đặc biệt của LIKE (% _ [) để người dùng gõ gì tìm đúng cái đó.</summary>
-        private static int ChayCapNhat(string sql, SqlParameter[] parameters)
+        private static int ChayCapNhat(string sql, NpgsqlParameter[] parameters)
         {
             using (var conn = LeTanDatPhongDAL.TaoKetNoi())
-            using (var cmd = new SqlCommand(sql, conn))
+            using (var cmd = new NpgsqlCommand(sql, conn))
             {
                 cmd.Parameters.AddRange(parameters);
                 conn.Open();

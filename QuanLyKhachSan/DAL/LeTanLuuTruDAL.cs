@@ -1,6 +1,6 @@
-﻿using System;
+using NpgsqlTypes;
+using System;
 using System.Data;
-using Microsoft.Data.SqlClient;    // Giống LeTanDatPhongDAL: nếu nhóm dùng System.Data.SqlClient thì đổi cho giống
 
 namespace Quản_Lý_Khách_Sạn.DAL
 {
@@ -27,8 +27,8 @@ WHERE d.TrangThai = @TrangThai
 ORDER BY d.NgayNhan, d.MaDat";
 
             return LeTanDatPhongDAL.LayBang(sql,
-                new SqlParameter("@TrangThai", SqlDbType.NVarChar, 20) { Value = trangThai },
-                new SqlParameter("@k", SqlDbType.NVarChar, 120) { Value = "%" + tuKhoa + "%" });
+                new NpgsqlParameter("@TrangThai", NpgsqlDbType.Varchar, 20) { Value = trangThai },
+                new NpgsqlParameter("@k", NpgsqlDbType.Varchar, 120) { Value = "%" + tuKhoa + "%" });
         }
 
         // Một đơn (để BLL kiểm tra quy tắc); null nếu không tồn tại
@@ -42,7 +42,7 @@ JOIN KhachHang kh ON kh.MaKH = d.MaKH
 WHERE d.MaDatPhong = @Id";
 
             DataTable dt = LeTanDatPhongDAL.LayBang(sql,
-                new SqlParameter("@Id", SqlDbType.Int) { Value = maDatPhong });
+                new NpgsqlParameter("@Id", NpgsqlDbType.Integer) { Value = maDatPhong });
             return dt.Rows.Count == 0 ? null : dt.Rows[0];
         }
 
@@ -51,13 +51,13 @@ WHERE d.MaDatPhong = @Id";
         {
             const string sql = @"
 SELECT COUNT(*) FROM DatPhong
-WHERE MaPhong = @MaPhong AND TrangThai = N'Đang ở' AND MaDatPhong <> @Id";
+WHERE MaPhong = @MaPhong AND TrangThai = 'Đang ở' AND MaDatPhong <> @Id";
 
             using (var conn = LeTanDatPhongDAL.TaoKetNoi())
-            using (var cmd = new SqlCommand(sql, conn))
+            using (var cmd = new NpgsqlCommand(sql, conn))
             {
-                cmd.Parameters.Add("@MaPhong", SqlDbType.Int).Value = maPhong;
-                cmd.Parameters.Add("@Id", SqlDbType.Int).Value = boQuaMaDatPhong;
+                cmd.Parameters.Add("@MaPhong", NpgsqlDbType.Integer).Value = maPhong;
+                cmd.Parameters.Add("@Id", NpgsqlDbType.Integer).Value = boQuaMaDatPhong;
                 conn.Open();
                 return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
             }
@@ -74,28 +74,28 @@ WHERE MaPhong = @MaPhong AND TrangThai = N'Đang ở' AND MaDatPhong <> @Id";
         public static bool NhanPhong(int maDatPhong)
         {
             const string sql = @"
-UPDATE d
-SET TrangThai = N'Đang ở', GioNhanThucTe = GETDATE()
-FROM DatPhong d JOIN Phong p ON p.MaPhong = d.MaPhong JOIN KhachHang kh ON kh.MaKH = d.MaKH
-WHERE d.MaDatPhong = @Id
-  AND d.TrangThai = N'Đã đặt'
-  AND p.TinhTrang = N'Hoạt động'
+UPDATE DatPhong d
+SET TrangThai = 'Đang ở', GioNhanThucTe = CURRENT_TIMESTAMP
+FROM Phong p, KhachHang kh
+WHERE p.MaPhong = d.MaPhong AND kh.MaKH = d.MaKH AND d.MaDatPhong = @Id
+  AND d.TrangThai = 'Đã đặt'
+  AND p.TinhTrang = 'Hoạt động'
   AND NULLIF(LTRIM(RTRIM(kh.CCCD)), '') IS NOT NULL
-  AND d.NgayNhan <= CAST(GETDATE() AS date) AND d.NgayTra > CAST(GETDATE() AS date)
+  AND d.NgayNhan <= CAST(CURRENT_TIMESTAMP AS date) AND d.NgayTra > CAST(CURRENT_TIMESTAMP AS date)
   AND NOT EXISTS (SELECT 1 FROM DatPhong x
                   WHERE x.MaPhong = d.MaPhong
-                    AND x.TrangThai = N'Đang ở'
+                    AND x.TrangThai = 'Đang ở'
                     AND x.MaDatPhong <> @Id)";
-            return ChayCapNhat(sql, new SqlParameter("@Id", SqlDbType.Int) { Value = maDatPhong });
+            return ChayCapNhat(sql, new NpgsqlParameter("@Id", NpgsqlDbType.Integer) { Value = maDatPhong });
         }
 
         public static bool TraPhong(int maDatPhong)
         {
             const string sql = @"
 UPDATE DatPhong
-SET TrangThai = N'Đã trả', GioTraThucTe = GETDATE()
-WHERE MaDatPhong = @Id AND TrangThai = N'Đang ở'";
-            return ChayCapNhat(sql, new SqlParameter("@Id", SqlDbType.Int) { Value = maDatPhong });
+SET TrangThai = 'Đã trả', GioTraThucTe = CURRENT_TIMESTAMP
+WHERE MaDatPhong = @Id AND TrangThai = 'Đang ở'";
+            return ChayCapNhat(sql, new NpgsqlParameter("@Id", NpgsqlDbType.Integer) { Value = maDatPhong });
         }
 
         public static bool HuyPhong(int maDatPhong, string lyDo, decimal tienHoan,
@@ -103,15 +103,15 @@ WHERE MaDatPhong = @Id AND TrangThai = N'Đang ở'";
         {
             const string sql = @"
 UPDATE DatPhong
-SET TrangThai = N'Đã hủy', NgayHuy = GETDATE(), LyDoHuy = @LyDo
-WHERE MaDatPhong = @Id AND TrangThai = N'Đã đặt' AND TienCoc = @Coc AND @Hoan BETWEEN 0 AND TienCoc";
+SET TrangThai = 'Đã hủy', NgayHuy = CURRENT_TIMESTAMP, LyDoHuy = @LyDo
+WHERE MaDatPhong = @Id AND TrangThai = 'Đã đặt' AND TienCoc = @Coc AND @Hoan BETWEEN 0 AND TienCoc";
             using var conn = LeTanDatPhongDAL.TaoKetNoi();
             conn.Open();
             using var tran = conn.BeginTransaction();
             LeTanDatPhongDAL.KhoaDatPhong(conn, tran);
-            using var cmd = new SqlCommand(sql, conn, tran);
-            cmd.Parameters.Add("@Id", SqlDbType.Int).Value = maDatPhong;
-            cmd.Parameters.Add("@LyDo", SqlDbType.NVarChar, 200).Value = lyDo;
+            using var cmd = new NpgsqlCommand(sql, conn, tran);
+            cmd.Parameters.Add("@Id", NpgsqlDbType.Integer).Value = maDatPhong;
+            cmd.Parameters.Add("@LyDo", NpgsqlDbType.Varchar, 200).Value = lyDo;
             cmd.Parameters.AddWithValue("@Coc", tienCocDaXem);
             cmd.Parameters.AddWithValue("@Hoan", tienHoan);
             if (cmd.ExecuteNonQuery() != 1) return false;
@@ -120,10 +120,10 @@ WHERE MaDatPhong = @Id AND TrangThai = N'Đã đặt' AND TienCoc = @Coc AND @Ho
             return true;
         }
 
-        private static bool ChayCapNhat(string sql, params SqlParameter[] ps)
+        private static bool ChayCapNhat(string sql, params NpgsqlParameter[] ps)
         {
             using (var conn = LeTanDatPhongDAL.TaoKetNoi())
-            using (var cmd = new SqlCommand(sql, conn))
+            using (var cmd = new NpgsqlCommand(sql, conn))
             {
                 cmd.Parameters.AddRange(ps);
                 conn.Open();

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using Quản_Lý_Khách_Sạn.DAL;
 
@@ -41,8 +41,8 @@ namespace Quản_Lý_Khách_Sạn.BLL
             if (Convert.ToString(r["TinhTrang"]) != "Hoạt động")
                 throw new NghiepVuException("Phòng đang ngừng hoạt động/bảo trì, chưa thể nhận phòng.");
 
-            DateTime nhan = Convert.ToDateTime(r["NgayNhan"]).Date;
-            DateTime tra = Convert.ToDateTime(r["NgayTra"]).Date;
+            DateTime nhan = ToDateTime(r["NgayNhan"]).Date;
+            DateTime tra = ToDateTime(r["NgayTra"]).Date;
 
             if (nhan > DateTime.Today)
                 throw new NghiepVuException(

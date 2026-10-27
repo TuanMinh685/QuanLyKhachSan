@@ -1,7 +1,7 @@
 using System.Data;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Microsoft.Data.SqlClient;
+using Npgsql;
 using Quản_Lý_Khách_Sạn;
 using Quản_Lý_Khách_Sạn.BLL;
 using Quản_Lý_Khách_Sạn.DAL;
@@ -21,7 +21,7 @@ internal static class Program
     {
         try { action(); }
         catch (NghiepVuException) { Check(true, name); return; }
-        catch (SqlException ex) when (ex.Number == 547 || ex.Number == 51000) { Check(true, name); return; }
+        catch (PostgresException ex) when (ex.SqlState == "23503" || ex.SqlState == "P0001") { Check(true, name); return; }
         throw new Exception("FAIL: expected rejection: " + name);
     }
 
@@ -30,7 +30,7 @@ internal static class Program
     private static decimal Money(string sql) => Convert.ToDecimal(Scalar(sql));
     private static void Sql(string sql) => DatabaseHelper.ExecuteNonQuery(sql);
     private static int Id(string maDat) => Convert.ToInt32(DatabaseHelper.ExecuteScalar(
-        "SELECT MaDatPhong FROM DatPhong WHERE MaDat=@Ma", new[] { new SqlParameter("@Ma", maDat) }));
+        "SELECT MaDatPhong FROM DatPhong WHERE MaDat=@Ma", new[] { new NpgsqlParameter("@Ma", maDat) }));
     private static string Book(int kh, int phong, DateTime nhan, decimal gia, decimal coc) =>
         LeTanDatPhongBLL.TaoDatPhong(kh, phong, nhan, nhan.AddDays(1), 2, 0, coc, "TM", 1, gia);
 
@@ -54,6 +54,8 @@ internal static class Program
             Reject(() => LeTanLuuTruBLL.KiemTraHoanCoc(-1, 165000), "Reject negative refund");
             Session.MaNhanVien = 1; Session.DangXuat();
             Check(Session.MaNhanVien == null, "Logout clears cashier identity");
+            if (args.Contains("--apply-deposit-migration")) ApplyDepositMigration();
+            if (args.Contains("--probe")) Probe();
             if (args.Contains("--integration")) Integration();
             Console.WriteLine($"SUCCESS: {passed} checks passed.");
             return 0;
@@ -61,33 +63,70 @@ internal static class Program
         catch (Exception ex) { Console.Error.WriteLine(ex); return 1; }
     }
 
+    private static void ApplyDepositMigration()
+    {
+        string root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
+        string sql = File.ReadAllText(Path.Combine(root, "Database", "Migrations", "002_Supabase_PhieuDatCoc.sql"));
+        using var conn = DatabaseHelper.GetConnection();
+        conn.Open();
+        using var cmd = new NpgsqlCommand("SET search_path TO public", conn);
+        cmd.ExecuteNonQuery();
+        cmd.CommandText = sql;
+        cmd.ExecuteNonQuery();
+        Console.WriteLine("Applied additive deposit-ledger migration in public.");
+    }
+
+    private static void Probe()
+    {
+        using var conn = DatabaseHelper.GetConnection();
+        conn.Open();
+        using var tx = conn.BeginTransaction();
+        using (var mode = new NpgsqlCommand("SET TRANSACTION READ ONLY", conn, tx)) mode.ExecuteNonQuery();
+        using var cmd = new NpgsqlCommand(@"SELECT current_setting('TimeZone'), to_regclass('public.phieudatcoc')::text,
+          (SELECT count(*) FROM information_schema.columns WHERE table_schema='public' AND table_name='phong' AND column_name IN ('hinhanh','tiennghi','ghichu'))", conn, tx);
+        using var reader = cmd.ExecuteReader(); reader.Read();
+        Console.WriteLine("Connected to PostgreSQL; timezone=" + reader.GetString(0));
+        Console.WriteLine("Deposit ledger exists=" + !reader.IsDBNull(1));
+        Console.WriteLine("Room UI columns=" + reader.GetInt64(2));
+        reader.Close(); tx.Rollback();
+        var customers = new KhachHangBLL();
+        Console.WriteLine("Customer query OK; returned rows=" + customers.TimKiem("", "").Count);
+        Console.WriteLine("Stay-history query OK; empty-customer rows=" + customers.LayLichSu(-1).Count);
+        Console.WriteLine("Deposit-ledger query OK; empty-customer rows=" + customers.LayGiaoDichCoc(-1).Rows.Count);
+        Console.WriteLine("Availability query OK; returned rows=" + LeTanDatPhongBLL.TimPhongTrong(DateTime.Today, DateTime.Today.AddDays(1), 1, 0, 0).Rows.Count);
+    }
+
     private static void Integration()
     {
-        // Chỉ tạo/xóa database tạm có tên ngẫu nhiên. Không dùng database thật cho test.
-        string db = "QLKS_Verify_" + Guid.NewGuid().ToString("N");
-        if (!Regex.IsMatch(db, "^QLKS_Verify_[a-f0-9]{32}$")) throw new Exception("Invalid test database name");
+        // Chỉ tạo/xóa schema riêng có tên ngẫu nhiên; không ghi vào public.
+        string db = "qlks_verify_" + Guid.NewGuid().ToString("N");
+        if (!Regex.IsMatch(db, "^qlks_verify_[a-f0-9]{32}$")) throw new Exception("Invalid test schema name");
         var configField = typeof(DatabaseHelper).GetField("connectionString", BindingFlags.Static | BindingFlags.NonPublic);
         string original = (string)configField.GetValue(null);
-        var builder = new SqlConnectionStringBuilder(original) { InitialCatalog = "master", ConnectTimeout = 5 };
-        using var master = new SqlConnection(builder.ConnectionString);
+        using var master = DatabaseHelper.GetConnection();
         master.Open();
         bool created = false;
         try
         {
-            using (var create = new SqlCommand($"CREATE DATABASE [{db}]", master)) create.ExecuteNonQuery();
+            using (var create = new NpgsqlCommand($"CREATE SCHEMA {db}", master)) create.ExecuteNonQuery();
             created = true;
-            builder.InitialCatalog = db;
+            var builder = new NpgsqlConnectionStringBuilder(original) { SearchPath = db };
             configField.SetValue(null, builder.ConnectionString);
+            if (Convert.ToString(Scalar("SELECT current_schema()")) != db)
+                throw new Exception("Test search_path is not isolated; aborting before any table writes.");
             string root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
-            string schema = File.ReadAllText(Path.Combine(root, "..", "Database", "QLKS.sql"));
-            // Bỏ toàn bộ phần xóa/tạo database của script gốc.
-            int start = schema.IndexOf("SET QUOTED_IDENTIFIER ON;", StringComparison.Ordinal);
-            if (start < 0) throw new Exception("Schema marker not found");
-            foreach (string batch in Regex.Split(schema.Substring(start), @"^\s*GO\s*$", RegexOptions.Multiline | RegexOptions.IgnoreCase))
-                if (!string.IsNullOrWhiteSpace(batch)) Sql(batch);
-            string migration = File.ReadAllText(Path.Combine(root, "Database", "Migrations", "001_PhieuDatCoc.sql"));
+            string schema = File.ReadAllText(Path.Combine(root, "..", "Database", "supabase_schema_and_data.sql"));
+            int start = schema.IndexOf("CREATE TABLE LoaiPhong", StringComparison.Ordinal);
+            int seed = schema.IndexOf("-- 12.", start, StringComparison.Ordinal);
+            if (start < 0 || seed < 0) throw new Exception("Schema markers not found");
+            Sql(schema.Substring(start, seed - start));
+            Sql(@"INSERT INTO LoaiPhong(TenLoai,GiaMotDem,SoNguoiToiDa) VALUES ('Standard',500000,2),('Deluxe',800000,3);
+                INSERT INTO Phong(SoPhong,Tang,MaLoai) VALUES ('P101',1,1),('P102',1,1),('P201',2,2);
+                INSERT INTO NhanVien(HoTen,ChucVu,SoDienThoai) VALUES ('Test','Lễ tân','0901234567');
+                INSERT INTO DichVu(MaDichVu,TenDichVu,DonGia) VALUES ('DV001','Test',120000);");
+            string migration = File.ReadAllText(Path.Combine(root, "Database", "Migrations", "002_Supabase_PhieuDatCoc.sql"));
             Sql(migration); Sql(migration);
-            Check(Number("SELECT COUNT(*) FROM sys.tables WHERE name='PhieuDatCoc'") == 1, "Migration is repeatable");
+            Check(Number("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=current_schema() AND table_name='phieudatcoc'") == 1, "Migration is repeatable");
 
             var customers = new KhachHangBLL();
             var kh = customers.Them(new KhachHang { HoTen = "Khach Kiem Thu", DienThoai = "0901234567", QuocTich = "Việt Nam", SoGiayTo = "012345678901" });
@@ -96,7 +135,7 @@ internal static class Program
             var loaded = customers.LayTheoMa(customer);
             loaded.HoTen = "Khach Cap Nhat";
             Check(customers.CapNhat(loaded).ThanhCong && customers.LayTheoMa(customer).HoTen == loaded.HoTen, "Update customer");
-            DateTime today = Convert.ToDateTime(Scalar("SELECT CAST(GETDATE() AS date)"));
+            DateTime today = DateTime.Today;
 
             string first = Book(customer, 1, today, 500000, 165000);
             int firstId = Id(first);
@@ -109,9 +148,9 @@ internal static class Program
             Reject(() => LeTanDatPhongBLL.TaoDatPhong(customer, 2, today, today.AddDays(1), 2, 0, 165000, "TM", 1, 400000), "Reject stale displayed price");
 
             int before = Number("SELECT COUNT(*) FROM DatPhong");
-            Sql("CREATE TRIGGER dbo.VerifyRejectReceipt ON dbo.PhieuDatCoc AFTER INSERT AS THROW 51000, 'Injected receipt failure', 1;");
+            Sql("CREATE FUNCTION reject_receipt() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'Injected receipt failure'; END $$; CREATE TRIGGER VerifyRejectReceipt AFTER INSERT ON PhieuDatCoc FOR EACH ROW EXECUTE FUNCTION reject_receipt();");
             try { Reject(() => Book(customer, 2, today, 500000, 165000), "Receipt write failure reaches caller"); }
-            finally { Sql("DROP TRIGGER dbo.VerifyRejectReceipt"); }
+            finally { Sql("DROP TRIGGER VerifyRejectReceipt ON PhieuDatCoc"); }
             Check(Number("SELECT COUNT(*) FROM DatPhong") == before, "Receipt failure rolls back booking");
 
             var attempts = Enumerable.Range(0, 2).Select(_ => Task.Run(() =>
@@ -166,12 +205,12 @@ internal static class Program
         finally
         {
             configField.SetValue(null, original);
-            SqlConnection.ClearAllPools();
+            NpgsqlConnection.ClearAllPools();
             if (created)
             {
-                using var cleanup = new SqlCommand($"ALTER DATABASE [{db}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE [{db}]", master);
+                using var cleanup = new NpgsqlCommand($"DROP SCHEMA {db} CASCADE", master);
                 cleanup.ExecuteNonQuery();
-                Console.WriteLine("Removed temporary database " + db);
+                Console.WriteLine("Removed temporary schema " + db);
             }
         }
     }

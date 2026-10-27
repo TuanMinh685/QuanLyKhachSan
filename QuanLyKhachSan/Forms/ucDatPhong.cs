@@ -29,6 +29,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             pnlTomTat.Controls.Add(lblSoDu);
             txtTienCoc.PlaceholderText = "Ví dụ: 165.000";
             txtTienCoc.TextChanged += (_, __) => CapNhatSoDu();
+            ThietKeGiaoDienDatPhong();
             GanSuKien();
         }
 
@@ -114,32 +115,21 @@ namespace Quản_Lý_Khách_Sạn.Forms
             if (dgvPhong.Columns.Count > 0) return;    // đã cấu hình rồi
 
             dgvPhong.AutoGenerateColumns = false;      // chỉ hiện cột mình khai báo
-            dgvPhong.ReadOnly = true;
-            dgvPhong.AllowUserToAddRows = false;
-            dgvPhong.AllowUserToDeleteRows = false;
-            dgvPhong.AllowUserToResizeRows = false;
-            dgvPhong.RowHeadersVisible = false;
-            dgvPhong.MultiSelect = false;
-            dgvPhong.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvPhong.BackgroundColor = Color.White;
-            dgvPhong.BorderStyle = BorderStyle.None;
-            dgvPhong.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            dgvPhong.GridColor = ColorTranslator.FromHtml("#D8E0E8");
-            dgvPhong.RowTemplate.Height = 52;
-
-            dgvPhong.EnableHeadersVisualStyles = false;
-            dgvPhong.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            dgvPhong.ColumnHeadersHeight = 30;
-            dgvPhong.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#F3F6F9");
-            dgvPhong.ColumnHeadersDefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#647487");
-            dgvPhong.DefaultCellStyle.SelectionBackColor = ColorTranslator.FromHtml("#E3EEF9");
-            dgvPhong.DefaultCellStyle.SelectionForeColor = Color.Black;
+            LeTanUi.Grid(dgvPhong);
 
             ThemCot("SoPhong", "Phòng", 70, false, DataGridViewContentAlignment.MiddleLeft, true);
             ThemCot("TenLoai", "Loại", 90, false, DataGridViewContentAlignment.MiddleLeft, false);
             ThemCot("MoTa", "Mô tả", 0, true, DataGridViewContentAlignment.MiddleLeft, false);
             ThemCot("GiaHienThi", "Giá / đêm", 130, false, DataGridViewContentAlignment.MiddleRight, true);
             ThemCot("ConPhong", "Còn", 100, false, DataGridViewContentAlignment.MiddleCenter, false);
+            foreach (DataGridViewColumn column in dgvPhong.Columns)
+                column.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            dgvPhong.Columns["colSoPhong"].MinimumWidth = 75;
+            dgvPhong.Columns["colTenLoai"].MinimumWidth = 90;
+            dgvPhong.Columns["colMoTa"].MinimumWidth = 170;
+            dgvPhong.Columns["colMoTa"].FillWeight = 180;
+            dgvPhong.Columns["colGiaHienThi"].MinimumWidth = 145;
+            dgvPhong.Columns["colConPhong"].MinimumWidth = 115;
         }
 
         private void ThemCot(string prop, string tieuDe, int rong, bool fill,
@@ -340,7 +330,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             }
             if (_maKH == 0)
             {
-                CanhBao("Vui lòng chọn khách đặt phòng (bấm biểu tượng bút ở mục Khách đặt phòng).");
+                CanhBao("Vui lòng bấm Chọn / đổi khách hàng trước khi đặt phòng.");
                 return;
             }
 

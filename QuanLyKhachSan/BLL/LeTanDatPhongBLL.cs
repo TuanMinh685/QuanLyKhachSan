@@ -6,7 +6,6 @@ using Quản_Lý_Khách_Sạn.DAL;
 
 namespace Quản_Lý_Khách_Sạn.BLL
 {
-    /// <summary>Lỗi nghiệp vụ (người dùng nhập sai, phòng đã bị đặt...). Giao diện báo thân thiện.</summary>
     public class NghiepVuException : Exception
     {
         public NghiepVuException(string message) : base(message) { }
