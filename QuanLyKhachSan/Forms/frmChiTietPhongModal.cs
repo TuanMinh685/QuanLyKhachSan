@@ -102,9 +102,10 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 Cursor = Cursors.Hand
             };
             btnSua.FlatAppearance.BorderSize = 0;
+            if (!Session.LaAdmin) btnSua.Text = "🔄 Đổi trạng thái"; // Lễ tân chỉ được đổi trạng thái phòng
             btnSua.Click += (_, __) =>
             {
-                using var modal = new frmPhongModal(_maPhong);
+                using var modal = new frmPhongModal(_maPhong, !Session.LaAdmin);
                 if (modal.ShowDialog(this) == DialogResult.OK)
                 {
                     TaiThongTinPhong();
@@ -263,6 +264,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
             pnlBody.Controls.Add(lblGhiChu);
 
             Controls.Add(pnlBody);
+            // Body (Fill) phải ở trên cùng z-order để được xếp bố cục SAU header/footer,
+            // nếu không 72px đầu (khung ảnh, tên phòng, giá) bị header che mất.
+            pnlBody.BringToFront();
         }
 
         private void TaiThongTinPhong()

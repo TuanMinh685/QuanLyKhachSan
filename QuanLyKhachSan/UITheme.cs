@@ -45,11 +45,32 @@ namespace Quản_Lý_Khách_Sạn
                     btn.UseMnemonic = false;
                     btn.Cursor = Cursors.Hand;
                 }
+                else if (ctrl is Label lbl)
+                {
+                    // Ký tự '&' trong nhãn (VD: "Tài khoản & Phân quyền") phải hiển thị nguyên văn.
+                    lbl.UseMnemonic = false;
+                }
 
                 if (ctrl.HasChildren)
                 {
                     ApplyThemeToControls(ctrl.Controls);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Tắt "phím tắt" (mnemonic) cho mọi Label/Button/CheckBox trong cây control,
+        /// để ký tự '&' hiển thị đúng thay vì bị WinForms nuốt mất.
+        /// </summary>
+        public static void DisableMnemonics(Control root)
+        {
+            if (root == null) return;
+            if (root is Label rootLabel) rootLabel.UseMnemonic = false;
+            else if (root is ButtonBase rootButton) rootButton.UseMnemonic = false;
+
+            foreach (Control child in root.Controls)
+            {
+                DisableMnemonics(child);
             }
         }
 
@@ -63,6 +84,22 @@ namespace Quản_Lý_Khách_Sạn
 
         // --- 3. ĐỊNH DẠNG BẢNG DỮ LIỆU (DATAGRIDVIEW) ĐỀU, RỘNG 100% KHUNG ---
         public static void StyleModernGrid(DataGridView dgv) => FormatDataGridView(dgv);
+
+        /// <summary>
+        /// Cho tiêu đề mỗi cột canh lề GIỐNG nội dung cột (Giá canh phải, Số liệu canh giữa...).
+        /// FormatDataGridView mặc định canh trái mọi tiêu đề nên tiêu đề bị lệch so với số liệu bên dưới.
+        /// Gọi SAU khi đã đặt DefaultCellStyle.Alignment cho các cột.
+        /// </summary>
+        public static void DongBoCanLeTieuDe(DataGridView dgv)
+        {
+            if (dgv == null) return;
+            foreach (DataGridViewColumn col in dgv.Columns)
+            {
+                var canLe = col.DefaultCellStyle.Alignment;
+                if (canLe != DataGridViewContentAlignment.NotSet)
+                    col.HeaderCell.Style.Alignment = canLe;
+            }
+        }
 
         public static void FormatDataGridView(DataGridView dgv)
         {

@@ -12,6 +12,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
     {
         private int maTaiKhoan = 0;
         private int maNhanVien = 0;
+        private bool vaiTroGocLaAdmin = false;   // vai trò trong DB trước khi sửa
+        private bool laChinhMinh = false;        // đang sửa chính tài khoản đang đăng nhập
 
         public frmTaiKhoanModal(int idTK = 0, int idNV = 0)
         {
@@ -28,6 +30,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 lblSubtitle.Text = "Cập nhật hồ sơ nhân viên, mật khẩu hoặc vai trò quyền hạn";
                 btnLuu.Text = "💾 Cập nhật";
                 btnLuu.BackColor = UITheme.PrimaryBlue;
+                lblHintMatKhau.Visible = true;
+                txtMatKhau.PlaceholderText = "Để trống nếu không đổi mật khẩu";
                 TaiThongTin(maTaiKhoan);
             }
             else
@@ -105,8 +109,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             btnLuu = new Button
             {
-                Size = new Size(160, 40),
-                Location = new Point(pnlFooter.Width - 280, 12),
+                Size = new Size(190, 40),
+                Location = new Point(pnlFooter.Width - 310, 12),
                 Anchor = AnchorStyles.Top | AnchorStyles.Right,
                 FlatStyle = FlatStyle.Flat,
                 BackColor = UITheme.PrimaryOrange,
@@ -179,12 +183,13 @@ namespace Quản_Lý_Khách_Sạn.Forms
             y += gap;
             TaoNhan(pnlBody, "Mật khẩu đăng nhập *", 28, y);
             var pnlPass = TaoBox(pnlBody, 28, y + 20, 508, 36);
-            txtMatKhau = new TextBox { BorderStyle = BorderStyle.None, Font = new Font("Segoe UI", 9.5F), Dock = DockStyle.Fill, UseSystemPasswordChar = true, PlaceholderText = "Ít nhất 8 ký tự (để trống nếu không đổi)" };
+            txtMatKhau = new TextBox { BorderStyle = BorderStyle.None, Font = new Font("Segoe UI", 9.5F), Dock = DockStyle.Fill, UseSystemPasswordChar = true, PlaceholderText = "Ít nhất 8 ký tự" };
             pnlPass.Controls.Add(txtMatKhau);
 
             lblHintMatKhau = new Label
             {
-                Text = "💡 Để trống ô mật khẩu nếu muốn giữ nguyên mật khẩu cũ của nhân viên khi cập nhật.",
+                Text = "💡 Khi sửa: để trống nếu không muốn đổi mật khẩu.",
+                Visible = false,
                 Font = new Font("Segoe UI", 8F, FontStyle.Italic),
                 ForeColor = UITheme.TextMuted,
                 Location = new Point(28, y + 58),
@@ -202,6 +207,10 @@ namespace Quản_Lý_Khách_Sạn.Forms
             pnlRole.Controls.Add(cboVaiTro);
 
             Controls.Add(pnlBody);
+            // QUAN TRỌNG: WinForms xếp control Dock theo z-order từ DƯỚI lên. Nếu body (Fill) nằm dưới
+            // header/footer thì nó chiếm cả form và 72px đầu (ô "Họ tên") bị header che mất.
+            // BringToFront đưa body lên trên cùng để nó được xếp SAU cùng, vào phần còn trống giữa header và footer.
+            pnlBody.BringToFront();
         }
 
         private static Label TaoNhan(Control parent, string text, int x, int y)
@@ -259,7 +268,18 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     cboChucVu.SelectedIndex = idxCv >= 0 ? idxCv : 1;
 
                     string vaiTro = r["VaiTro"].ToString();
-                    cboVaiTro.SelectedIndex = vaiTro.Equals("Admin", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
+                    vaiTroGocLaAdmin = vaiTro.Equals("Admin", StringComparison.OrdinalIgnoreCase);
+                    cboVaiTro.SelectedIndex = vaiTroGocLaAdmin ? 0 : 1;
+
+                    // Sửa chính tài khoản đang đăng nhập: khóa vai trò và tên đăng nhập.
+                    // Tránh tự hạ quyền (mất quyền Admin) hoặc đổi tên làm phiên đăng nhập bị lệch.
+                    laChinhMinh = txtTenDangNhap.Text.Equals(Session.TenDangNhap, StringComparison.OrdinalIgnoreCase);
+                    if (laChinhMinh)
+                    {
+                        cboVaiTro.Enabled = false;
+                        txtTenDangNhap.ReadOnly = true;
+                        lblSubtitle.Text = "Đây là tài khoản của bạn: không đổi được vai trò và tên đăng nhập";
+                    }
                 }
             }
             catch { }
@@ -335,9 +355,14 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     DialogResult = DialogResult.OK;
                     Close();
                 }
+                catch (PostgresException pex) when (pex.SqlState == PostgresErrorCodes.UniqueViolation)
+                {
+                    MessageBox.Show($"Tên đăng nhập [{user}] đã tồn tại. Vui lòng chọn tên khác.", "Trùng tên đăng nhập", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtTenDangNhap.Focus();
+                }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Không thể tạo tài khoản. Tên đăng nhập có thể đã tồn tại trong hệ thống.\n" + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Không thể tạo tài khoản:\n" + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
@@ -359,6 +384,29 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     using var conn = DatabaseHelper.GetConnection();
                     conn.Open();
                     using var tx = conn.BeginTransaction();
+
+                    // Bảo vệ ở tầng lưu (ngoài việc khóa ô trên giao diện): không tự hạ quyền mình,
+                    // và không hạ quyền Admin cuối cùng để hệ thống luôn còn người vào được các màn Admin.
+                    if (vaiTroGocLaAdmin && vaiTro != "Admin")
+                    {
+                        int soAdminKhac;
+                        using (var cmdChk = new SqlCommand(
+                            "SELECT COUNT(*) FROM TaiKhoan WHERE UPPER(VaiTro) = 'ADMIN' AND MaTaiKhoan <> @id", conn, tx))
+                        {
+                            cmdChk.Parameters.AddWithValue("@id", maTaiKhoan);
+                            soAdminKhac = Convert.ToInt32(cmdChk.ExecuteScalar());
+                        }
+
+                        if (laChinhMinh || soAdminKhac == 0)
+                        {
+                            tx.Rollback();
+                            MessageBox.Show(laChinhMinh
+                                    ? "Bạn không thể tự hạ quyền chính mình."
+                                    : "Hệ thống phải còn ít nhất một tài khoản Admin. Hãy tạo hoặc nâng quyền một Admin khác trước.",
+                                "Không thể đổi vai trò", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
+                    }
 
                     string sqlNV = "UPDATE NhanVien SET HoTen = @ten, ChucVu = @cv, SoDienThoai = @sdt WHERE MaNhanVien = @nv";
                     using (var cmd = new SqlCommand(sqlNV, conn, tx))
@@ -397,6 +445,11 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     MessageBox.Show($"Cập nhật nhân viên [{hoTen}] thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     DialogResult = DialogResult.OK;
                     Close();
+                }
+                catch (PostgresException pex) when (pex.SqlState == PostgresErrorCodes.UniqueViolation)
+                {
+                    MessageBox.Show($"Tên đăng nhập [{user}] đã được tài khoản khác sử dụng.", "Trùng tên đăng nhập", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtTenDangNhap.Focus();
                 }
                 catch (Exception ex)
                 {

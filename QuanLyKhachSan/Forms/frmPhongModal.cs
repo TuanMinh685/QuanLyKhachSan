@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Windows.Forms;
 using Quản_Lý_Khách_Sạn.DAL;
 
@@ -9,10 +10,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
     public partial class frmPhongModal : Form
     {
         private int _maPhong;
+        private readonly bool _chiDoiTrangThai; // true: Lễ tân chỉ được đổi trạng thái (Hoạt động/Bảo trì)
 
-        public frmPhongModal(int maPhong = 0)
+        public frmPhongModal(int maPhong = 0, bool chiDoiTrangThai = false)
         {
             _maPhong = maPhong;
+            _chiDoiTrangThai = chiDoiTrangThai && maPhong > 0;
             InitializeComponent();
             InitializeComponentCustom();
             UITheme.ApplyTheme(this);
@@ -32,6 +35,16 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 lblSubtitle.Text = "Khai báo buồng phòng mới vào hệ thống khách sạn";
                 btnLuu.Text = "💾 Lưu phòng";
                 btnLuu.BackColor = UITheme.PrimaryOrange;
+            }
+
+            if (_chiDoiTrangThai)
+            {
+                lblTitle.Text = "🔄 ĐỔI TRẠNG THÁI PHÒNG";
+                lblSubtitle.Text = "Bạn chỉ được đổi trạng thái Hoạt động / Bảo trì. Các thông tin khác do Admin quản lý";
+                foreach (Control c in new Control[] { txtSoPhong, txtTang, cboLoai, txtMoTa, txtDienTich, txtHinhAnh, btnChonAnh, txtTienNghi, txtGhiChu })
+                    c.Enabled = false;
+                btnLuu.Text = "💾 Cập nhật";
+                btnLuu.BackColor = UITheme.PrimaryBlue;
             }
         }
 
@@ -225,6 +238,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
             pnlGhiChu.Controls.Add(txtGhiChu);
 
             Controls.Add(pnlBody);
+            // QUAN TRỌNG: body (Fill) phải ở trên cùng z-order để được xếp bố cục SAU header/footer.
+            // Nếu không, 72px đầu (hàng "Số phòng" và "Tầng") bị header che mất nên không nhập được.
+            pnlBody.BringToFront();
         }
 
         private static Label TaoNhan(Control parent, string text, int x, int y)
@@ -281,7 +297,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 cboLoai.SelectedValue = Convert.ToInt32(r["MaLoai"]);
                 cboTinhTrang.Text = r["TinhTrang"].ToString();
                 txtMoTa.Text = r["MoTaGiuong"] == DBNull.Value ? "" : r["MoTaGiuong"].ToString();
-                txtDienTich.Text = r["DienTich"] == DBNull.Value ? "" : r["DienTich"].ToString();
+                txtDienTich.Text = r["DienTich"] == DBNull.Value ? "" : Convert.ToDecimal(r["DienTich"]).ToString("0.##", CultureInfo.InvariantCulture);
                 txtHinhAnh.Text = r.Table.Columns.Contains("HinhAnh") && r["HinhAnh"] != DBNull.Value ? r["HinhAnh"].ToString() : "";
                 txtTienNghi.Text = r.Table.Columns.Contains("TienNghi") && r["TienNghi"] != DBNull.Value ? r["TienNghi"].ToString() : "";
                 txtGhiChu.Text = r.Table.Columns.Contains("GhiChu") && r["GhiChu"] != DBNull.Value ? r["GhiChu"].ToString() : "";
@@ -291,6 +307,31 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void LuuDuLieu()
         {
+            // Lễ tân: chỉ cập nhật đúng một cột trạng thái
+            if (_chiDoiTrangThai)
+            {
+                try
+                {
+                    DatabaseHelper.ExecuteNonQuery(
+                        "UPDATE Phong SET TinhTrang = @tt WHERE MaPhong = @id",
+                        new[] { new SqlParameter("@tt", cboTinhTrang.Text), new SqlParameter("@id", _maPhong) });
+                    MessageBox.Show($"Đã cập nhật trạng thái phòng thành [{cboTinhTrang.Text}].", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    DialogResult = DialogResult.OK;
+                    Close();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Lỗi cập nhật trạng thái phòng: " + ex.Message, "Lỗi CSDL", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                return;
+            }
+
+            if (!Session.LaAdmin)
+            {
+                MessageBox.Show("Chỉ Admin mới được thêm hoặc sửa thông tin phòng.", "Không đủ quyền", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             string soPhong = txtSoPhong.Text.Trim();
             if (string.IsNullOrWhiteSpace(soPhong))
             {
@@ -306,10 +347,25 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 return;
             }
 
+            // Chấp nhận cả "25.5" lẫn "25,5" và luôn đọc theo InvariantCulture
+            // (nếu dùng culture vi-VN, "25.5" sẽ bị hiểu nhầm thành 255 vì '.' là dấu phân cách hàng nghìn).
             decimal? dt = null;
             if (!string.IsNullOrWhiteSpace(txtDienTich.Text))
             {
-                if (decimal.TryParse(txtDienTich.Text.Trim(), out decimal val)) dt = val;
+                string dtText = txtDienTich.Text.Trim().Replace(',', '.');
+                if (!decimal.TryParse(dtText, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out decimal val) || val <= 0)
+                {
+                    MessageBox.Show("Diện tích phải là số dương, ví dụ 25 hoặc 25.5.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtDienTich.Focus();
+                    return;
+                }
+                dt = val;
+            }
+
+            if (cboLoai.SelectedValue == null)
+            {
+                MessageBox.Show("Chưa có loại phòng nào. Vui lòng tạo loại phòng trước.", "Thiếu thông tin", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
 
             int maLoai = Convert.ToInt32(cboLoai.SelectedValue);
@@ -357,6 +413,11 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
                 DialogResult = DialogResult.OK;
                 Close();
+            }
+            catch (PostgresException pex) when (pex.SqlState == PostgresErrorCodes.UniqueViolation)
+            {
+                MessageBox.Show($"Số phòng [{soPhong}] đã tồn tại. Vui lòng nhập số phòng khác.", "Trùng số phòng", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtSoPhong.Focus();
             }
             catch (Exception ex)
             {
