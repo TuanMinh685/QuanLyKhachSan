@@ -260,6 +260,7 @@ ORDER BY lp.GiaMotDem, lp.TenLoai";
             ThietLapCot("Giá/đêm", "GIÁ / ĐÊM", 25, DataGridViewContentAlignment.MiddleRight, true);
             ThietLapCot("Sức chứa", "SỨC CHỨA", 18, DataGridViewContentAlignment.MiddleCenter, false);
             ThietLapCot("Số phòng", "SỐ PHÒNG THUỘC LOẠI", 22, DataGridViewContentAlignment.MiddleCenter, false);
+            UITheme.DongBoCanLeTieuDe(grid); // tiêu đề canh lề giống số liệu bên dưới
         }
 
         private void ThietLapCot(string ten, string tieuDe, float fillWeight, DataGridViewContentAlignment canLe, bool dam)

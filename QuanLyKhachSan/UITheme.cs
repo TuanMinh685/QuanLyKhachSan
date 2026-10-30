@@ -85,6 +85,22 @@ namespace Quản_Lý_Khách_Sạn
         // --- 3. ĐỊNH DẠNG BẢNG DỮ LIỆU (DATAGRIDVIEW) ĐỀU, RỘNG 100% KHUNG ---
         public static void StyleModernGrid(DataGridView dgv) => FormatDataGridView(dgv);
 
+        /// <summary>
+        /// Cho tiêu đề mỗi cột canh lề GIỐNG nội dung cột (Giá canh phải, Số liệu canh giữa...).
+        /// FormatDataGridView mặc định canh trái mọi tiêu đề nên tiêu đề bị lệch so với số liệu bên dưới.
+        /// Gọi SAU khi đã đặt DefaultCellStyle.Alignment cho các cột.
+        /// </summary>
+        public static void DongBoCanLeTieuDe(DataGridView dgv)
+        {
+            if (dgv == null) return;
+            foreach (DataGridViewColumn col in dgv.Columns)
+            {
+                var canLe = col.DefaultCellStyle.Alignment;
+                if (canLe != DataGridViewContentAlignment.NotSet)
+                    col.HeaderCell.Style.Alignment = canLe;
+            }
+        }
+
         public static void FormatDataGridView(DataGridView dgv)
         {
             if (dgv == null) return;

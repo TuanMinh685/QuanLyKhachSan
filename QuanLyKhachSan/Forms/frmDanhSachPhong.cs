@@ -478,6 +478,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 col.HeaderText = "TIỆN NGHI BUỒNG PHÒNG";
                 col.FillWeight = 200;
             }
+
+            UITheme.DongBoCanLeTieuDe(grid); // tiêu đề canh lề giống số liệu bên dưới
         }
 
         private void Grid_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
