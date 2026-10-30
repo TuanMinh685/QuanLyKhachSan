@@ -96,8 +96,18 @@ namespace Quản_Lý_Khách_Sạn
             foreach (DataGridViewColumn col in dgv.Columns)
             {
                 var canLe = col.DefaultCellStyle.Alignment;
-                if (canLe != DataGridViewContentAlignment.NotSet)
-                    col.HeaderCell.Style.Alignment = canLe;
+                if (canLe == DataGridViewContentAlignment.NotSet) continue;
+
+                col.HeaderCell.Style.Alignment = canLe;
+
+                // Cột cho phép sắp xếp luôn bị chừa ~22-25px bên phải tiêu đề cho mũi tên sắp xếp,
+                // làm tiêu đề canh GIỮA / canh PHẢI bị đẩy lệch trái so với số liệu bên dưới.
+                // Với cột số (không canh trái) tắt sắp xếp để tiêu đề thẳng hàng với dữ liệu.
+                bool canhTrai = canLe == DataGridViewContentAlignment.MiddleLeft
+                             || canLe == DataGridViewContentAlignment.TopLeft
+                             || canLe == DataGridViewContentAlignment.BottomLeft;
+                if (!canhTrai)
+                    col.SortMode = DataGridViewColumnSortMode.NotSortable;
             }
         }
 
