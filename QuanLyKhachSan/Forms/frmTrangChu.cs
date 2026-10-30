@@ -15,12 +15,14 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private Button btnBanLamViec;
         private Button btnTaiKhoan;
         private Button btnPhuongThucTT;
+        private Button btnLoaiPhong;
         private Button btnKhoaManHinh;
         private Button btnDoiMK;
 
         public frmTrangChu()
         {
             InitializeComponent();
+            lblTitleSection.UseMnemonic = false; // hiển thị đúng ký tự '&' trong tiêu đề
 
             btnBanLamViec = new Button
             {
@@ -45,7 +47,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnTaiKhoan = new Button
             {
                 Name = "btnTaiKhoan",
-                Text = "👤 Tài khoản & Phân quyền",
+                Text = "👤 Tài khoản",   // tên đầy đủ "Tài khoản & Phân quyền" hiện ở tiêu đề màn hình
                 Dock = DockStyle.Top,
                 Height = 52,
                 Cursor = Cursors.Hand,
@@ -81,6 +83,28 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnPhuongThucTT.Click += (_, __) => { if (YeuCauAdmin()) MoFormCon(new frmPhuongThucThanhToan(), btnPhuongThucTT, "QUẢN LÝ PHƯƠNG THỨC THANH TOÁN"); };
             pnlSidebar.Controls.Add(btnPhuongThucTT);
             pnlSidebar.Controls.SetChildIndex(btnPhuongThucTT, 2);
+
+            // Menu "Loại phòng & giá" (Admin): đặt ngay dưới "Quản lý phòng"
+            btnLoaiPhong = new Button
+            {
+                Name = "btnLoaiPhong",
+                Text = "🏷️ Loại phòng & giá",
+                Dock = DockStyle.Top,
+                Height = 52,
+                Cursor = Cursors.Hand,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                ForeColor = Color.FromArgb(226, 232, 240),
+                BackColor = Color.FromArgb(15, 37, 55),
+                TextAlign = ContentAlignment.MiddleLeft,
+                Padding = new Padding(24, 0, 0, 0),
+                UseMnemonic = false
+            };
+            btnLoaiPhong.FlatAppearance.BorderSize = 0;
+            btnLoaiPhong.Click += (_, __) => { if (YeuCauAdmin()) MoFormCon(new frmLoaiPhong(), btnLoaiPhong, "QUẢN LÝ LOẠI PHÒNG & GIÁ"); };
+            pnlSidebar.Controls.Add(btnLoaiPhong);
+            // Control Dock=Top có index CAO hơn thì nằm TRÊN: đặt cùng index với btnPhong để nằm ngay dưới nó
+            pnlSidebar.Controls.SetChildIndex(btnLoaiPhong, pnlSidebar.Controls.GetChildIndex(btnPhong));
 
             // Đồng bộ chiều cao, lề trái và hiển thị dấu '&' cho toàn bộ nút menu bên trái
             foreach (Control ctrl in pnlSidebar.Controls)
@@ -172,6 +196,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             bool admin = Quản_Lý_Khách_Sạn.Session.LaAdmin;
             btnTaiKhoan.Visible = admin;
             btnPhuongThucTT.Visible = admin;
+            btnLoaiPhong.Visible = admin;
             btnVoucher.Visible = admin;
             btnBaoCao.Visible = admin;
             lblUserGreeting.Text = "Chào mừng, " +
@@ -316,6 +341,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     pnlContent.Controls.Add(manHinh);
                 }
 
+                UITheme.DisableMnemonics(manHinh); // không để '&' bị nuốt thành phím tắt
                 manHinh.Show();
                 manHinh.BringToFront();
 

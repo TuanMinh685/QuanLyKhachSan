@@ -45,11 +45,32 @@ namespace Quản_Lý_Khách_Sạn
                     btn.UseMnemonic = false;
                     btn.Cursor = Cursors.Hand;
                 }
+                else if (ctrl is Label lbl)
+                {
+                    // Ký tự '&' trong nhãn (VD: "Tài khoản & Phân quyền") phải hiển thị nguyên văn.
+                    lbl.UseMnemonic = false;
+                }
 
                 if (ctrl.HasChildren)
                 {
                     ApplyThemeToControls(ctrl.Controls);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Tắt "phím tắt" (mnemonic) cho mọi Label/Button/CheckBox trong cây control,
+        /// để ký tự '&' hiển thị đúng thay vì bị WinForms nuốt mất.
+        /// </summary>
+        public static void DisableMnemonics(Control root)
+        {
+            if (root == null) return;
+            if (root is Label rootLabel) rootLabel.UseMnemonic = false;
+            else if (root is ButtonBase rootButton) rootButton.UseMnemonic = false;
+
+            foreach (Control child in root.Controls)
+            {
+                DisableMnemonics(child);
             }
         }
 

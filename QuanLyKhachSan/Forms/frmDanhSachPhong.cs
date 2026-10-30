@@ -81,8 +81,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 Text = "🚪 QUẢN LÝ BUỒNG PHÒNG & HÌNH ẢNH CHI TIẾT",
                 Font = new Font("Segoe UI", 12.5F, FontStyle.Bold),
                 ForeColor = UITheme.DarkNavy,
-                Location = new Point(24, 12),
-                AutoSize = true
+                AutoSize = true,
+                UseMnemonic = false,
+                Margin = new Padding(0, 0, 0, 2)
             };
 
             lblSubtitle = new Label
@@ -90,18 +91,33 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 Text = "Tra cứu thông tin, hình ảnh thực tế, tiện nghi buồng phòng và trạng thái theo thời gian thực",
                 Font = new Font("Segoe UI", 8.8F),
                 ForeColor = UITheme.TextMuted,
-                Location = new Point(24, 38),
-                AutoSize = true
+                AutoSize = true,
+                UseMnemonic = false,
+                Margin = new Padding(0)
             };
 
-            // Thẻ thống kê (Pills)
+            // Tiêu đề + phụ đề xếp dọc, bên trái (không còn đè lên nhau)
+            var pnlTieuDe = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Left,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                FlowDirection = FlowDirection.TopDown,
+                WrapContents = false,
+                BackColor = Color.Transparent
+            };
+            pnlTieuDe.Controls.Add(lblTitle);
+            pnlTieuDe.Controls.Add(lblSubtitle);
+
+            // Thẻ thống kê (Pills): bám mép phải, tự giãn theo nội dung (không bị cắt chữ)
             pnlStats = new FlowLayoutPanel
             {
-                Anchor = AnchorStyles.Top | AnchorStyles.Right,
-                Location = new Point(Width - 490, 20),
-                Size = new Size(460, 36),
+                Dock = DockStyle.Right,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
                 FlowDirection = FlowDirection.RightToLeft,
                 WrapContents = false,
+                Padding = new Padding(0, 8, 0, 0),
                 BackColor = Color.Transparent
             };
 
@@ -111,17 +127,16 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             pnlStats.Controls.AddRange(new Control[] { lblPillBaoTri, lblPillHoatDong, lblPillTong });
 
-            pnlHeader.Controls.Add(lblTitle);
-            pnlHeader.Controls.Add(lblSubtitle);
-            pnlHeader.Controls.Add(pnlStats);
-
-            // Divider dưới Header
+            // Divider dưới Header. Thứ tự Add quan trọng: control Add SAU được xếp bố cục TRƯỚC,
+            // nên divider (Bottom) thêm cuối để chiếm 1px đáy trước, rồi trái/phải mới chia phần còn lại.
             var pnlDivider = new Panel
             {
                 Dock = DockStyle.Bottom,
                 Height = 1,
                 BackColor = UITheme.BorderColor
             };
+            pnlHeader.Controls.Add(pnlStats);
+            pnlHeader.Controls.Add(pnlTieuDe);
             pnlHeader.Controls.Add(pnlDivider);
 
             // 2. TOOLBAR TÌM KIẾM & NÚT HÀNH ĐỘNG
@@ -130,49 +145,63 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 Dock = DockStyle.Top,
                 Height = 56,
                 BackColor = Color.White,
-                Padding = new Padding(24, 10, 24, 10)
+                Padding = new Padding(24, 0, 24, 0)
             };
 
             // Ô tìm kiếm
             txtTim = new TextBox
             {
-                Location = new Point(24, 13),
-                Size = new Size(240, 29),
+                Size = new Size(260, 29),
                 Font = new Font("Segoe UI", 9.5F),
-                PlaceholderText = "🔍 Tìm số phòng, loại phòng..."
+                PlaceholderText = "🔍 Tìm số phòng, loại phòng...",
+                Margin = new Padding(0, 0, 10, 0)
             };
             txtTim.TextChanged += (_, __) => ApDungBoLoc();
 
             // Lọc loại phòng
             cboLocLoai = new ComboBox
             {
-                Location = new Point(274, 13),
-                Size = new Size(160, 29),
+                Size = new Size(200, 29),
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Segoe UI", 9F)
+                Font = new Font("Segoe UI", 9F),
+                Margin = new Padding(0, 0, 10, 0)
             };
             cboLocLoai.SelectedIndexChanged += (_, __) => ApDungBoLoc();
 
             // Lọc trạng thái
             cboLocTrangThai = new ComboBox
             {
-                Location = new Point(444, 13),
-                Size = new Size(135, 29),
+                Size = new Size(180, 29),
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Segoe UI", 9F)
+                Font = new Font("Segoe UI", 9F),
+                Margin = new Padding(0)
             };
             cboLocTrangThai.Items.AddRange(new object[] { "-- Tất cả trạng thái --", "Hoạt động", "Bảo trì" });
             cboLocTrangThai.SelectedIndex = 0;
             cboLocTrangThai.SelectedIndexChanged += (_, __) => ApDungBoLoc();
 
-            // Các nút hành động bên phải
+            // Nhóm ô tìm kiếm + bộ lọc bên trái
+            var flowLoc = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Left,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                FlowDirection = FlowDirection.LeftToRight,
+                WrapContents = false,
+                Padding = new Padding(0, 12, 0, 0),
+                BackColor = Color.Transparent
+            };
+            flowLoc.Controls.AddRange(new Control[] { txtTim, cboLocLoai, cboLocTrangThai });
+
+            // Các nút hành động bên phải: bám mép phải, tự giãn theo độ dài chữ
             var flowActions = new FlowLayoutPanel
             {
-                Anchor = AnchorStyles.Top | AnchorStyles.Right,
-                Location = new Point(Width - 580, 8),
-                Size = new Size(550, 40),
+                Dock = DockStyle.Right,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
                 FlowDirection = FlowDirection.RightToLeft,
                 WrapContents = false,
+                Padding = new Padding(0, 10, 0, 0),
                 BackColor = Color.Transparent
             };
 
@@ -199,17 +228,14 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             flowActions.Controls.AddRange(new Control[] { btnLamMoi, btnXoa, btnSua, btnXemChiTiet, btnThem });
 
-            pnlToolbar.Controls.Add(txtTim);
-            pnlToolbar.Controls.Add(cboLocLoai);
-            pnlToolbar.Controls.Add(cboLocTrangThai);
-            pnlToolbar.Controls.Add(flowActions);
-
             var pnlDivider2 = new Panel
             {
                 Dock = DockStyle.Bottom,
                 Height = 1,
                 BackColor = UITheme.BorderColor
             };
+            pnlToolbar.Controls.Add(flowActions);
+            pnlToolbar.Controls.Add(flowLoc);
             pnlToolbar.Controls.Add(pnlDivider2);
 
             // 3. CONTAINER CHỨA GRID TOÀN MÀN HÌNH
@@ -245,6 +271,17 @@ namespace Quản_Lý_Khách_Sạn.Forms
             });
             grid.ContextMenuStrip = contextMenuGrid;
 
+            // PHÂN QUYỀN: Admin được thêm/sửa/xóa. Lễ tân chỉ xem và đổi trạng thái phòng.
+            if (!Session.LaAdmin)
+            {
+                btnThem.Visible = false;
+                btnXoa.Visible = false;
+                itemXoa.Visible = false;
+                contextMenuGrid.Items[2].Visible = false; // đường kẻ phân cách trước mục Xóa
+                btnSua.Text = "🔄 Đổi trạng thái";
+                itemSua.Text = "🔄 Đổi trạng thái phòng";
+            }
+
             grid.CellDoubleClick += (_, e) =>
             {
                 if (e.RowIndex >= 0)
@@ -261,12 +298,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
             Controls.Add(pnlGridContainer);
             Controls.Add(pnlToolbar);
             Controls.Add(pnlHeader);
-
-            Resize += (_, __) =>
-            {
-                pnlStats.Location = new Point(Math.Max(300, Width - 490), 20);
-                flowActions.Location = new Point(Math.Max(500, Width - 580), 8);
-            };
         }
 
         private static Label TaoThePill(string text, Color bg, Color fg)
@@ -289,12 +320,16 @@ namespace Quản_Lý_Khách_Sạn.Forms
             var btn = new Button
             {
                 Text = text,
-                Size = new Size(width, 34),
+                AutoSize = true,                       // giãn theo độ dài chữ, không bị cắt ("Chi tiết & Ảnh", "Làm mới")
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                MinimumSize = new Size(width, 34),
+                Padding = new Padding(10, 0, 10, 0),
                 BackColor = bg,
                 ForeColor = fg,
                 FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                 Cursor = Cursors.Hand,
+                UseMnemonic = false,
                 Margin = new Padding(4, 0, 0, 0)
             };
             btn.FlatAppearance.BorderSize = 0;
@@ -452,7 +487,17 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             string colName = grid.Columns[e.ColumnIndex].Name;
 
-            if (colName == "Trạng thái" && e.Value != null)
+            // AlternatingRowsDefaultCellStyle ưu tiên hơn style của cột, nên màu cột phải đặt tại đây
+            // để các dòng chẵn/lẻ cùng một màu (trước đây giá cam/đen xen kẽ).
+            if (colName == "Giá/đêm")
+            {
+                e.CellStyle.ForeColor = UITheme.PrimaryOrange;
+            }
+            else if (colName == "Số phòng")
+            {
+                e.CellStyle.ForeColor = UITheme.DarkNavy;
+            }
+            else if (colName == "Trạng thái" && e.Value != null)
             {
                 string status = e.Value.ToString();
                 if (status.Equals("Hoạt động", StringComparison.OrdinalIgnoreCase))
@@ -508,7 +553,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             string filter = "1=1";
 
             // Lọc theo từ khóa tìm kiếm
-            string kw = txtTim.Text.Trim().Replace("'", "''");
+            string kw = EscapeLikeValue(txtTim.Text.Trim());
             if (!string.IsNullOrWhiteSpace(kw))
             {
                 filter += $" AND ([Số phòng] LIKE '%{kw}%' OR [Loại phòng] LIKE '%{kw}%' OR [Tiện nghi] LIKE '%{kw}%')";
@@ -527,7 +572,30 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 filter += $" AND [Trạng thái] = '{tt}'";
             }
 
-            dvPhong.RowFilter = filter;
+            try
+            {
+                dvPhong.RowFilter = filter;
+            }
+            catch (Exception)
+            {
+                dvPhong.RowFilter = "1=0"; // từ khóa không hợp lệ: hiện danh sách rỗng thay vì báo lỗi
+            }
+        }
+
+        // Escape theo quy tắc của DataView.RowFilter (LIKE): ' -> '', và [ ] * % đặt trong [ ].
+        private static string EscapeLikeValue(string value)
+        {
+            var sb = new System.Text.StringBuilder(value.Length + 8);
+            foreach (char c in value)
+            {
+                switch (c)
+                {
+                    case ']': case '[': case '%': case '*': sb.Append('[').Append(c).Append(']'); break;
+                    case '\'': sb.Append("''"); break;
+                    default: sb.Append(c); break;
+                }
+            }
+            return sb.ToString();
         }
 
         private int LayMaPhongDangChon()
@@ -540,8 +608,17 @@ namespace Quản_Lý_Khách_Sạn.Forms
             return Convert.ToInt32(grid.CurrentRow.Cells["MaPhong"].Value);
         }
 
+        private static bool CanQuyenAdmin()
+        {
+            if (Session.LaAdmin) return true;
+            MessageBox.Show("Chỉ Admin mới được thêm hoặc xóa phòng. Lễ tân chỉ được đổi trạng thái phòng.",
+                "Không đủ quyền", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return false;
+        }
+
         private void ThemPhong()
         {
+            if (!CanQuyenAdmin()) return;
             using var modal = new frmPhongModal(0);
             if (modal.ShowDialog(this) == DialogResult.OK)
             {
@@ -566,7 +643,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             int id = LayMaPhongDangChon();
             if (id <= 0) return;
 
-            using var modal = new frmPhongModal(id);
+            using var modal = new frmPhongModal(id, !Session.LaAdmin);
             if (modal.ShowDialog(this) == DialogResult.OK)
             {
                 LoadPhong();
@@ -575,6 +652,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void XoaPhong()
         {
+            if (!CanQuyenAdmin()) return;
             int id = LayMaPhongDangChon();
             if (id <= 0) return;
 

@@ -107,9 +107,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             pnlSearch = new Panel
             {
-                Location = new Point(0, 0),
-                Size = new Size(pnlToolbar.Width - 550, 40),
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
+                Dock = DockStyle.Fill,   // lấp đầy phần bên trái, nhường chỗ cho nhóm nút bên phải
                 BackColor = Color.White
             };
             pnlSearch.Paint += (s, e) => UITheme.DrawInputBox(s, e, 6);
@@ -144,9 +142,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnThem = new Button
             {
                 Text = "➕ Thêm nhân sự mới",
-                Size = new Size(175, 40),
-                Location = new Point(pnlToolbar.Width - 175, 0),
-                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                MinimumSize = new Size(175, 40),
+                Padding = new Padding(10, 0, 10, 0),
+                Margin = new Padding(8, 0, 0, 0),
+                UseMnemonic = false,
                 FlatStyle = FlatStyle.Flat,
                 BackColor = UITheme.PrimaryOrange,
                 ForeColor = Color.White,
@@ -160,9 +161,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnSua = new Button
             {
                 Text = "✏️ Chỉnh sửa",
-                Size = new Size(120, 40),
-                Location = new Point(pnlToolbar.Width - 305, 0),
-                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                MinimumSize = new Size(120, 40),
+                Padding = new Padding(10, 0, 10, 0),
+                Margin = new Padding(8, 0, 0, 0),
+                UseMnemonic = false,
                 FlatStyle = FlatStyle.Flat,
                 BackColor = UITheme.PrimaryBlue,
                 ForeColor = Color.White,
@@ -176,9 +180,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnXoa = new Button
             {
                 Text = "🗑 Xóa",
-                Size = new Size(95, 40),
-                Location = new Point(pnlToolbar.Width - 410, 0),
-                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                MinimumSize = new Size(95, 40),
+                Padding = new Padding(10, 0, 10, 0),
+                Margin = new Padding(8, 0, 0, 0),
+                UseMnemonic = false,
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.FromArgb(254, 242, 242),
                 ForeColor = Color.FromArgb(220, 38, 38),
@@ -192,9 +199,12 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnLamMoi = new Button
             {
                 Text = "🔄 Làm mới",
-                Size = new Size(100, 40),
-                Location = new Point(pnlToolbar.Width - 520, 0),
-                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                MinimumSize = new Size(100, 40),
+                Padding = new Padding(10, 0, 10, 0),
+                Margin = new Padding(8, 0, 0, 0),
+                UseMnemonic = false,
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.FromArgb(248, 250, 252),
                 ForeColor = UITheme.DarkNavy,
@@ -204,10 +214,22 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnLamMoi.FlatAppearance.BorderColor = UITheme.BorderColor;
             btnLamMoi.Click += (_, __) => { txtTim.Clear(); LoadTaiKhoan(); };
 
-            pnlToolbar.Controls.Add(btnThem);
-            pnlToolbar.Controls.Add(btnSua);
-            pnlToolbar.Controls.Add(btnXoa);
-            pnlToolbar.Controls.Add(btnLamMoi);
+            // Nhóm nút bám mép phải, tự giãn theo chữ. Thêm SAU pnlSearch để được xếp bố cục trước,
+            // phần còn lại bên trái mới thuộc về ô tìm kiếm (trước đây ô tìm kiếm tràn đè lên các nút Sửa/Xóa/Làm mới).
+            var flowNut = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Right,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                FlowDirection = FlowDirection.RightToLeft,
+                WrapContents = false,
+                BackColor = Color.Transparent
+            };
+            flowNut.Controls.Add(btnThem);     // ngoài cùng bên phải
+            flowNut.Controls.Add(btnSua);
+            flowNut.Controls.Add(btnXoa);
+            flowNut.Controls.Add(btnLamMoi);
+            pnlToolbar.Controls.Add(flowNut);
             cardMain.Controls.Add(pnlToolbar);
 
             // 3. Bọc bảng DataGridView Full 100%
@@ -399,12 +421,44 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 conn.Open();
                 using var tx = conn.BeginTransaction();
 
+                // Không được xóa Admin cuối cùng: kiểm tra ngay trong transaction ngay trước khi xóa
+                string vaiTroMucTieu;
+                using (var cmdVai = new SqlCommand("SELECT VaiTro FROM TaiKhoan WHERE MaTaiKhoan = @id", conn, tx))
+                {
+                    cmdVai.Parameters.AddWithValue("@id", idTK);
+                    vaiTroMucTieu = Convert.ToString(cmdVai.ExecuteScalar()) ?? "";
+                }
+
+                if (vaiTroMucTieu.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    int soAdminKhac;
+                    using (var cmdSo = new SqlCommand(
+                        "SELECT COUNT(*) FROM TaiKhoan WHERE UPPER(VaiTro) = 'ADMIN' AND MaTaiKhoan <> @id", conn, tx))
+                    {
+                        cmdSo.Parameters.AddWithValue("@id", idTK);
+                        soAdminKhac = Convert.ToInt32(cmdSo.ExecuteScalar());
+                    }
+
+                    if (soAdminKhac == 0)
+                    {
+                        tx.Rollback();
+                        MessageBox.Show("Không thể xóa Admin cuối cùng. Hệ thống phải còn ít nhất một tài khoản Admin.",
+                            "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                }
+
                 using (var cmd = new SqlCommand("DELETE FROM TaiKhoan WHERE MaTaiKhoan = @id", conn, tx))
                 {
                     cmd.Parameters.AddWithValue("@id", idTK);
                     cmd.ExecuteNonQuery();
                 }
 
+                // Hồ sơ nhân viên có thể đang được phiếu đặt phòng/hóa đơn tham chiếu nên chưa chắc xóa được.
+                // PostgreSQL: một lệnh lỗi làm HỎNG CẢ transaction (kể cả lệnh xóa tài khoản ở trên), nên không thể
+                // dùng try/catch trống như SQL Server. Dùng SAVEPOINT để chỉ hoàn tác riêng lệnh xóa hồ sơ.
+                bool daXoaHoSo = true;
+                tx.Save("sp_xoa_nhanvien");
                 try
                 {
                     using (var cmd = new SqlCommand("DELETE FROM NhanVien WHERE MaNhanVien = @nv", conn, tx))
@@ -413,11 +467,18 @@ namespace Quản_Lý_Khách_Sạn.Forms
                         cmd.ExecuteNonQuery();
                     }
                 }
-                catch { }
+                catch (PostgresException)
+                {
+                    tx.Rollback("sp_xoa_nhanvien");
+                    daXoaHoSo = false;
+                }
 
                 tx.Commit();
                 BaoMatHelper.GhiNhatKy(Session.TenDangNhap, "XOA_TAI_KHOAN", $"Xóa tài khoản [{user}] của nhân viên [{hoTen}] (Mã TK: {idTK})");
-                MessageBox.Show("Đã xóa tài khoản nhân sự thành công.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(daXoaHoSo
+                        ? "Đã xóa tài khoản và hồ sơ nhân sự thành công."
+                        : "Đã xóa tài khoản đăng nhập.\nHồ sơ nhân viên được giữ lại vì còn gắn với dữ liệu đặt phòng/hóa đơn.",
+                    "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoadTaiKhoan();
             }
             catch (Exception ex)
