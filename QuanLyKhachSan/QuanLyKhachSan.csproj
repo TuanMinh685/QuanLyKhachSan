@@ -14,6 +14,8 @@
     <EmbeddedResource Remove="Verification\**\*" />
     <None Remove="Verification\bin\**\*;Verification\obj\**\*" />
     <PackageReference Include="Npgsql" Version="10.0.3" />
+    <!-- Ảnh nền màn hình đăng nhập (thay bằng ảnh khách sạn thật: chép đè file này, giữ nguyên tên) -->
+    <EmbeddedResource Include="Resources\login_hero.jpg" LogicalName="login_hero.jpg" />
   </ItemGroup>
 
 </Project>
