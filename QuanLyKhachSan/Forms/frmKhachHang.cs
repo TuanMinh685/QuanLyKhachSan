@@ -212,7 +212,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             XoaLoi();
 
             lblTieuDeThongTin.Text = "Thông tin khách hàng";
-            btnCapNhat.Text = "Cập nhật";
+            btnCapNhat.Text = "Lưu thay đổi";
 
             txtHoTen.Text = kh.HoTen;
             txtDienThoai.Text = kh.DienThoai;
@@ -220,10 +220,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
             DatNgaySinh(kh.NgaySinh);
             txtQuocTich.Text = kh.QuocTich;
             txtEmail.Text = kh.Email ?? "";
-            txtDiaChi.Text = kh.DiaChi ?? "";
             txtSoGiayTo.Text = kh.SoGiayTo ?? "";
             txtGhiChu.Text = kh.GhiChu ?? "";
-            chkNhanUuDai.Checked = kh.DongYNhanUuDai;
 
             HienThiThongKe(kh);
         }
@@ -251,12 +249,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             lblNhomBadge.ForeColor = chu;
             lblNhomBadge.Visible = true;
 
-            // Các tab bên dưới danh sách
-            lblThongTinChung.Text =
-                "Mã khách hàng:" + "\t\t" + kh.MaKH + Environment.NewLine + Environment.NewLine +
-                "Nhóm khách:" + "\t\t" + kh.NhomKhach + " (" + kh.SoLanLuuTru + " lần lưu trú)" + Environment.NewLine + Environment.NewLine +
-                "Lần lưu trú gần nhất:" + "\t" + (kh.LanLuuTruGanNhat.HasValue ? kh.LanLuuTruGanNhat.Value.ToString("dd/MM/yyyy") : "—") + Environment.NewLine + Environment.NewLine +
-                "Ngày tạo hồ sơ:" + "\t\t" + kh.NgayTao.ToString("dd/MM/yyyy HH:mm");
+            CapNhatTomTatKhachHang(kh);
             lblGhiChuXem.Text = string.IsNullOrWhiteSpace(kh.GhiChu) ? "(Không có ghi chú)" : kh.GhiChu;
             NapLichSu(kh.MaKhachHang);
         }
@@ -311,10 +304,11 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 NgaySinh = dtpNgaySinh.Checked ? (DateTime?)dtpNgaySinh.Value.Date : null,
                 QuocTich = txtQuocTich.Text,
                 Email = txtEmail.Text,
-                DiaChi = txtDiaChi.Text,
+                // Hai trường đã bỏ khỏi giao diện: giữ giá trị cũ khi sửa hồ sơ.
+                DiaChi = khDangChon?.DiaChi,
                 SoGiayTo = txtSoGiayTo.Text,
                 GhiChu = txtGhiChu.Text,
-                DongYNhanUuDai = chkNhanUuDai.Checked
+                DongYNhanUuDai = khDangChon?.DongYNhanUuDai ?? false
             };
         }
 
@@ -327,10 +321,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
             dtpNgaySinh.Checked = false;
             txtQuocTich.Text = "Việt Nam";
             txtEmail.Clear();
-            txtDiaChi.Clear();
             txtSoGiayTo.Clear();
             txtGhiChu.Clear();
-            chkNhanUuDai.Checked = false;
         }
 
         private void BatDauThemMoi()
@@ -350,6 +342,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             lblTieuDeThongTin.Text = "Thêm khách hàng mới";
             btnCapNhat.Text = "Lưu khách hàng";
             lblNhomBadge.Visible = false;
+            CapNhatTomTatKhachHang(null);
             lblThongTinChung.Text = "Hồ sơ mới – chưa có thông tin lưu trú.";
             lblGhiChuXem.Text = "";
             NapLichSu(null);
@@ -476,7 +469,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 case "NgaySinh": return dtpNgaySinh;
                 case "QuocTich": return txtQuocTich;
                 case "Email": return txtEmail;
-                case "DiaChi": return txtDiaChi;
                 case "GhiChu": return txtGhiChu;
                 default: return null;
             }
@@ -484,6 +476,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void HienLoiSoGiayTo(string thongBao)
         {
+            if (khungNhapLieu != null)
+                khungNhapLieu.RowStyles[dongLoiGiayTo].Height = string.IsNullOrEmpty(thongBao) ? 0 : 36 * DeviceDpi / 96F;
             if (string.IsNullOrEmpty(thongBao))
             {
                 lblLoiSoGiayTo.Visible = false;
