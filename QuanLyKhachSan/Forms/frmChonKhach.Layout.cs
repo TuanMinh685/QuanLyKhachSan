@@ -45,6 +45,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             footer.Controls.Add(LeTanUi.Actions(btnChon, btnDong), 1, 0);
             LeTanUi.Row(root, footer, 68);
             Controls.Add(root); ResumeLayout(true);
+            UITheme.ApplyTheme(this);
         }
     }
 }

@@ -48,6 +48,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             footer.BackColor = Color.White; footer.Padding = new Padding(24, 14, 24, 14);
             LeTanUi.Row(root, footer, 68);
             Controls.Add(root); ResumeLayout(true);
+            UITheme.ApplyTheme(this);
         }
     }
 }

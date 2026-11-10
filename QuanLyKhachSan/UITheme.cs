@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -28,10 +28,47 @@ namespace Quản_Lý_Khách_Sạn
         public static void ApplyTheme(Form form)
         {
             if (form == null) return;
-            form.BackColor = BackgroundGray;
+            if (form.BackColor == SystemColors.Control)
+                form.BackColor = BackgroundGray;
             SetDoubleBuffered(form);
             DisableMnemonics(form);
             ApplyThemeToControls(form.Controls);
+
+            // HALLMARK: Tự động trang trí dải màu nhận diện thương hiệu (Top Accent Strip) cho các Form Modal tác vụ nhỏ
+            if (form.FormBorderStyle == FormBorderStyle.FixedDialog || !form.MaximizeBox)
+            {
+                foreach (Control ctrl in form.Controls)
+                {
+                    if (ctrl is Panel pnl && pnl.Dock == DockStyle.Top && pnl.Height >= 55 && pnl.Height <= 95)
+                    {
+                        pnl.Paint -= DrawModalHeaderAccent;
+                        pnl.Paint += DrawModalHeaderAccent;
+                    }
+                }
+            }
+        }
+
+        private static void DrawModalHeaderAccent(object sender, PaintEventArgs e)
+        {
+            if (sender is not Control pnl || pnl.Width <= 0) return;
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+            // Dải Gradient thương hiệu 3px trên đỉnh Modal
+            using (var brush = new LinearGradientBrush(
+                new Rectangle(0, 0, Math.Max(1, pnl.Width), 4),
+                PrimaryOrange,
+                DarkNavy,
+                LinearGradientMode.Horizontal))
+            {
+                e.Graphics.FillRectangle(brush, 0, 0, pnl.Width, 3);
+            }
+
+            // Thanh nhấn dọc 4px bên trái tiêu đề
+            using (var path = GetRoundedRectPath(new Rectangle(12, 16, 4, Math.Max(16, pnl.Height - 32)), 2))
+            using (var accentBrush = new SolidBrush(PrimaryOrange))
+            {
+                e.Graphics.FillPath(accentBrush, path);
+            }
         }
 
         /// <summary>
@@ -67,17 +104,51 @@ namespace Quản_Lý_Khách_Sạn
                 {
                     btn.UseMnemonic = false;
                     btn.Cursor = Cursors.Hand;
+                    if (btn.FlatStyle == FlatStyle.Flat && btn.BackColor != Color.Transparent)
+                    {
+                        if (btn.BackColor == PrimaryOrange || btn.BackColor == PrimaryBlue || btn.BackColor == DarkNavy || btn.BackColor == SuccessGreen || btn.BackColor == DangerRed)
+                        {
+                            btn.FlatAppearance.MouseOverBackColor = ControlPaint.Light(btn.BackColor, 0.12f);
+                            btn.FlatAppearance.MouseDownBackColor = ControlPaint.Dark(btn.BackColor, 0.08f);
+                        }
+                        else if (btn.BackColor == Color.White)
+                        {
+                            btn.FlatAppearance.MouseOverBackColor = BackgroundLight;
+                            btn.FlatAppearance.MouseDownBackColor = ColorTranslator.FromHtml("#E2E8F0");
+                        }
+                    }
                 }
                 else if (ctrl is Label lbl)
                 {
                     // Ký tự '&' trong nhãn (VD: "Tài khoản & Phân quyền") phải hiển thị nguyên văn.
                     lbl.UseMnemonic = false;
                 }
+                else if (ctrl is TextBox or ComboBox or DateTimePicker or NumericUpDown)
+                {
+                    // SKILL: Tự động gắn hiệu ứng Focus Ring cho khung chứa Input khi người dùng nhập liệu
+                    if (ctrl.Parent is Panel parentBox && parentBox.Height <= 90)
+                    {
+                        ctrl.Enter -= InputChild_FocusChanged;
+                        ctrl.Enter += InputChild_FocusChanged;
+                        ctrl.Leave -= InputChild_FocusChanged;
+                        ctrl.Leave += InputChild_FocusChanged;
+                    }
+                }
 
                 if (ctrl.HasChildren)
                 {
                     ApplyThemeToControls(ctrl.Controls);
                 }
+            }
+        }
+
+        private static void InputChild_FocusChanged(object sender, EventArgs e)
+        {
+            if (sender is Control c && c.Parent is Panel parentBox)
+            {
+                bool focused = c.Focused || parentBox.ContainsFocus;
+                parentBox.BackColor = focused ? ColorTranslator.FromHtml("#FFFBF7") : Color.White;
+                parentBox.Invalidate();
             }
         }
 
@@ -190,15 +261,15 @@ namespace Quản_Lý_Khách_Sạn
             e.ThrowException = false;
         }
 
-        // --- 4. VẼ KHUNG CARD & Ô INPUT BO GÓC MƯỢT ---
+        // --- 4. VẼ KHUNG CARD & Ô INPUT BO GÓC MƯỢT (PRO MAX FOCUS RING & ELEVATION) ---
         public static void DrawCard(object sender, PaintEventArgs e, int radius = 10)
         {
-            if (sender is Control ctrl)
+            if (sender is Control ctrl && ctrl.Width > 2 && ctrl.Height > 2)
             {
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 Rectangle rect = new Rectangle(0, 0, ctrl.Width - 1, ctrl.Height - 1);
                 using (GraphicsPath path = GetRoundedRectPath(rect, radius))
-                using (Pen pen = new Pen(BorderColor, 1.2f))
+                using (Pen pen = new Pen(BorderColor, 1.25f))
                 {
                     e.Graphics.DrawPath(pen, path);
                 }
@@ -207,12 +278,15 @@ namespace Quản_Lý_Khách_Sạn
 
         public static void DrawInputBox(object sender, PaintEventArgs e, int radius = 6)
         {
-            if (sender is Control ctrl)
+            if (sender is Control ctrl && ctrl.Width > 2 && ctrl.Height > 2)
             {
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                bool focused = ctrl.ContainsFocus;
                 Rectangle rect = new Rectangle(0, 0, ctrl.Width - 1, ctrl.Height - 1);
                 using (GraphicsPath path = GetRoundedRectPath(rect, radius))
-                using (Pen pen = new Pen(ColorTranslator.FromHtml("#CBD5E1"), 1.1f))
+                using (Pen pen = new Pen(
+                    focused ? PrimaryOrange : ColorTranslator.FromHtml("#CBD5E1"),
+                    focused ? 1.6f : 1.15f))
                 {
                     e.Graphics.DrawPath(pen, path);
                 }

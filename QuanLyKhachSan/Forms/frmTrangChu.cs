@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using Quản_Lý_Khách_Sạn.BLL;
 
@@ -18,6 +19,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private Button btnLoaiPhong;
         private Button btnKhoaManHinh;
         private Button btnDoiMK;
+        private Label lblBreadcrumb;
+        private Label lblClock;
+        private System.Windows.Forms.Timer timerClock;
 
         public frmTrangChu()
         {
@@ -26,19 +30,30 @@ namespace Quản_Lý_Khách_Sạn.Forms
             UITheme.DisableMnemonics(this);
             lblTitleSection.UseMnemonic = false; // hiển thị đúng ký tự '&' trong tiêu đề
 
+            // 1. NÂNG CẤP LOGO THƯƠNG HIỆU TRÊN SIDEBAR (PRO MAX BRAND HEADER)
+            lblHotelName.Location = new Point(74, 19);
+            lblHotelName.Font = new Font("Segoe UI", 12.5F, FontStyle.Bold);
+            lblHotelName.ForeColor = Color.White;
+            lblHotelSub.Location = new Point(75, 48);
+            lblHotelSub.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+            lblHotelSub.ForeColor = Color.FromArgb(251, 146, 60);
+            lblHotelSub.Text = "HOSPITALITY PMS PRO";
+            pnlLogo.Paint += PnlLogo_Paint;
+
+            // 2. KHỞI TẠO CÁC NÚT ĐIỀU HƯỚNG BỔ SUNG
             btnBanLamViec = new Button
             {
                 Name = "btnBanLamViec",
-                Text = "⊞ Bàn làm việc lễ tân",
+                Text = "⊞  Bàn làm việc lễ tân",
                 Dock = DockStyle.Top,
                 Height = 52,
                 Cursor = Cursors.Hand,
                 FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(226, 232, 240),
+                ForeColor = Color.FromArgb(203, 213, 225),
                 BackColor = Color.FromArgb(15, 37, 55),
                 TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(24, 0, 0, 0),
+                Padding = new Padding(26, 0, 0, 0),
                 UseMnemonic = false
             };
             btnBanLamViec.FlatAppearance.BorderSize = 0;
@@ -49,16 +64,16 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnTaiKhoan = new Button
             {
                 Name = "btnTaiKhoan",
-                Text = "👤 Tài khoản",   // tên đầy đủ "Tài khoản & Phân quyền" hiện ở tiêu đề màn hình
+                Text = "🛡️  Tài khoản & Phân quyền",
                 Dock = DockStyle.Top,
                 Height = 52,
                 Cursor = Cursors.Hand,
                 FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(226, 232, 240),
+                ForeColor = Color.FromArgb(203, 213, 225),
                 BackColor = Color.FromArgb(15, 37, 55),
                 TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(24, 0, 0, 0),
+                Padding = new Padding(26, 0, 0, 0),
                 UseMnemonic = false
             };
             btnTaiKhoan.FlatAppearance.BorderSize = 0;
@@ -69,16 +84,16 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnPhuongThucTT = new Button
             {
                 Name = "btnPhuongThucTT",
-                Text = "💳 Phương thức TT",
+                Text = "💳  Phương thức TT",
                 Dock = DockStyle.Top,
                 Height = 52,
                 Cursor = Cursors.Hand,
                 FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(226, 232, 240),
+                ForeColor = Color.FromArgb(203, 213, 225),
                 BackColor = Color.FromArgb(15, 37, 55),
                 TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(24, 0, 0, 0),
+                Padding = new Padding(26, 0, 0, 0),
                 UseMnemonic = false,
                 Visible = false
             };
@@ -89,47 +104,74 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnLoaiPhong = new Button
             {
                 Name = "btnLoaiPhong",
-                Text = "🏷️ Loại phòng & giá",
+                Text = "🏷️  Loại phòng & giá",
                 Dock = DockStyle.Top,
                 Height = 52,
                 Cursor = Cursors.Hand,
                 FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(226, 232, 240),
+                ForeColor = Color.FromArgb(203, 213, 225),
                 BackColor = Color.FromArgb(15, 37, 55),
                 TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(24, 0, 0, 0),
+                Padding = new Padding(26, 0, 0, 0),
                 UseMnemonic = false
             };
             btnLoaiPhong.FlatAppearance.BorderSize = 0;
             btnLoaiPhong.Click += (_, __) => { if (YeuCauAdmin()) MoFormCon(new frmLoaiPhong(), btnLoaiPhong, "QUẢN LÝ LOẠI PHÒNG & GIÁ"); };
             pnlSidebar.Controls.Add(btnLoaiPhong);
-            // Control Dock=Top có index CAO hơn thì nằm TRÊN: đặt cùng index với btnPhong để nằm ngay dưới nó
             pnlSidebar.Controls.SetChildIndex(btnLoaiPhong, pnlSidebar.Controls.GetChildIndex(btnPhong));
 
-            // Đồng bộ chiều cao, lề trái và hiển thị dấu '&' cho toàn bộ nút menu bên trái
+            // 3. ĐỒNG BỘ PRO MAX NAV INDICATOR CHO TOÀN BỘ NÚT MENU SIDEBAR
             foreach (Control ctrl in pnlSidebar.Controls)
             {
                 if (ctrl is Button btn && btn != btnDangXuat)
                 {
                     btn.UseMnemonic = false;
                     btn.Height = 52;
-                    btn.Padding = new Padding(24, 0, 0, 0);
+                    btn.Padding = new Padding(26, 0, 0, 0);
+                    btn.FlatAppearance.BorderSize = 0;
+                    btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(20, 47, 69);
+                    btn.FlatAppearance.MouseDownBackColor = Color.FromArgb(26, 58, 84);
+                    btn.Paint -= NutMenuSidebar_Paint;
+                    btn.Paint += NutMenuSidebar_Paint;
                 }
             }
 
-            // Thiết lập nút bảo mật trên Header (Khóa màn hình & Đổi MK)
+            btnDangXuat.FlatAppearance.MouseOverBackColor = Color.FromArgb(30, 41, 59);
+            btnDangXuat.Paint += (s, e) =>
+            {
+                using var pen = new Pen(Color.FromArgb(30, 58, 82), 1f);
+                e.Graphics.DrawLine(pen, 20, 0, btnDangXuat.Width - 20, 0);
+            };
+
+            // 4. THIẾT KẾ HEADER TRUNG TÂM HIỆN ĐẠI (BREADCRUMB + ĐỒNG HỒ THỜI GIAN THỰC + NÚT BẢO MẬT)
             KeyPreview = true;
             KeyDown += frmTrangChu_KeyDown;
+
+            lblBreadcrumb = new Label
+            {
+                Name = "lblBreadcrumb",
+                Text = "AN NHIÊN HOTEL  •  PHÂN HỆ TÁC NGHIỆP",
+                Font = new Font("Segoe UI", 7.8F, FontStyle.Bold),
+                ForeColor = Color.FromArgb(100, 116, 139),
+                Location = new Point(38, 13),
+                AutoSize = true,
+                UseMnemonic = false
+            };
+            pnlHeader.Controls.Add(lblBreadcrumb);
+
+            lblTitleSection.Location = new Point(38, 30);
+            lblTitleSection.Font = new Font("Segoe UI", 12.5F, FontStyle.Bold);
+            lblTitleSection.ForeColor = UITheme.DarkNavy;
 
             btnKhoaManHinh = new Button
             {
                 Name = "btnKhoaManHinh",
                 Text = "🔒 Khóa máy (Ctrl+L)",
                 Anchor = AnchorStyles.Top | AnchorStyles.Right,
-                Size = new Size(160, 36),
+                Size = new Size(158, 36),
                 Location = new Point(pnlHeader.Width - 175, 19),
-                BackColor = Color.FromArgb(241, 245, 249),
+                BackColor = Color.FromArgb(248, 250, 252),
                 ForeColor = Color.FromArgb(30, 41, 59),
                 FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold),
@@ -137,7 +179,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             };
             btnKhoaManHinh.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
             btnKhoaManHinh.MouseEnter += (s, e) => btnKhoaManHinh.BackColor = Color.FromArgb(226, 232, 240);
-            btnKhoaManHinh.MouseLeave += (s, e) => btnKhoaManHinh.BackColor = Color.FromArgb(241, 245, 249);
+            btnKhoaManHinh.MouseLeave += (s, e) => btnKhoaManHinh.BackColor = Color.FromArgb(248, 250, 252);
             btnKhoaManHinh.Click += (s, e) => MoKhoaManHinh();
 
             btnDoiMK = new Button
@@ -145,9 +187,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 Name = "btnDoiMK",
                 Text = "🔑 Đổi MK",
                 Anchor = AnchorStyles.Top | AnchorStyles.Right,
-                Size = new Size(100, 36),
-                Location = new Point(pnlHeader.Width - 285, 19),
-                BackColor = Color.FromArgb(241, 245, 249),
+                Size = new Size(98, 36),
+                Location = new Point(pnlHeader.Width - 282, 19),
+                BackColor = Color.FromArgb(248, 250, 252),
                 ForeColor = Color.FromArgb(30, 41, 59),
                 FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold),
@@ -155,15 +197,38 @@ namespace Quản_Lý_Khách_Sạn.Forms
             };
             btnDoiMK.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
             btnDoiMK.MouseEnter += (s, e) => btnDoiMK.BackColor = Color.FromArgb(226, 232, 240);
-            btnDoiMK.MouseLeave += (s, e) => btnDoiMK.BackColor = Color.FromArgb(241, 245, 249);
+            btnDoiMK.MouseLeave += (s, e) => btnDoiMK.BackColor = Color.FromArgb(248, 250, 252);
             btnDoiMK.Click += (s, e) => MoDoiMatKhau();
 
-            lblUserGreeting.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            lblUserGreeting.Location = new Point(pnlHeader.Width - 690, 22);
-            lblUserGreeting.Size = new Size(395, 30);
+            lblClock = new Label
+            {
+                Name = "lblClock",
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                Location = new Point(pnlHeader.Width - 690, 14),
+                Size = new Size(395, 20),
+                Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
+                ForeColor = UITheme.PrimaryOrange,
+                TextAlign = ContentAlignment.MiddleRight,
+                Text = "🕒 " + DateTime.Now.ToString("HH:mm:ss  •  dd/MM/yyyy")
+            };
 
+            lblUserGreeting.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblUserGreeting.Location = new Point(pnlHeader.Width - 690, 35);
+            lblUserGreeting.Size = new Size(395, 24);
+            lblUserGreeting.Font = new Font("Segoe UI", 9.25F, FontStyle.Bold);
+            lblUserGreeting.ForeColor = UITheme.DarkNavy;
+
+            pnlHeader.Controls.Add(lblClock);
             pnlHeader.Controls.Add(btnKhoaManHinh);
             pnlHeader.Controls.Add(btnDoiMK);
+
+            timerClock = new System.Windows.Forms.Timer { Interval = 1000 };
+            timerClock.Tick += (_, __) =>
+            {
+                if (!IsDisposed && lblClock != null)
+                    lblClock.Text = "🕒 " + DateTime.Now.ToString("HH:mm:ss  •  dd/MM/yyyy");
+            };
+            timerClock.Start();
 
             ApDungPhanQuyen();
         }
@@ -200,9 +265,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
             btnLoaiPhong.Visible = admin;
             btnVoucher.Visible = admin;
             btnBaoCao.Visible = admin;
-            lblUserGreeting.Text = "Chào mừng, " +
-                (admin ? "Quản trị viên (Admin)" : "Lễ tân") +
-                " - " + Quản_Lý_Khách_Sạn.Session.TenDangNhap;
+            lblUserGreeting.Text = (admin ? "🛡️ Quản trị viên (Admin)" : "🛎️ Ca trực Lễ tân") +
+                "  •  " + Quản_Lý_Khách_Sạn.Session.TenDangNhap;
         }
 
         private bool YeuCauAdmin()
@@ -391,24 +455,101 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             if (btn == null) return;
 
-            if (nutDangChon != null)
+            Button nutCu = nutDangChon;
+            if (nutCu != null)
             {
-                nutDangChon.BackColor = Color.FromArgb(15, 37, 55);
-                nutDangChon.ForeColor = Color.FromArgb(226, 232, 240);
+                nutCu.BackColor = Color.FromArgb(15, 37, 55);
+                nutCu.ForeColor = Color.FromArgb(203, 213, 225);
+                nutCu.Invalidate();
             }
 
             nutDangChon = btn;
-            nutDangChon.BackColor = Color.FromArgb(232, 119, 26);
+            nutDangChon.BackColor = Color.FromArgb(24, 54, 79);
             nutDangChon.ForeColor = Color.White;
+            nutDangChon.Invalidate();
+        }
+
+        private void PnlLogo_Paint(object sender, PaintEventArgs e)
+        {
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+            // Huy hiệu thương hiệu bo góc 40x40 bên trái
+            var badgeRect = new Rectangle(22, 20, 40, 40);
+            using (var badgePath = UITheme.GetRoundedRectPath(badgeRect, 10))
+            using (var badgeBrush = new LinearGradientBrush(
+                badgeRect,
+                Color.FromArgb(234, 88, 12),
+                Color.FromArgb(249, 115, 22),
+                LinearGradientMode.ForwardDiagonal))
+            {
+                e.Graphics.FillPath(badgeBrush, badgePath);
+            }
+
+            using (var fontBadge = new Font("Segoe UI", 11F, FontStyle.Bold))
+            {
+                TextRenderer.DrawText(
+                    e.Graphics,
+                    "AN",
+                    fontBadge,
+                    badgeRect,
+                    Color.White,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            }
+
+            // Đường phân cách mảnh ở đáy khối Logo
+            using (var pen = new Pen(Color.FromArgb(30, 58, 82), 1f))
+            {
+                e.Graphics.DrawLine(pen, 20, pnlLogo.Height - 1, pnlLogo.Width - 20, pnlLogo.Height - 1);
+            }
+        }
+
+        private void NutMenuSidebar_Paint(object sender, PaintEventArgs e)
+        {
+            if (sender is not Button btn) return;
+            bool active = ReferenceEquals(btn, nutDangChon);
+            if (!active) return;
+
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+            // Thanh chỉ báo trạng thái đang chọn (Active Left Pill Bar) chuẩn Pro Max
+            var pillRect = new Rectangle(6, 10, 4, Math.Max(16, btn.Height - 20));
+            using (var pillPath = UITheme.GetRoundedRectPath(pillRect, 2))
+            using (var pillBrush = new SolidBrush(Color.FromArgb(249, 115, 22)))
+            {
+                e.Graphics.FillPath(pillBrush, pillPath);
+            }
+
+            // Dấu mũi tên điều hướng bên phải
+            using (var chevronFont = new Font("Segoe UI", 11F, FontStyle.Bold))
+            {
+                var chevronRect = new Rectangle(btn.Width - 28, 0, 20, btn.Height);
+                TextRenderer.DrawText(
+                    e.Graphics,
+                    "›",
+                    chevronFont,
+                    chevronRect,
+                    Color.FromArgb(251, 146, 60),
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            }
         }
 
         private void pnlHeader_Paint(object sender, PaintEventArgs e)
         {
-            ControlPaint.DrawBorder(e.Graphics, pnlHeader.ClientRectangle,
-                Color.Transparent, 0, ButtonBorderStyle.None,
-                Color.Transparent, 0, ButtonBorderStyle.None,
-                Color.Transparent, 0, ButtonBorderStyle.None,
-                Color.FromArgb(226, 232, 240), 1, ButtonBorderStyle.Solid);
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+            // Thanh nhấn dọc màu cam bên trái tiêu đề trang
+            var accentRect = new Rectangle(22, 16, 4, Math.Max(20, pnlHeader.Height - 32));
+            using (var accentPath = UITheme.GetRoundedRectPath(accentRect, 2))
+            using (var accentBrush = new SolidBrush(UITheme.PrimaryOrange))
+            {
+                e.Graphics.FillPath(accentBrush, accentPath);
+            }
+
+            // Đường viền đáy Header
+            using (var pen = new Pen(Color.FromArgb(226, 232, 240), 1f))
+            {
+                e.Graphics.DrawLine(pen, 0, pnlHeader.Height - 1, pnlHeader.Width, pnlHeader.Height - 1);
+            }
         }
 
         private void btnPhong_Click(object sender, EventArgs e)

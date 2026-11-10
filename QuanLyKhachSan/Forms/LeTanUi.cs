@@ -41,7 +41,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         internal static Panel Header(Label title, Label subtitle, Control trailing = null)
         {
-            var header = new Panel { Dock = DockStyle.Fill, BackColor = Color.White, Padding = new Padding(24, 14, 24, 12) };
+            var header = new Panel { Dock = DockStyle.Fill, BackColor = Color.White, Padding = new Padding(28, 15, 24, 12) };
             var layout = Table(2);
             layout.ColumnStyles[0] = new ColumnStyle(SizeType.Percent, 100);
             layout.ColumnStyles[1] = new ColumnStyle(SizeType.Absolute, trailing == null ? 0 : 225);
@@ -63,6 +63,21 @@ namespace Quản_Lý_Khách_Sạn.Forms
             header.Controls.Add(layout);
             header.Paint += (_, e) =>
             {
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                // Dải màu thương hiệu 3px trên cùng
+                using (var topBrush = new LinearGradientBrush(
+                    new Rectangle(0, 0, Math.Max(1, header.Width), 4),
+                    UITheme.PrimaryOrange, UITheme.DarkNavy, LinearGradientMode.Horizontal))
+                {
+                    e.Graphics.FillRectangle(topBrush, 0, 0, header.Width, 3);
+                }
+                // Thanh nhấn dọc 4px bên trái tiêu đề
+                using (var pillPath = UITheme.GetRoundedRectPath(new Rectangle(14, 17, 4, Math.Max(18, header.Height - 34)), 2))
+                using (var pillBrush = new SolidBrush(UITheme.PrimaryOrange))
+                {
+                    e.Graphics.FillPath(pillBrush, pillPath);
+                }
+                // Đường phân cách đáy
                 using var pen = new Pen(UITheme.BorderColor);
                 e.Graphics.DrawLine(pen, 0, header.Height - 1, header.Width, header.Height - 1);
             };
@@ -105,8 +120,22 @@ namespace Quản_Lý_Khách_Sạn.Forms
             if (input is ComboBox combo) combo.FlatStyle = FlatStyle.Flat;
             input.Dock = DockStyle.Fill;
             frame.Controls.Add(input);
-            input.Enter += (_, __) => { frame.BorderColor = UITheme.PrimaryOrange; frame.Invalidate(); };
-            input.Leave += (_, __) => { frame.BorderColor = UITheme.BorderColor; frame.Invalidate(); };
+            input.Enter += (_, __) =>
+            {
+                frame.BorderColor = UITheme.PrimaryOrange;
+                frame.BorderWidth = 1.6f;
+                frame.BackColor = ColorTranslator.FromHtml("#FFFBF7");
+                if (input is TextBox tb) tb.BackColor = ColorTranslator.FromHtml("#FFFBF7");
+                frame.Invalidate();
+            };
+            input.Leave += (_, __) =>
+            {
+                frame.BorderColor = UITheme.BorderColor;
+                frame.BorderWidth = 1.15f;
+                frame.BackColor = Color.White;
+                if (input is TextBox tb) tb.BackColor = Color.White;
+                frame.Invalidate();
+            };
             return frame;
         }
 
@@ -164,6 +193,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
     internal sealed class LeTanCard : Panel
     {
         internal Color BorderColor = UITheme.BorderColor;
+        internal float BorderWidth = 1.15f;
         internal LeTanCard()
         {
             DoubleBuffered = true; ResizeRedraw = true;
@@ -175,7 +205,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             if (Width < 20 || Height < 20) return;
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             using var path = UITheme.GetRoundedRectPath(new Rectangle(0, 0, Width - 1, Height - 1), 8);
-            using var pen = new Pen(BorderColor);
+            using var pen = new Pen(BorderColor, BorderWidth);
             e.Graphics.DrawPath(pen, path);
         }
     }

@@ -55,6 +55,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             buttons.BackColor = Color.White; buttons.Padding = new Padding(24, 14, 24, 14);
             LeTanUi.Row(root, buttons, 68);
             CancelButton = cancel; AcceptButton = ok;
+            UITheme.ApplyTheme(this);
             txtHoan.TextChanged += (_, __) =>
             {
                 try
