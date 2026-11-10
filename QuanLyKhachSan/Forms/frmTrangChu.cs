@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 using Quản_Lý_Khách_Sạn.BLL;
@@ -79,12 +79,11 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 BackColor = Color.FromArgb(15, 37, 55),
                 TextAlign = ContentAlignment.MiddleLeft,
                 Padding = new Padding(24, 0, 0, 0),
-                UseMnemonic = false
+                UseMnemonic = false,
+                Visible = false
             };
             btnPhuongThucTT.FlatAppearance.BorderSize = 0;
             btnPhuongThucTT.Click += (_, __) => { if (YeuCauAdmin()) MoFormCon(new frmPhuongThucThanhToan(), btnPhuongThucTT, "QUẢN LÝ PHƯƠNG THỨC THANH TOÁN"); };
-            pnlSidebar.Controls.Add(btnPhuongThucTT);
-            pnlSidebar.Controls.SetChildIndex(btnPhuongThucTT, 2);
 
             // Menu "Loại phòng & giá" (Admin): đặt ngay dưới "Quản lý phòng"
             btnLoaiPhong = new Button
@@ -197,7 +196,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             bool admin = Quản_Lý_Khách_Sạn.Session.LaAdmin;
             btnTaiKhoan.Visible = admin;
-            btnPhuongThucTT.Visible = admin;
+            btnPhuongThucTT.Visible = false; // Tinh gọn menu: Phương thức TT tích hợp sẵn trong màn hình Hóa đơn
             btnLoaiPhong.Visible = admin;
             btnVoucher.Visible = admin;
             btnBaoCao.Visible = admin;

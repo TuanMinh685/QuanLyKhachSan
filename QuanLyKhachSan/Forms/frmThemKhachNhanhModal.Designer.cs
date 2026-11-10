@@ -29,9 +29,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             this.dtpNgaySinh = new System.Windows.Forms.DateTimePicker();
             this.txtQuocTich = new System.Windows.Forms.TextBox();
             this.txtEmail = new System.Windows.Forms.TextBox();
-            this.txtDiaChi = new System.Windows.Forms.TextBox();
             this.txtGhiChu = new System.Windows.Forms.TextBox();
-            this.chkDongY = new System.Windows.Forms.CheckBox();
             this.pnlFooter = new System.Windows.Forms.Panel();
             this.btnLuu = new System.Windows.Forms.Button();
             this.btnHuy = new System.Windows.Forms.Button();
@@ -42,7 +40,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             this.AutoScaleDimensions = new System.Drawing.SizeF(9.5F, 21.5F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(680, 680);
+            this.ClientSize = new System.Drawing.Size(620, 560);
             this.Font = new System.Drawing.Font("Segoe UI", 9.5F);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -67,9 +65,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private System.Windows.Forms.DateTimePicker dtpNgaySinh;
         private System.Windows.Forms.TextBox txtQuocTich;
         private System.Windows.Forms.TextBox txtEmail;
-        private System.Windows.Forms.TextBox txtDiaChi;
         private System.Windows.Forms.TextBox txtGhiChu;
-        private System.Windows.Forms.CheckBox chkDongY;
         private System.Windows.Forms.Panel pnlFooter;
         private System.Windows.Forms.Button btnLuu;
         private System.Windows.Forms.Button btnHuy;

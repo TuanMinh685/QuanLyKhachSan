@@ -26,7 +26,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private void InitializeComponentCustom()
         {
             Text = "Khai báo thông tin khách hàng mới";
-            Size = new Size(620, 680);
+            Size = new Size(620, 560);
             StartPosition = FormStartPosition.CenterParent;
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
@@ -223,44 +223,19 @@ namespace Quản_Lý_Khách_Sạn.Forms
             };
             pnlEmail.Controls.Add(txtEmail);
 
-            // Dòng 5: Địa chỉ thường trú
-            y += gap;
-            TaoNhan(pnlBody, "Địa chỉ thường trú", 28, y);
-            var pnlDiaChi = TaoBox(pnlBody, 28, y + 20, fullW, 36);
-            txtDiaChi = new TextBox
-            {
-                BorderStyle = BorderStyle.None,
-                Font = new Font("Segoe UI", 9.5F),
-                Dock = DockStyle.Fill,
-                PlaceholderText = "Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/TP..."
-            };
-            pnlDiaChi.Controls.Add(txtDiaChi);
-
-            // Dòng 6: Ghi chú sở thích phòng
+            // Dòng 5: Ghi chú sở thích phòng
             y += gap;
             TaoNhan(pnlBody, "Ghi chú & Yêu cầu lưu trú", 28, y);
-            var pnlGhiChu = TaoBox(pnlBody, 28, y + 20, fullW, 36);
+            var pnlGhiChu = TaoBox(pnlBody, 28, y + 20, fullW, 56);
             txtGhiChu = new TextBox
             {
                 BorderStyle = BorderStyle.None,
                 Font = new Font("Segoe UI", 9.5F),
                 Dock = DockStyle.Fill,
+                Multiline = true,
                 PlaceholderText = "Ví dụ: Khách thích tầng cao, yên tĩnh, không hút thuốc..."
             };
             pnlGhiChu.Controls.Add(txtGhiChu);
-
-            // Dòng 7: Checkbox đồng ý
-            y += gap + 8;
-            chkDongY = new CheckBox
-            {
-                Text = "Đồng ý nhận thông tin ưu đãi và chăm sóc thành viên VIP của khách sạn",
-                Location = new Point(28, y),
-                Size = new Size(fullW, 26),
-                Font = new Font("Segoe UI", 9F),
-                ForeColor = UITheme.TextMain,
-                Checked = true
-            };
-            pnlBody.Controls.Add(chkDongY);
 
             // THỨ TỰ ADD CONTROL CHUẨN ĐỂ KHÔNG BỊ HEADER CHE KHUẤT
             Controls.Add(pnlBody);
@@ -331,9 +306,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 NgaySinh = dtpNgaySinh.Checked ? dtpNgaySinh.Value.Date : (DateTime?)null,
                 QuocTich = string.IsNullOrWhiteSpace(txtQuocTich.Text) ? "Việt Nam" : txtQuocTich.Text.Trim(),
                 Email = string.IsNullOrWhiteSpace(txtEmail.Text) ? null : txtEmail.Text.Trim(),
-                DiaChi = string.IsNullOrWhiteSpace(txtDiaChi.Text) ? null : txtDiaChi.Text.Trim(),
+                DiaChi = null,
                 GhiChu = string.IsNullOrWhiteSpace(txtGhiChu.Text) ? null : txtGhiChu.Text.Trim(),
-                DongYNhanUuDai = chkDongY.Checked,
+                DongYNhanUuDai = false,
                 NhomKhach = "Mới"
             };
 
