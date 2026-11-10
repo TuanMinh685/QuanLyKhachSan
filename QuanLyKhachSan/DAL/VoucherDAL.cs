@@ -66,7 +66,21 @@ namespace Quản_Lý_Khách_Sạn.DAL
 
         public bool GiamSoLuong(int maVoucher)
         {
-            string sql = "UPDATE Voucher SET SoLuong = SoLuong - 1 WHERE MaVoucher = @Ma AND SoLuong > 0";
+            // Ngăn chặn trừ kép 2 lần: chỉ trừ ở tầng C# nếu trigger trg_XuLyVoucherHoaDon chưa được bật trên PostgreSQL
+            string sql = @"
+                UPDATE Voucher
+                SET SoLuong = SoLuong - 1,
+                    TrangThai = CASE WHEN (SoLuong - 1) <= 0 THEN FALSE ELSE TrangThai END
+                WHERE MaVoucher = @Ma
+                  AND SoLuong > 0
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM pg_trigger t
+                      JOIN pg_class c ON c.oid = t.tgrelid
+                      WHERE c.relname = 'hoadon'
+                        AND t.tgname = 'trg_xulyvoucherhoadon'
+                        AND t.tgenabled <> 'D'
+                  )";
             try
             {
                 using (SqlConnection conn = DatabaseHelper.GetConnection())
@@ -74,7 +88,8 @@ namespace Quản_Lý_Khách_Sạn.DAL
                 {
                     cmd.Parameters.AddWithValue("@Ma", maVoucher);
                     conn.Open();
-                    return cmd.ExecuteNonQuery() > 0;
+                    cmd.ExecuteNonQuery();
+                    return true;
                 }
             }
             catch { return false; }

@@ -152,6 +152,27 @@ DELETE FROM HoaDon WHERE MaDatPhong IN (@Id, @Ma) AND TrangThai = 'Chưa thanh t
                         cmd.ExecuteNonQuery();
                     }
 
+                    // Nếu CSDL chưa bật trigger trg_XuLyVoucherHoaDon thì trừ lượt Voucher ngay trong cùng Transaction
+                    if (hd.MaVoucher.HasValue)
+                    {
+                        using var cmdVc = new NpgsqlCommand(@"
+                            UPDATE Voucher
+                            SET SoLuong = SoLuong - 1,
+                                TrangThai = CASE WHEN (SoLuong - 1) <= 0 THEN FALSE ELSE TrangThai END
+                            WHERE MaVoucher = @MaVC
+                              AND SoLuong > 0
+                              AND NOT EXISTS (
+                                  SELECT 1
+                                  FROM pg_trigger t
+                                  JOIN pg_class c ON c.oid = t.tgrelid
+                                  WHERE c.relname = 'hoadon'
+                                    AND t.tgname = 'trg_xulyvoucherhoadon'
+                                    AND t.tgenabled <> 'D'
+                              )", conn, trans);
+                        cmdVc.Parameters.AddWithValue("@MaVC", hd.MaVoucher.Value);
+                        cmdVc.ExecuteNonQuery();
+                    }
+
                     // Chi tiết dịch vụ cùng transaction với hóa đơn và trả phòng.
                     foreach (var ct in chiTiet)
                     {

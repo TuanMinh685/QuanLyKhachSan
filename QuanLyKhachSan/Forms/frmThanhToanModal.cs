@@ -970,13 +970,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     if (pos.ShowDialog(this) != DialogResult.OK) return;
                 }
                 if (!hoaDonBLL.ThanhToanVaTraPhong(hd, dp.MaDatPhong.ToString(), chiTiet, Session.MaNhanVien)) return;
-                // Giữ thao tác giảm lượt voucher của module thanh toán hiện có.
-                if (hd.MaVoucher.HasValue)
-                {
-                    try { voucherBLL.GiamSoLuongVoucher(hd.MaVoucher.Value); }
-                    catch (Exception ex) { MessageBox.Show(this, "Hóa đơn đã lưu, nhưng chưa cập nhật lượt voucher: " + ex.Message); }
-                }
-                // Phiếu thu/hoàn và các dòng dịch vụ đã được lưu trong cùng giao dịch.
+                // Lượt sử dụng Voucher, phiếu thu/hoàn và các dòng dịch vụ đã được xử lý đồng bộ trong cùng giao dịch ACID.
                 MessageBox.Show($"Thanh toán hóa đơn [{hd.MaHoaDon}] thành công! Thực thu: {hd.TongTien:N0} đ" +
                     (hoanDu > 0 ? $"\nĐã hoàn cọc dư: {hoanDu:N0} đ" : ""), "Thành công");
                 DialogResult = DialogResult.OK;

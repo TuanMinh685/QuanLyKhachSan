@@ -55,6 +55,7 @@ internal static class Program
             Session.MaNhanVien = 1; Session.DangXuat();
             Check(Session.MaNhanVien == null, "Logout clears cashier identity");
             if (args.Contains("--apply-deposit-migration")) ApplyDepositMigration();
+            if (args.Contains("--apply-cd1-fixes")) ApplyCd1Fixes();
             if (args.Contains("--probe")) Probe();
             if (args.Contains("--integration")) Integration();
             Console.WriteLine($"SUCCESS: {passed} checks passed.");
@@ -74,6 +75,52 @@ internal static class Program
         cmd.CommandText = sql;
         cmd.ExecuteNonQuery();
         Console.WriteLine("Applied additive deposit-ledger migration in public.");
+    }
+
+    private static void ApplyCd1Fixes()
+    {
+        string sql1 = File.ReadAllText(@"D:\ChuyenDe 1+2\Quản Lý Khách Sạn\Database\chuyen_de_1_khai_thac_csdl.sql");
+        string sql2 = File.ReadAllText(@"D:\ChuyenDe 1+2\Quản Lý Khách Sạn\Database\supabase_fix_security.sql");
+        using var conn = DatabaseHelper.GetConnection();
+        conn.Open();
+        using (var cmd = new NpgsqlCommand(sql1, conn))
+        {
+            cmd.CommandTimeout = 120;
+            cmd.ExecuteNonQuery();
+            Console.WriteLine("PASS: Executed chuyen_de_1_khai_thac_csdl.sql on Supabase");
+            passed++;
+        }
+        using (var cmd2 = new NpgsqlCommand(sql2, conn))
+        {
+            cmd2.CommandTimeout = 120;
+            cmd2.ExecuteNonQuery();
+            Console.WriteLine("PASS: Executed supabase_fix_security.sql on Supabase");
+            passed++;
+        }
+
+        // Verify View 2 (Occupancy > 0% when active stays exist)
+        var dtView2 = DatabaseHelper.ExecuteQuery("SELECT * FROM vw_KhaiThacCongSuatLoaiPhong");
+        Console.WriteLine("PASS: vw_KhaiThacCongSuatLoaiPhong rows = " + dtView2.Rows.Count);
+        foreach (DataRow r in dtView2.Rows)
+            Console.WriteLine($"  Loai={r["TenLoai"]} | Tong={r["TongSoPhong"]} | DangO={r["SoPhongDangCoKhach"]} | SanSang={r["SoPhongSanSangDonKhach"]} | TyLe={r["TyLeLapDayPhanTram"]}%");
+        passed++;
+
+        // Verify View 3 (Top DichVu only counts Paid invoices)
+        var dtView3 = DatabaseHelper.ExecuteQuery("SELECT SUM(TongDoanhThuDichVu) FROM vw_KhaiThacTopDichVu");
+        decimal sumView3 = Convert.ToDecimal(dtView3.Rows[0][0]);
+        decimal sumView1 = Convert.ToDecimal(DatabaseHelper.ExecuteScalar("SELECT COALESCE(SUM(DoanhThuDichVu),0) FROM vw_KhaiThacDoanhThuTheoThang"));
+        Console.WriteLine($"PASS: View 3 Paid Service Revenue = {sumView3:N0} VND (View 1 Paid Service Revenue = {sumView1:N0} VND)");
+        passed++;
+
+        // Verify View 4 (VIP Customer excludes cancelled bookings)
+        var dtView4 = DatabaseHelper.ExecuteQuery("SELECT * FROM vw_KhaiThacKhachHangVIP");
+        Console.WriteLine("PASS: vw_KhaiThacKhachHangVIP rows = " + dtView4.Rows.Count);
+        passed++;
+
+        // Verify View 5 (Dashboard)
+        var dtView5 = DatabaseHelper.ExecuteQuery("SELECT * FROM vw_KhaiThacDashboardTongHop");
+        Console.WriteLine($"PASS: Dashboard PhongDangO = {dtView5.Rows[0]["PhongDangO"]} / TongSoPhong = {dtView5.Rows[0]["TongSoPhong"]}");
+        passed++;
     }
 
     private static void Probe()

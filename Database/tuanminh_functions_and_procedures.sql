@@ -9,13 +9,48 @@
 -- ============================================================================
 
 -- ============================================================================
+-- PHẦN 0: ĐẢM BẢO BẢNG PHỤ TRỢ (NHẬT KÝ HỆ THỐNG & PHIẾU ĐẶT CỌC) TỒN TẠI
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS NhatKyHeThong (
+    MaNhatKy        SERIAL PRIMARY KEY,
+    LoaiHanhDong    VARCHAR(50)   NOT NULL,
+    BangTacDong     VARCHAR(50)   NOT NULL,
+    KhoaChinh       VARCHAR(50)   NOT NULL,
+    GiaTriCu        TEXT          NULL,
+    GiaTriMoi       TEXT          NULL,
+    NguoiThucHien   VARCHAR(100)  DEFAULT CURRENT_USER,
+    ThoiGian        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    MoTaChiTiet     TEXT          NULL
+);
+
+CREATE TABLE IF NOT EXISTS PhieuDatCoc (
+    MaPhieu         SERIAL PRIMARY KEY,
+    MaDatPhong      INT           NOT NULL REFERENCES DatPhong(MaDatPhong) ON DELETE CASCADE,
+    LoaiGiaoDich    VARCHAR(10)   NOT NULL CHECK (LoaiGiaoDich IN ('Thu', 'Hoan')),
+    SoTien          NUMERIC(18,2) NOT NULL CHECK (SoTien >= 0),
+    PhuongThuc      VARCHAR(10)   NOT NULL DEFAULT 'TM',
+    MaNhanVien      INT           NULL REFERENCES NhanVien(MaNhanVien),
+    NgayGiaoDich    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    GhiChu          VARCHAR(200)  NULL
+);
+
+-- Chuẩn hóa từ điển trạng thái vận hành vật lý của phòng ('Hoạt động' / 'Bảo trì')
+UPDATE Phong
+SET TinhTrang = 'Hoạt động'
+WHERE TinhTrang NOT IN ('Hoạt động', 'Bảo trì');
+
+
+-- ============================================================================
 -- PHẦN 1: HÀM NGHIỆP VỤ (FUNCTIONS)
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------
 -- FUNCTION 1: Tìm kiếm phòng trống thông minh theo khoảng ngày & sức chứa
--- Nghiệp vụ: Lọc các phòng đang ở trạng thái Hoạt động/Trống, kiểm tra không bị
--- giao thoa với bất kỳ đơn đặt phòng nào đang hoạt động trong khoảng ngày đó.
+-- Nghiệp vụ:
+--  - Đồng bộ từ điển trạng thái phòng với ứng dụng C#: chỉ lọc các phòng có
+--    trạng thái vận hành vật lý p.TinhTrang = 'Hoạt động' (không bảo trì).
+--  - Kiểm tra không giao thoa (Overlap) với bất kỳ đơn đặt phòng nào đang ở
+--    trạng thái 'Đã đặt' hoặc 'Đang ở' trong khoảng [p_NgayNhan, p_NgayTra).
 -- ----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION fn_TimPhongTrong(
     p_NgayNhan DATE,
@@ -55,7 +90,7 @@ BEGIN
         p.TinhTrang
     FROM Phong p
     JOIN LoaiPhong lp ON p.MaLoai = lp.MaLoai
-    WHERE p.TinhTrang IN ('Hoạt động', 'Trống', 'Đã dọn dẹp')
+    WHERE p.TinhTrang = 'Hoạt động'
       AND (p_MaLoai IS NULL OR p.MaLoai = p_MaLoai)
       AND (lp.SoNguoiToiDa >= p_SoNguoi)
       AND NOT EXISTS (
@@ -135,10 +170,10 @@ $$ LANGUAGE plpgsql;
 -- PROCEDURE 1: Quy trình Check-in nhận phòng an toàn (Transaction ACID)
 -- Nghiệp vụ:
 --  1. Kiểm tra đơn đặt phòng và khóa dòng dữ liệu (FOR UPDATE) chống tranh chấp.
---  2. Kiểm tra tính hợp lệ của ngày nhận (không được nhận trước ngày ghi trên đơn).
---  3. Kiểm tra phòng có đang bị khách khác ở không.
+--  2. Kiểm tra tính hợp lệ của ngày nhận và trạng thái bảo trì của phòng.
+--  3. Kiểm tra phòng có đang bị khách khác lưu trú ('Đang ở') không.
 --  4. Chuyển trạng thái đơn sang 'Đang ở', ghi nhận giờ nhận thực tế.
---  5. Đổi trạng thái phòng sang 'Đang sử dụng'.
+--  5. Giữ Phong.TinhTrang = 'Hoạt động' (tránh xung đột từ điển gây kẹt phòng).
 -- ----------------------------------------------------------------------------
 CREATE OR REPLACE PROCEDURE sp_ThucHienCheckIn(
     p_MaDatPhong INT,
@@ -151,10 +186,11 @@ DECLARE
     v_NgayNhan DATE;
     v_MaPhong INT;
     v_SoPhong VARCHAR(20);
+    v_TinhTrangPhong VARCHAR(30);
 BEGIN
     -- 1. Kiểm tra sự tồn tại và khóa dòng dữ liệu
-    SELECT dp.TrangThai, dp.NgayNhan, dp.MaPhong, p.SoPhong
-    INTO v_TrangThai, v_NgayNhan, v_MaPhong, v_SoPhong
+    SELECT dp.TrangThai, dp.NgayNhan, dp.MaPhong, p.SoPhong, p.TinhTrang
+    INTO v_TrangThai, v_NgayNhan, v_MaPhong, v_SoPhong, v_TinhTrangPhong
     FROM DatPhong dp
     JOIN Phong p ON dp.MaPhong = p.MaPhong
     WHERE dp.MaDatPhong = p_MaDatPhong
@@ -166,6 +202,10 @@ BEGIN
 
     IF v_TrangThai <> 'Đã đặt' THEN
         RAISE EXCEPTION 'Đơn phòng đang ở trạng thái "%", không thể thực hiện nhận phòng!', v_TrangThai;
+    END IF;
+
+    IF v_TinhTrangPhong = 'Bảo trì' THEN
+        RAISE EXCEPTION 'Phòng % hiện đang trong trạng thái Bảo trì, không thể nhận phòng!', v_SoPhong;
     END IF;
 
     IF v_NgayNhan > CURRENT_DATE THEN
@@ -180,14 +220,14 @@ BEGIN
     -- 3. Cập nhật trạng thái nhận phòng
     UPDATE DatPhong
     SET TrangThai = 'Đang ở',
-        GioNhanThucTe = CURRENT_TIMESTAMP,
+        GioNhanThucTe = COALESCE(GioNhanThucTe, CURRENT_TIMESTAMP),
         MaNhanVien = COALESCE(p_MaNhanVien, MaNhanVien)
     WHERE MaDatPhong = p_MaDatPhong;
 
-    -- 4. Đồng bộ trạng thái buồng phòng
+    -- 4. Đảm bảo trạng thái vật lý của buồng phòng là 'Hoạt động' (đồng bộ với C#)
     UPDATE Phong
-    SET TinhTrang = 'Đang sử dụng'
-    WHERE MaPhong = v_MaPhong;
+    SET TinhTrang = 'Hoạt động'
+    WHERE MaPhong = v_MaPhong AND TinhTrang <> 'Bảo trì';
 
     RAISE NOTICE 'Đã thực hiện Check-in thành công cho đơn đặt phòng % (Phòng %)', p_MaDatPhong, v_SoPhong;
 END;
@@ -195,21 +235,21 @@ $$;
 
 
 -- ----------------------------------------------------------------------------
--- PROCEDURE 2: Quy trình Check-out, quyết toán hóa đơn và đóng buồng phòng
+-- PROCEDURE 2: Quy trình Check-out, quyết toán hóa đơn và hoàn cọc dư (ACID)
 -- Nghiệp vụ:
---  1. Kiểm tra đơn đặt phòng 'Đang ở' và khóa dòng dữ liệu (FOR UPDATE).
---  2. Tự động sinh mã hóa đơn duy nhất chuẩn HD-YYYYMMDD-XXXX.
---  3. Tính tổng tiền dịch vụ phát sinh từ bảng ChiTietHoaDon.
---  4. Tính số tiền giảm giá từ Voucher (theo % hoặc số tiền cố định).
---  5. Tính tổng thu thực tế: TienPhong + TienDichVu - TienDatCoc - TienGiamGia.
---  6. Ghi nhận hóa đơn vào bảng HoaDon, chuyển trạng thái đơn sang 'Đã trả'.
---  7. Chuyển phòng sang 'Chờ dọn dẹp' để buồng phòng làm việc.
+--  1. Khóa dòng đơn đặt phòng ('Đang ở') bằng FOR UPDATE và kiểm tra trùng thanh toán.
+--  2. Tự động sinh mã hóa đơn duy nhất chuẩn HDYYYYMMDDXXXX nếu chưa truyền vào.
+--  3. Kế thừa các dòng dịch vụ từ hóa đơn tạm ('Chưa thanh toán') và xóa hóa đơn tạm.
+--  4. Kiểm tra đầy đủ điều kiện Voucher (TrangThai, NgayBatDau, NgayHetHan, SoLuong, DonToiThieu).
+--  5. Tính tổng thực thu & ghi nhận phiếu hoàn cọc dư vào PhieuDatCoc (nếu cọc > tổng phí).
+--  6. Lưu HoaDon, chuyển DatPhong sang 'Đã trả' và giữ Phong.TinhTrang = 'Hoạt động'.
 -- ----------------------------------------------------------------------------
 CREATE OR REPLACE PROCEDURE sp_ThucHienCheckOut(
-    p_MaDatPhong   INT,
-    p_MaPTTT       VARCHAR(10),
-    p_MaVoucher    INT,
-    INOUT p_MaHoaDon VARCHAR(20) DEFAULT NULL
+    p_MaDatPhong     INT,
+    p_MaPTTT         VARCHAR(10),
+    p_MaVoucher      INT,
+    INOUT p_MaHoaDon VARCHAR(20) DEFAULT NULL,
+    p_MaNhanVien     INT DEFAULT 1
 )
 LANGUAGE plpgsql
 AS $$
@@ -217,78 +257,183 @@ DECLARE
     v_MaDat VARCHAR(20);
     v_MaPhong INT;
     v_SoPhong VARCHAR(20);
+    v_MaNV INT;
     v_TienPhong NUMERIC(18,2);
     v_TienCoc NUMERIC(18,2);
     v_TienDV NUMERIC(18,2) := 0;
     v_TienGiam NUMERIC(18,2) := 0;
     v_TongCanThu NUMERIC(18,2) := 0;
+    v_HoanCocDu NUMERIC(18,2) := 0;
+    v_LoaiGiam VARCHAR(10);
+    v_GiaTriVoucher NUMERIC(18,2);
+    v_DonToiThieu NUMERIC(18,2);
+    v_NgayBD DATE;
+    v_NgayKT DATE;
+    v_SoLuongVC INT;
+    v_TrangThaiVC BOOLEAN;
+    v_PhuongThucCoc VARCHAR(10);
 BEGIN
-    -- 1. Lấy thông tin đơn đặt phòng
-    SELECT dp.MaDat, dp.MaPhong, p.SoPhong, COALESCE(dp.TongTien, 0), COALESCE(dp.TienCoc, 0)
-    INTO v_MaDat, v_MaPhong, v_SoPhong, v_TienPhong, v_TienCoc
+    -- 1. Lấy thông tin đơn đặt phòng và khóa dòng dữ liệu
+    SELECT dp.MaDat, dp.MaPhong, p.SoPhong, COALESCE(dp.TongTien, 0), COALESCE(dp.TienCoc, 0), COALESCE(p_MaNhanVien, dp.MaNhanVien, 1)
+    INTO v_MaDat, v_MaPhong, v_SoPhong, v_TienPhong, v_TienCoc, v_MaNV
     FROM DatPhong dp
     JOIN Phong p ON dp.MaPhong = p.MaPhong
-    WHERE dp.MaDatPhong = p_MaDatPhong AND dp.TrangThai = 'Đang ở'
+    WHERE dp.MaDatPhong = p_MaDatPhong AND dp.TrangThai IN ('Đang ở', 'Đã trả')
     FOR UPDATE;
 
     IF NOT FOUND THEN
-        RAISE EXCEPTION 'Không tìm thấy đơn đặt phòng đang ở có mã: %!', p_MaDatPhong;
+        RAISE EXCEPTION 'Không tìm thấy đơn đặt phòng đang lưu trú có mã: %!', p_MaDatPhong;
+    END IF;
+
+    -- Kiểm tra đơn đã có hóa đơn thanh toán chưa
+    IF EXISTS (
+        SELECT 1 FROM HoaDon
+        WHERE MaDatPhong IN (v_MaDat, p_MaDatPhong::TEXT)
+          AND TrangThai = 'Đã thanh toán'
+          AND (p_MaHoaDon IS NULL OR MaHoaDon <> p_MaHoaDon)
+    ) THEN
+        RAISE EXCEPTION 'Đơn đặt phòng % đã được thanh toán trước đó!', v_MaDat;
     END IF;
 
     -- 2. Sinh mã hóa đơn nếu chưa truyền vào (HDYYYYMMDDXXXX)
-    IF p_MaHoaDon IS NULL OR p_MaHoaDon = '' THEN
+    IF p_MaHoaDon IS NULL OR btrim(p_MaHoaDon) = '' THEN
         p_MaHoaDon := 'HD' || TO_CHAR(CURRENT_TIMESTAMP, 'YYYYMMDD') || LPAD(p_MaDatPhong::TEXT, 4, '0');
     END IF;
 
-    -- 3. Tính tiền dịch vụ phát sinh (nếu có chi tiết tạm gán)
-    SELECT COALESCE(SUM(ThanhTien), 0) INTO v_TienDV
-    FROM ChiTietHoaDon
-    WHERE MaHoaDon = p_MaHoaDon;
-
-    -- 4. Tính giảm giá voucher (nếu có)
-    IF p_MaVoucher IS NOT NULL THEN
-        SELECT 
-            CASE 
-                WHEN LoaiGiam = 'PhanTram' THEN LEAST(v_TienPhong * (GiaTri / 100), v_TienPhong)
-                ELSE LEAST(GiaTri, v_TienPhong)
-            END
-        INTO v_TienGiam
-        FROM Voucher
-        WHERE MaVoucher = p_MaVoucher AND TrangThai = TRUE;
-    END IF;
-
-    -- 5. Tổng tiền thực tế cần thanh toán
-    v_TongCanThu := GREATEST(0, (v_TienPhong + v_TienDV - v_TienCoc - v_TienGiam));
-
-    -- 6. Ghi nhận hóa đơn thanh toán
+    -- 3. Đảm bảo bản ghi HoaDon đích tồn tại trước khi chuyển ChiTietHoaDon từ hóa đơn tạm sang
     INSERT INTO HoaDon (
         MaHoaDon, MaDatPhong, NgayLap, NgayThanhToan,
         TienPhong, TienDichVu, TienGiamGia, TienDatCoc, TongTien,
         MaPTTT, MaVoucher, TrangThai
     )
     VALUES (
-        p_MaHoaDon, v_MaDat, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
-        v_TienPhong, v_TienDV, v_TienGiam, v_TienCoc, v_TongCanThu,
-        COALESCE(p_MaPTTT, 'TM'), p_MaVoucher, 'Đã thanh toán'
+        p_MaHoaDon, v_MaDat, CURRENT_TIMESTAMP, NULL,
+        v_TienPhong, 0, 0, v_TienCoc, 0,
+        COALESCE(p_MaPTTT, 'TM'), NULL, 'Chưa thanh toán'
     )
-    ON CONFLICT (MaHoaDon) DO UPDATE 
-    SET NgayThanhToan = CURRENT_TIMESTAMP,
-        TongTien = EXCLUDED.TongTien,
-        TrangThai = 'Đã thanh toán';
+    ON CONFLICT (MaHoaDon) DO NOTHING;
 
-    -- 7. Cập nhật đơn đặt phòng sang 'Đã trả'
+    -- Chuyển các chi tiết dịch vụ từ hóa đơn tạm ('Chưa thanh toán') của đơn này sang p_MaHoaDon
+    UPDATE ChiTietHoaDon
+    SET MaHoaDon = p_MaHoaDon
+    WHERE MaHoaDon IN (
+        SELECT MaHoaDon FROM HoaDon
+        WHERE MaDatPhong IN (v_MaDat, p_MaDatPhong::TEXT)
+          AND TrangThai = 'Chưa thanh toán'
+          AND MaHoaDon <> p_MaHoaDon
+    );
+
+    -- Xóa các hóa đơn tạm dư thừa của đơn này
+    DELETE FROM HoaDon
+    WHERE MaDatPhong IN (v_MaDat, p_MaDatPhong::TEXT)
+      AND TrangThai = 'Chưa thanh toán'
+      AND MaHoaDon <> p_MaHoaDon;
+
+    -- Tính tổng tiền dịch vụ phát sinh
+    SELECT COALESCE(SUM(ThanhTien), 0) INTO v_TienDV
+    FROM ChiTietHoaDon
+    WHERE MaHoaDon = p_MaHoaDon;
+
+    -- 4. Kiểm tra đầy đủ điều kiện và tính giảm giá Voucher (nếu có)
+    IF p_MaVoucher IS NOT NULL THEN
+        SELECT LoaiGiam, GiaTri, COALESCE(DonToiThieu, 0), NgayBatDau, NgayHetHan, SoLuong, TrangThai
+        INTO v_LoaiGiam, v_GiaTriVoucher, v_DonToiThieu, v_NgayBD, v_NgayKT, v_SoLuongVC, v_TrangThaiVC
+        FROM Voucher
+        WHERE MaVoucher = p_MaVoucher
+        FOR UPDATE;
+
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Mã khuyến mãi (Voucher %) không tồn tại!', p_MaVoucher;
+        END IF;
+
+        IF v_TrangThaiVC = FALSE THEN
+            RAISE EXCEPTION 'Mã khuyến mãi hiện đang bị khóa hoặc ngừng áp dụng!';
+        END IF;
+
+        IF CURRENT_DATE < v_NgayBD OR CURRENT_DATE > v_NgayKT THEN
+            RAISE EXCEPTION 'Mã khuyến mãi nằm ngoài thời hạn áp dụng (% đến %)!', v_NgayBD, v_NgayKT;
+        END IF;
+
+        IF v_SoLuongVC IS NOT NULL AND v_SoLuongVC <= 0 THEN
+            RAISE EXCEPTION 'Mã khuyến mãi đã hết lượt sử dụng!';
+        END IF;
+
+        IF (v_TienPhong + v_TienDV) < v_DonToiThieu THEN
+            RAISE EXCEPTION 'Tổng tiền phòng & dịch vụ (%) chưa đạt mức đơn tối thiểu (%) của Voucher!',
+                (v_TienPhong + v_TienDV), v_DonToiThieu;
+        END IF;
+
+        IF v_LoaiGiam = 'PhanTram' THEN
+            v_TienGiam := LEAST((v_TienPhong + v_TienDV) * (v_GiaTriVoucher / 100.0), (v_TienPhong + v_TienDV));
+        ELSE
+            v_TienGiam := LEAST(v_GiaTriVoucher, (v_TienPhong + v_TienDV));
+        END IF;
+    END IF;
+
+    -- 5. Tổng tiền thực tế cần thu và tiền hoàn cọc dư (nếu tiền cọc > tổng chi phí sau giảm giá)
+    v_TongCanThu := GREATEST(0, (v_TienPhong + v_TienDV - v_TienCoc - v_TienGiam));
+    v_HoanCocDu  := GREATEST(0, v_TienCoc - (v_TienPhong + v_TienDV - v_TienGiam));
+
+    -- 6. Cập nhật chốt hóa đơn 'Đã thanh toán'
+    UPDATE HoaDon
+    SET MaDatPhong    = v_MaDat,
+        NgayThanhToan = CURRENT_TIMESTAMP,
+        TienPhong     = v_TienPhong,
+        TienDichVu    = v_TienDV,
+        TienGiamGia   = v_TienGiam,
+        TienDatCoc    = v_TienCoc,
+        TongTien      = v_TongCanThu,
+        MaPTTT        = COALESCE(p_MaPTTT, 'TM'),
+        MaVoucher     = p_MaVoucher,
+        TrangThai     = 'Đã thanh toán'
+    WHERE MaHoaDon = p_MaHoaDon;
+
+    -- Nếu trigger trg_XuLyVoucherHoaDon chưa được bật hoặc chỉ bắt INSERT thì trừ Voucher an toàn (tránh trừ kép)
+    IF p_MaVoucher IS NOT NULL AND NOT EXISTS (
+        SELECT 1 FROM NhatKyHeThong
+        WHERE LoaiHanhDong = 'AP_VOUCHER' AND KhoaChinh = p_MaHoaDon
+    ) THEN
+        UPDATE Voucher
+        SET SoLuong = CASE WHEN SoLuong IS NOT NULL THEN SoLuong - 1 ELSE NULL END,
+            TrangThai = CASE WHEN SoLuong IS NOT NULL AND (SoLuong - 1) <= 0 THEN FALSE ELSE TrangThai END
+        WHERE MaVoucher = p_MaVoucher AND (SoLuong IS NULL OR SoLuong > 0);
+
+        INSERT INTO NhatKyHeThong (LoaiHanhDong, BangTacDong, KhoaChinh, GiaTriCu, GiaTriMoi, MoTaChiTiet)
+        VALUES ('AP_VOUCHER', 'HoaDon', p_MaHoaDon, NULL, p_MaVoucher::TEXT,
+                'Áp dụng voucher khi Check-out hóa đơn ' || p_MaHoaDon);
+    END IF;
+
+    -- 7. Ghi sổ hoàn cọc dư vào bảng PhieuDatCoc (đồng bộ với HoaDonDAL.LuuHoaDonVaCheckOut)
+    IF v_HoanCocDu > 0 THEN
+        v_PhuongThucCoc := CASE
+            WHEN COALESCE(p_MaPTTT, 'TM') IN ('CK', 'VNPAY', 'MOMO') THEN 'CK'
+            WHEN COALESCE(p_MaPTTT, 'TM') IN ('POS', 'APPLEPAY') THEN 'POS'
+            ELSE 'TM'
+        END;
+
+        INSERT INTO PhieuDatCoc (MaDatPhong, LoaiGiaoDich, SoTien, PhuongThuc, MaNhanVien, GhiChu)
+        VALUES (
+            p_MaDatPhong,
+            'Hoan',
+            v_HoanCocDu,
+            v_PhuongThucCoc,
+            v_MaNV,
+            'Hoàn cọc dư khi thanh toán ' || p_MaHoaDon || ' qua ' || COALESCE(p_MaPTTT, 'TM')
+        );
+    END IF;
+
+    -- 8. Cập nhật đơn đặt phòng sang 'Đã trả' và giữ Phong.TinhTrang = 'Hoạt động'
     UPDATE DatPhong
     SET TrangThai = 'Đã trả',
-        GioTraThucTe = CURRENT_TIMESTAMP
+        GioTraThucTe = COALESCE(GioTraThucTe, CURRENT_TIMESTAMP)
     WHERE MaDatPhong = p_MaDatPhong;
 
-    -- 8. Cập nhật phòng sang 'Chờ dọn dẹp'
     UPDATE Phong
-    SET TinhTrang = 'Chờ dọn dẹp'
-    WHERE MaPhong = v_MaPhong;
+    SET TinhTrang = 'Hoạt động'
+    WHERE MaPhong = v_MaPhong AND TinhTrang <> 'Bảo trì';
 
-    RAISE NOTICE 'Đã Check-out và xuất hóa đơn % thành công cho phòng %. Tổng thu: % VNĐ', 
-        p_MaHoaDon, v_SoPhong, v_TongCanThu;
+    RAISE NOTICE 'Đã Check-out và xuất hóa đơn % thành công cho phòng %. Tổng thu: % VNĐ (Hoàn cọc dư: % VNĐ)', 
+        p_MaHoaDon, v_SoPhong, v_TongCanThu, v_HoanCocDu;
 END;
 $$;
 
@@ -298,20 +443,7 @@ $$;
 -- ============================================================================
 
 -- 1. Demo Hàm tìm phòng trống:
--- Tìm các phòng trống từ ngày mai trong 3 ngày tới cho 2 khách
 SELECT * FROM fn_TimPhongTrong(CURRENT_DATE + 1, CURRENT_DATE + 4, 2, NULL);
 
 -- 2. Demo Hàm tính chi phí dự kiến & tiền cọc 30%:
--- Tính tiền phòng đơn giá 800.000 đ, 3 đêm, 2 người lớn, 1 trẻ em
 SELECT * FROM fn_TinhToanChiPhiDatPhong(800000, CURRENT_DATE, CURRENT_DATE + 3, 2, 1, 0.10);
-
--- 3. Demo Thủ tục Check-in nhận phòng:
--- CALL sp_ThucHienCheckIn(p_MaDatPhong := 1, p_MaNhanVien := 1);
-
--- 4. Demo Thủ tục Check-out xuất hóa đơn:
--- DO $$
--- DECLARE v_HD VARCHAR(20);
--- BEGIN
---     CALL sp_ThucHienCheckOut(1, 'VNPAY', NULL, v_HD);
---     RAISE NOTICE 'Mã hóa đơn vừa sinh: %', v_HD;
--- END $$;

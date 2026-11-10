@@ -6,6 +6,9 @@
 
 -- 0. Xóa bảng cũ nếu tồn tại (theo thứ tự khóa ngoại)
 DROP VIEW IF EXISTS vw_LeTanKhachHangTongQuan CASCADE;
+DROP TABLE IF EXISTS NhatKyBaoMat CASCADE;
+DROP TABLE IF EXISTS NhatKyHeThong CASCADE;
+DROP TABLE IF EXISTS PhieuDatCoc CASCADE;
 DROP TABLE IF EXISTS ChiTietHoaDon CASCADE;
 DROP TABLE IF EXISTS HoaDon CASCADE;
 DROP TABLE IF EXISTS Voucher CASCADE;
@@ -38,7 +41,8 @@ CREATE TABLE Phong (
     MaLoai          INT           NOT NULL REFERENCES LoaiPhong(MaLoai),
     MoTaGiuong      VARCHAR(100)  NULL,
     DienTich        NUMERIC(6,2)  NULL,
-    TinhTrang       VARCHAR(30)   NOT NULL DEFAULT 'Hoạt động'
+    TinhTrang       VARCHAR(30)   NOT NULL DEFAULT 'Hoạt động',
+    CONSTRAINT CK_Phong_TinhTrang CHECK (TinhTrang IN ('Hoạt động', 'Bảo trì'))
 );
 
 -- ============================================================================
@@ -57,7 +61,7 @@ CREATE TABLE TaiKhoan (
     TenDangNhap     VARCHAR(50)   NOT NULL UNIQUE,
     MatKhau         VARCHAR(255)  NOT NULL,
     VaiTro          VARCHAR(20)   NOT NULL,
-    MaNhanVien      INT           NOT NULL REFERENCES NhanVien(MaNhanVien)
+    MaNhanVien      INT           NOT NULL UNIQUE REFERENCES NhanVien(MaNhanVien)
 );
 
 -- ============================================================================
@@ -67,7 +71,7 @@ CREATE TABLE KhachHang (
     MaKH            SERIAL PRIMARY KEY,
     MaKHHienThi     VARCHAR(20) GENERATED ALWAYS AS ('KH' || LPAD(MaKH::TEXT, 6, '0')) STORED,
     HoTen           VARCHAR(100)  NOT NULL,
-    SoDienThoai     VARCHAR(20)   NOT NULL,
+    SoDienThoai     VARCHAR(20)   NOT NULL UNIQUE,
     GioiTinh        VARCHAR(10)   NULL,
     NgaySinh        DATE          NULL,
     QuocTich        VARCHAR(50)   NOT NULL DEFAULT 'Việt Nam',
@@ -127,6 +131,7 @@ CREATE TABLE DichVu (
 -- ============================================================================
 CREATE TABLE PhuongThucThanhToan (
     MaPhuongThuc    SERIAL PRIMARY KEY,
+    MaPTTT          VARCHAR(10)   NOT NULL UNIQUE,
     TenPhuongThuc   VARCHAR(50)   NOT NULL UNIQUE,
     MoTa            VARCHAR(200)  NULL,
     KichHoat        BOOLEAN       NOT NULL DEFAULT TRUE
@@ -137,7 +142,7 @@ CREATE TABLE PhuongThucThanhToan (
 -- ============================================================================
 CREATE TABLE Voucher (
     MaVoucher       SERIAL PRIMARY KEY,
-    Code            VARCHAR(30)   NOT NULL,
+    Code            VARCHAR(30)   NOT NULL UNIQUE,
     TenChuongTrinh  VARCHAR(100)  NOT NULL DEFAULT 'Khuyến mãi',
     LoaiGiam        VARCHAR(10)   NOT NULL CHECK (LoaiGiam IN ('PhanTram', 'SoTien')),
     GiaTri          NUMERIC(18,2) NOT NULL,
@@ -154,7 +159,7 @@ CREATE UNIQUE INDEX UX_Voucher_Code ON Voucher(Code);
 -- ============================================================================
 CREATE TABLE HoaDon (
     MaHoaDon        VARCHAR(20)   NOT NULL PRIMARY KEY,
-    MaDatPhong      VARCHAR(30)   NULL,
+    MaDatPhong      VARCHAR(30)   NULL REFERENCES DatPhong(MaDat) ON UPDATE CASCADE ON DELETE SET NULL,
     NgayLap         TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     NgayThanhToan   TIMESTAMP     NULL,
     TienPhong       NUMERIC(18,2) NOT NULL DEFAULT 0,
@@ -162,7 +167,7 @@ CREATE TABLE HoaDon (
     TienGiamGia     NUMERIC(18,2) NOT NULL DEFAULT 0,
     TienDatCoc      NUMERIC(18,2) NOT NULL DEFAULT 0,
     TongTien        NUMERIC(18,2) NOT NULL DEFAULT 0,
-    MaPTTT          VARCHAR(10)   NOT NULL DEFAULT 'TM',
+    MaPTTT          VARCHAR(10)   NOT NULL DEFAULT 'TM' REFERENCES PhuongThucThanhToan(MaPTTT) ON UPDATE CASCADE,
     MaVoucher       INT           NULL REFERENCES Voucher(MaVoucher),
     TrangThai       VARCHAR(30)   NOT NULL DEFAULT 'Đã thanh toán'
 );
@@ -177,6 +182,41 @@ CREATE TABLE ChiTietHoaDon (
     SoLuong         INT           NOT NULL DEFAULT 1,
     DonGia          NUMERIC(18,2) NOT NULL,
     ThanhTien       NUMERIC(18,2) NOT NULL
+);
+
+-- ============================================================================
+-- 10B. SỔ PHIẾU ĐẶT CỌC & NHẬT KÝ HỆ THỐNG / BẢO MẬT
+-- ============================================================================
+CREATE TABLE PhieuDatCoc (
+    MaPhieu         SERIAL PRIMARY KEY,
+    MaDatPhong      INT           NOT NULL REFERENCES DatPhong(MaDatPhong) ON DELETE CASCADE,
+    LoaiGiaoDich    VARCHAR(10)   NOT NULL CHECK (LoaiGiaoDich IN ('Thu', 'Hoan')),
+    SoTien          NUMERIC(18,2) NOT NULL CHECK (SoTien >= 0),
+    PhuongThuc      VARCHAR(10)   NOT NULL DEFAULT 'TM',
+    MaNhanVien      INT           NULL REFERENCES NhanVien(MaNhanVien),
+    NgayGiaoDich    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    GhiChu          VARCHAR(200)  NULL
+);
+
+CREATE TABLE NhatKyHeThong (
+    MaNhatKy        SERIAL PRIMARY KEY,
+    LoaiHanhDong    VARCHAR(50)   NOT NULL,
+    BangTacDong     VARCHAR(50)   NOT NULL,
+    KhoaChinh       VARCHAR(50)   NOT NULL,
+    GiaTriCu        TEXT          NULL,
+    GiaTriMoi       TEXT          NULL,
+    NguoiThucHien   VARCHAR(100)  DEFAULT CURRENT_USER,
+    ThoiGian        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    MoTaChiTiet     TEXT          NULL
+);
+
+CREATE TABLE NhatKyBaoMat (
+    MaNhatKy        SERIAL PRIMARY KEY,
+    TaiKhoan        VARCHAR(50)   NOT NULL,
+    HanhDong        VARCHAR(100)  NOT NULL,
+    ChiTiet         TEXT          NULL,
+    MayTram         VARCHAR(100)  NULL,
+    ThoiGian        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================================================
@@ -234,10 +274,13 @@ INSERT INTO TaiKhoan (TenDangNhap, MatKhau, VaiTro, MaNhanVien) VALUES
  ('letan01', '123456', 'LeTan', 2);
 
 -- Phương thức thanh toán
-INSERT INTO PhuongThucThanhToan (TenPhuongThuc) VALUES
- ('Tiền mặt'),
- ('Chuyển khoản'),
- ('Thẻ');
+INSERT INTO PhuongThucThanhToan (MaPTTT, TenPhuongThuc, MoTa) VALUES
+ ('TM',       'Tiền mặt',              'Thanh toán tiền mặt tại quầy lễ tân'),
+ ('CK',       'Chuyển khoản',          'Chuyển khoản ngân hàng nội địa'),
+ ('POS',      'Thẻ',                   'Quẹt thẻ ngân hàng qua máy POS'),
+ ('VNPAY',    'VNPAY-QR',              'Quét mã QR cổng VNPAY chuẩn EMVCo'),
+ ('MOMO',     'Ví MoMo',               'Thanh toán qua ví điện tử MoMo QR'),
+ ('APPLEPAY', 'Apple Pay Contactless', 'Thanh toán chạm NFC Apple Pay');
 
 -- Dịch vụ
 INSERT INTO DichVu (MaDichVu, TenDichVu, LoaiDichVu, DonGia, DonViTinh) VALUES
