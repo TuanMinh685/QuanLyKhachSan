@@ -102,16 +102,9 @@ namespace Quản_Lý_Khách_Sạn.Forms
             cardLeft.Margin = new Padding(0);
 
             // 2. Nâng cấp Toolbar trên cardLeft với các nút nghiệp vụ
-            pnlSearch.Location = new Point(20, 108);
-            pnlSearch.Height = 44;
-            pnlSearch.Width = cardLeft.ClientSize.Width - 40;
-            pnlSearch.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-
-            // Nút Lập hóa đơn & Thanh toán (Modal Popup)
             btnThanhToan.Parent = cardLeft;
             btnThanhToan.Text = "💳 Lập hóa đơn / Thanh toán";
-            btnThanhToan.Size = new Size(225, 40);
-            btnThanhToan.Location = new Point(cardLeft.ClientSize.Width - 245, 108);
+            btnThanhToan.Size = new Size(220, 40);
             btnThanhToan.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnThanhToan.BackColor = UITheme.PrimaryOrange;
             btnThanhToan.ForeColor = Color.White;
@@ -120,8 +113,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             btnInHoaDon.Parent = cardLeft;
             btnInHoaDon.Text = "🖨️ In lại bill";
-            btnInHoaDon.Size = new Size(115, 40);
-            btnInHoaDon.Location = new Point(cardLeft.ClientSize.Width - 368, 108);
+            btnInHoaDon.Size = new Size(120, 40);
             btnInHoaDon.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnInHoaDon.BackColor = Color.FromArgb(248, 250, 252);
             btnInHoaDon.ForeColor = UITheme.DarkNavy;
@@ -129,8 +121,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             btnVietQR.Parent = cardLeft;
             btnVietQR.Text = "🔍 Xem chi tiết";
-            btnVietQR.Size = new Size(130, 40);
-            btnVietQR.Location = new Point(cardLeft.ClientSize.Width - 506, 108);
+            btnVietQR.Size = new Size(135, 40);
             btnVietQR.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnVietQR.BackColor = UITheme.DarkNavy;
             btnVietQR.ForeColor = Color.White;
@@ -138,28 +129,19 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             btnLamMoi.Parent = cardLeft;
             btnLamMoi.Text = "🔄 Làm mới";
-            btnLamMoi.Size = new Size(100, 40);
-            btnLamMoi.Location = new Point(cardLeft.ClientSize.Width - 609, 108);
+            btnLamMoi.Size = new Size(115, 40);
             btnLamMoi.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnLamMoi.BackColor = Color.FromArgb(248, 250, 252);
             btnLamMoi.ForeColor = UITheme.TextMain;
             btnLamMoi.BringToFront();
 
-            // Khung tìm kiếm bên trái
-            pnlSearch.Width = cardLeft.ClientSize.Width - 620;
-            pnlSearch.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            txtTimKiem.Width = pnlSearch.Width - 45;
-
-            // Bảng danh sách hóa đơn Full 100%
+            // Khung tìm kiếm bên trái và bảng danh sách hóa đơn Full 100%
+            pnlSearch.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             pnlGridWrapper.Location = new Point(20, 164);
             pnlGridWrapper.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
-            cardLeft.Resize += (s, e) =>
-            {
-                pnlGridWrapper.Size = new Size(cardLeft.ClientSize.Width - 40, cardLeft.ClientSize.Height - 184);
-                pnlSearch.Width = cardLeft.ClientSize.Width - 620;
-                txtTimKiem.Width = Math.Max(150, pnlSearch.Width - 45);
-            };
+            CapNhatBoCucThanhCongCu();
+            cardLeft.Resize += (s, e) => CapNhatBoCucThanhCongCu();
 
             btnThemDV.Text = "➕ Thêm DV";
             btnGoiYVoucher.Text = "💡 Gợi ý";
@@ -167,6 +149,35 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             dgvHoaDon.CellFormatting += DgvHoaDon_CellFormatting;
             dgvHoaDon.CellDoubleClick += (s, e) => { if (e.RowIndex >= 0) MoChiTietHoaDonDangChon(); };
+        }
+
+        private void CapNhatBoCucThanhCongCu()
+        {
+            int w = cardLeft.ClientSize.Width;
+            int h = cardLeft.ClientSize.Height;
+            if (w <= 0) return;
+
+            int y = 108;
+            int right = w - 20;
+
+            btnThanhToan.Location = new Point(right - btnThanhToan.Width, y);
+            right = btnThanhToan.Left - 8;
+
+            btnInHoaDon.Location = new Point(right - btnInHoaDon.Width, y);
+            right = btnInHoaDon.Left - 8;
+
+            btnVietQR.Location = new Point(right - btnVietQR.Width, y);
+            right = btnVietQR.Left - 8;
+
+            btnLamMoi.Location = new Point(right - btnLamMoi.Width, y);
+            right = btnLamMoi.Left - 12;
+
+            pnlSearch.Location = new Point(20, y);
+            pnlSearch.Size = new Size(Math.Max(180, right - 20), 40);
+            txtTimKiem.Width = Math.Max(120, pnlSearch.Width - 52);
+
+            pnlGridWrapper.Location = new Point(20, 164);
+            pnlGridWrapper.Size = new Size(Math.Max(200, w - 40), Math.Max(150, h - 184));
         }
 
         private Label TaoTheThongKe(string text, Color bg, Color fg)
@@ -218,8 +229,10 @@ namespace Quản_Lý_Khách_Sạn.Forms
             UITheme.StyleModernGrid(dgvChiTietDV);
             KhoiTaoBangChiTietTam();
 
-            btnVietQR.Text = "Mã VietQR";
-            btnInHoaDon.Text = "In bill";
+            btnVietQR.Text = "🔍 Xem chi tiết";
+            btnInHoaDon.Text = "🖨️ In lại bill";
+            btnLamMoi.Text = "🔄 Làm mới";
+            btnThanhToan.Text = "💳 Lập hóa đơn / Thanh toán";
             btnGoiYVoucher.Text = "Gợi ý";
             btnApDungVoucher.Text = "Áp dụng";
             btnThemDV.Text = "Thêm DV";
@@ -230,6 +243,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             TaiDanhSachHoaDon();
 
             LamMoiForm();
+            CapNhatBoCucThanhCongCu();
         }
 
         private void DrawFigmaCard(object sender, PaintEventArgs e) => UITheme.DrawCard(sender, e);
@@ -352,9 +366,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 cboDatPhong.Text = "(Không có lượt đặt phòng nào đang chờ thanh toán)";
                 txtTienPhong.Text = "0";
                 txtTienDatCoc.Text = "0";
-                btnThanhToan.Enabled = false;
-                btnThanhToan.BackColor = Color.FromArgb(148, 163, 184);
-                btnThanhToan.Text = "Không có phòng";
             }
         }
 
@@ -400,6 +411,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     dgvHoaDon.Columns["TongTien"].DefaultCellStyle.ForeColor = UITheme.PrimaryOrange;
                     dgvHoaDon.Columns["TongTien"].FillWeight = 25;
                 }
+                UITheme.DongBoCanLeTieuDe(dgvHoaDon);
 
                 int count = danhSachHoaDon.Count;
                 decimal tongThu = danhSachHoaDon.Sum(x => x.TongTien);
@@ -414,7 +426,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void cboDatPhong_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // Khi chọn lượt đặt phòng cần thanh toán, tự động bật lại nút thu tiền và tạo mã mới
             if (maHDDangChon != null)
             {
                 maHDDangChon = null;
@@ -423,10 +434,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             if (cboDatPhong.SelectedItem is ThongTinDatPhongThanhToan dp)
             {
-                btnThanhToan.Enabled = true;
-                btnThanhToan.BackColor = UITheme.PrimaryOrange;
-                btnThanhToan.Text = "Xác nhận thu";
-
                 txtTienPhong.Text = dp.TienPhong.ToString("N0");
                 txtTienDatCoc.Text = dp.TienCoc.ToString("N0");
             }
@@ -434,9 +441,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
             {
                 txtTienPhong.Text = "0";
                 txtTienDatCoc.Text = "0";
-                btnThanhToan.Enabled = false;
-                btnThanhToan.BackColor = Color.FromArgb(148, 163, 184);
-                btnThanhToan.Text = "Chưa chọn phòng";
             }
             TinhTongTienTuDong(null, null);
         }
@@ -647,11 +651,6 @@ namespace Quản_Lý_Khách_Sạn.Forms
             lblCardTitle.Text = $"🧾 Hóa đơn đã thu: [{h.MaHoaDon}]";
             lblCardSubtitle.Text = $"Thanh toán lúc {h.NgayThanhToan:dd/MM/yyyy HH:mm} (Chế độ xem lịch sử)";
 
-            // Khi click xem một hóa đơn cũ đã thanh toán xong:
-            btnThanhToan.Enabled = false;
-            btnThanhToan.BackColor = Color.FromArgb(148, 163, 184);
-            btnThanhToan.Text = "Đã thanh toán";
-
             DataTable dtChiTiet = chiTietDAL.LayChiTietTheoHoaDon(h.MaHoaDon);
             dtChiTietTam.Rows.Clear();
             foreach (DataRow r in dtChiTiet.Rows)
@@ -683,7 +682,11 @@ namespace Quản_Lý_Khách_Sạn.Forms
             }
         }
 
-        private void btnLamMoi_Click(object sender, EventArgs e) => LamMoiForm();
+        private void btnLamMoi_Click(object sender, EventArgs e)
+        {
+            TaiDanhSachHoaDon();
+            LamMoiForm();
+        }
 
         private void LamMoiForm()
         {
@@ -704,7 +707,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             btnThanhToan.Enabled = true;
             btnThanhToan.BackColor = UITheme.PrimaryOrange;
-            btnThanhToan.Text = "Xác nhận thu";
+            btnThanhToan.Text = "💳 Lập hóa đơn / Thanh toán";
         }
 
         private void btnInHoaDon_Click(object sender, EventArgs e)

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -24,12 +24,35 @@ namespace Quản_Lý_Khách_Sạn
         public static readonly Font MainFont = new Font("Segoe UI", 9.5F, FontStyle.Regular);
         public static readonly Font BoldFont = new Font("Segoe UI", 9.5F, FontStyle.Bold);
 
-        // --- 2. ÁP DỤNG THEME CHO FORM (GIỮ NGUYÊN BỐ CỤC FIGMA CARD & INPUT) ---
+        // --- 2. ÁP DỤNG THEME CHO FORM (CHUẨN 4 TIÊU CHÍ: TASTE - SKILL - HALLMARK - IMPECCABLE) ---
         public static void ApplyTheme(Form form)
         {
             if (form == null) return;
             form.BackColor = BackgroundGray;
+            SetDoubleBuffered(form);
+            DisableMnemonics(form);
             ApplyThemeToControls(form.Controls);
+        }
+
+        /// <summary>
+        /// KỸ THUẬT CHẾ TÁC (SKILL): Kích hoạt bộ đệm kép DoubleBuffered đệ quy toàn bộ cây điều khiển,
+        /// xóa sổ hoàn toàn hiện tượng nhấp nháy (flicker) và xé hình khi resize hoặc đổi màn hình trong WinForms.
+        /// </summary>
+        public static void SetDoubleBuffered(Control control)
+        {
+            if (control == null) return;
+            try
+            {
+                var prop = typeof(Control).GetProperty("DoubleBuffered",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                prop?.SetValue(control, true, null);
+            }
+            catch { }
+
+            foreach (Control child in control.Controls)
+            {
+                SetDoubleBuffered(child);
+            }
         }
 
         private static void ApplyThemeToControls(Control.ControlCollection controls)

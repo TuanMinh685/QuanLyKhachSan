@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
 using Quản_Lý_Khách_Sạn.BLL;
@@ -22,6 +22,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
         public frmTrangChu()
         {
             InitializeComponent();
+            UITheme.SetDoubleBuffered(this);
+            UITheme.DisableMnemonics(this);
             lblTitleSection.UseMnemonic = false; // hiển thị đúng ký tự '&' trong tiêu đề
 
             btnBanLamViec = new Button
@@ -341,6 +343,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     pnlContent.Controls.Add(manHinh);
                 }
 
+                UITheme.SetDoubleBuffered(manHinh);
                 UITheme.DisableMnemonics(manHinh); // không để '&' bị nuốt thành phím tắt
                 manHinh.Show();
                 manHinh.BringToFront();

@@ -307,7 +307,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                         COALESCE(p.SoPhong, '---') AS SoPhong, 
                         COALESCE(lp.TenLoai, '---') AS TenLoai,
                         COALESCE(pt.TenPhuongThuc, hd.MaPTTT) AS TenPhuongThuc,
-                        COALESCE(vc.MaCode, '') AS CodeVoucher
+                        COALESCE(vc.Code, '') AS CodeVoucher
                     FROM HoaDon hd
                     LEFT JOIN DatPhong dp ON (CAST(dp.MaDatPhong AS TEXT) = hd.MaDatPhong OR dp.MaDat = hd.MaDatPhong)
                     LEFT JOIN KhachHang kh ON dp.MaKH = kh.MaKH
@@ -390,6 +390,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                     dgvChiTiet.Columns["Thành tiền"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                     dgvChiTiet.Columns["Thành tiền"].DefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
                 }
+                UITheme.DongBoCanLeTieuDe(dgvChiTiet);
 
                 // 3. Tài chính
                 decimal tienDV = Convert.ToDecimal(_drHoaDon["TienDichVu"]);
