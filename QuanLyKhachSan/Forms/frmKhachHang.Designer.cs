@@ -58,14 +58,11 @@
             this.txtQuocTich = new System.Windows.Forms.TextBox();
             this.lblEmail = new System.Windows.Forms.Label();
             this.txtEmail = new System.Windows.Forms.TextBox();
-            this.lblDiaChi = new System.Windows.Forms.Label();
-            this.txtDiaChi = new System.Windows.Forms.TextBox();
             this.lblSoGiayTo = new System.Windows.Forms.Label();
             this.txtSoGiayTo = new System.Windows.Forms.TextBox();
             this.lblLoiSoGiayTo = new System.Windows.Forms.Label();
             this.lblGhiChu = new System.Windows.Forms.Label();
             this.txtGhiChu = new System.Windows.Forms.TextBox();
-            this.chkNhanUuDai = new System.Windows.Forms.CheckBox();
             this.btnHuy = new System.Windows.Forms.Button();
             this.btnCapNhat = new System.Windows.Forms.Button();
             this.tabChiTiet = new System.Windows.Forms.TabControl();
@@ -213,14 +210,11 @@
             this.pnlThongTin.Location = new System.Drawing.Point(730, 120);
             this.pnlThongTin.Name = "pnlThongTin";
             this.pnlThongTin.Size = new System.Drawing.Size(340, 506);
-            this.pnlThongTin.Controls.Add(this.chkNhanUuDai);
             this.pnlThongTin.Controls.Add(this.txtGhiChu);
             this.pnlThongTin.Controls.Add(this.lblGhiChu);
             this.pnlThongTin.Controls.Add(this.lblLoiSoGiayTo);
             this.pnlThongTin.Controls.Add(this.txtSoGiayTo);
             this.pnlThongTin.Controls.Add(this.lblSoGiayTo);
-            this.pnlThongTin.Controls.Add(this.txtDiaChi);
-            this.pnlThongTin.Controls.Add(this.lblDiaChi);
             this.pnlThongTin.Controls.Add(this.txtEmail);
             this.pnlThongTin.Controls.Add(this.lblEmail);
             this.pnlThongTin.Controls.Add(this.txtQuocTich);
@@ -375,25 +369,6 @@
             this.txtEmail.Name = "txtEmail";
             this.txtEmail.Size = new System.Drawing.Size(312, 27);
             // 
-            // lblDiaChi
-            // 
-            this.lblDiaChi.AutoSize = true;
-            this.lblDiaChi.Font = new System.Drawing.Font("Segoe UI Semibold", 8.5F, System.Drawing.FontStyle.Bold);
-            this.lblDiaChi.ForeColor = System.Drawing.Color.FromArgb(51, 65, 85);
-            this.lblDiaChi.Location = new System.Drawing.Point(14, 232);
-            this.lblDiaChi.Name = "lblDiaChi";
-            this.lblDiaChi.Text = "Địa chỉ";
-            // 
-            // txtDiaChi
-            // 
-            this.txtDiaChi.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtDiaChi.Font = new System.Drawing.Font("Segoe UI", 9.75F);
-            this.txtDiaChi.ForeColor = System.Drawing.Color.FromArgb(30, 41, 59);
-            this.txtDiaChi.Location = new System.Drawing.Point(14, 249);
-            this.txtDiaChi.MaxLength = 255;
-            this.txtDiaChi.Name = "txtDiaChi";
-            this.txtDiaChi.Size = new System.Drawing.Size(312, 27);
-            // 
             // lblSoGiayTo
             // 
             this.lblSoGiayTo.AutoSize = true;
@@ -444,17 +419,6 @@
             this.txtGhiChu.Multiline = true;
             this.txtGhiChu.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtGhiChu.Size = new System.Drawing.Size(312, 34);
-            // 
-            // chkNhanUuDai
-            // 
-            this.chkNhanUuDai.AutoSize = true;
-            this.chkNhanUuDai.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.chkNhanUuDai.ForeColor = System.Drawing.Color.FromArgb(51, 65, 85);
-            this.chkNhanUuDai.Location = new System.Drawing.Point(14, 398);
-            this.chkNhanUuDai.Name = "chkNhanUuDai";
-            this.chkNhanUuDai.Size = new System.Drawing.Size(194, 19);
-            this.chkNhanUuDai.Text = "Đồng ý nhận thông tin ưu đãi";
-            this.chkNhanUuDai.UseVisualStyleBackColor = true;
             // 
             // btnHuy
             // 
@@ -826,14 +790,11 @@
         private System.Windows.Forms.TextBox txtQuocTich;
         private System.Windows.Forms.Label lblEmail;
         private System.Windows.Forms.TextBox txtEmail;
-        private System.Windows.Forms.Label lblDiaChi;
-        private System.Windows.Forms.TextBox txtDiaChi;
         private System.Windows.Forms.Label lblSoGiayTo;
         private System.Windows.Forms.TextBox txtSoGiayTo;
         private System.Windows.Forms.Label lblLoiSoGiayTo;
         private System.Windows.Forms.Label lblGhiChu;
         private System.Windows.Forms.TextBox txtGhiChu;
-        private System.Windows.Forms.CheckBox chkNhanUuDai;
         private System.Windows.Forms.Button btnHuy;
         private System.Windows.Forms.Button btnCapNhat;
         private System.Windows.Forms.TabControl tabChiTiet;

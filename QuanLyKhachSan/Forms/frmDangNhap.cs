@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -234,6 +234,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         /// </summary>
         private sealed class Nhan : Label
         {
+            [System.ComponentModel.DefaultValue(false)]
             [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
             public bool NhieuDong { get; set; }
 
@@ -265,6 +266,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             private bool _hover;
             private bool _dangHien;
 
+            [System.ComponentModel.DefaultValue(false)]
             [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
             public bool DangHien
             {
