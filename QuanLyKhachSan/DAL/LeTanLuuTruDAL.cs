@@ -73,7 +73,19 @@ WHERE MaPhong = @MaPhong AND TrangThai = 'Đang ở' AND MaDatPhong <> @Id";
 
         public static bool NhanPhong(int maDatPhong)
         {
-            const string sql = @"
+            try
+            {
+                using var conn = LeTanDatPhongDAL.TaoKetNoi();
+                conn.Open();
+                using var cmd = new NpgsqlCommand("CALL sp_ThucHienCheckIn(@Id, @NV)", conn);
+                cmd.Parameters.Add("@Id", NpgsqlDbType.Integer).Value = maDatPhong;
+                cmd.Parameters.Add("@NV", NpgsqlDbType.Integer).Value = (object)Quản_Lý_Khách_Sạn.Session.MaNhanVien ?? 1;
+                cmd.ExecuteNonQuery();
+                return true;
+            }
+            catch (PostgresException ex) when (ex.SqlState == "42883")
+            {
+                const string sql = @"
 UPDATE DatPhong d
 SET TrangThai = 'Đang ở', GioNhanThucTe = CURRENT_TIMESTAMP
 FROM Phong p, KhachHang kh
@@ -86,7 +98,12 @@ WHERE p.MaPhong = d.MaPhong AND kh.MaKH = d.MaKH AND d.MaDatPhong = @Id
                   WHERE x.MaPhong = d.MaPhong
                     AND x.TrangThai = 'Đang ở'
                     AND x.MaDatPhong <> @Id)";
-            return ChayCapNhat(sql, new NpgsqlParameter("@Id", NpgsqlDbType.Integer) { Value = maDatPhong });
+                return ChayCapNhat(sql, new NpgsqlParameter("@Id", NpgsqlDbType.Integer) { Value = maDatPhong });
+            }
+            catch (PostgresException ex) when (ex.SqlState == "P0001")
+            {
+                throw new BLL.NghiepVuException(ex.MessageText);
+            }
         }
 
         public static bool TraPhong(int maDatPhong)

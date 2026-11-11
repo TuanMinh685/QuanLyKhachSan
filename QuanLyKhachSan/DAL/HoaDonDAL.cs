@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 using Quản_Lý_Khách_Sạn.Models;
 
 namespace Quản_Lý_Khách_Sạn.DAL
@@ -85,111 +87,190 @@ namespace Quản_Lý_Khách_Sạn.DAL
             }
         }
 
-        // --- HÀM NÂNG CẤP ĐÃ ĐƯỢC THÊM VÀO ĐÂY ---
+        // --- HÀM NÂNG CẤP ĐÃ ĐƯỢC KẾT NỐI VỚI STORED PROCEDURE CỦA CHUYÊN ĐỀ 1 ---
         public bool LuuHoaDonVaCheckOut(HoaDon hd, string maDatPhong, IReadOnlyList<ChiTietHoaDon> chiTiet, int? maNhanVien)
         {
             using (NpgsqlConnection conn = DatabaseHelper.GetConnection())
             {
                 conn.Open();
-                using NpgsqlTransaction trans = conn.BeginTransaction();
+
+                // 1. Kiểm tra và lấy thông tin đơn đặt phòng cần thanh toán
+                int id;
+                string maDat;
+                using (var don = new NpgsqlCommand(@"
+SELECT MaDatPhong, MaDat, TienCoc, TongTien, TrangThai FROM DatPhong
+WHERE MaDat = @Ma OR CAST(MaDatPhong AS text) = @Ma", conn))
+                {
+                    don.Parameters.AddWithValue("@Ma", maDatPhong);
+                    using var reader = don.ExecuteReader();
+                    if (!reader.Read()) throw new BLL.NghiepVuException("Không tìm thấy đơn đặt phòng cần thanh toán.");
+                    id = Convert.ToInt32(reader["MaDatPhong"]);
+                    maDat = Convert.ToString(reader["MaDat"]);
+                    string trangThai = Convert.ToString(reader["TrangThai"]);
+                    if (trangThai != "Đang ở" && trangThai != "Đã trả")
+                        throw new BLL.NghiepVuException("Chỉ thanh toán đơn đã nhận phòng hoặc đã trả phòng.");
+                    if (hd.TienDatCoc != Convert.ToDecimal(reader["TienCoc"]) || hd.TienPhong != Convert.ToDecimal(reader["TongTien"]))
+                        throw new BLL.NghiepVuException("Tiền phòng/cọc không khớp đơn đã lưu. Hãy chọn lại đơn để tải số tiền mới nhất.");
+                }
+
+                // 2. Chặn thanh toán trùng lặp
+                using (var duplicate = new NpgsqlCommand(@"SELECT COUNT(*) FROM HoaDon
+WHERE MaDatPhong IN (@Id, @Ma) AND TrangThai = 'Đã thanh toán'", conn))
+                {
+                    duplicate.Parameters.AddWithValue("@Id", id.ToString());
+                    duplicate.Parameters.AddWithValue("@Ma", maDat);
+                    if (Convert.ToInt32(duplicate.ExecuteScalar()) > 0)
+                        throw new BLL.NghiepVuException("Đơn này đã được thanh toán. Vui lòng làm mới danh sách.");
+                }
+                hd.MaDatPhong = maDat;
+
+                // 3. Chuẩn bị mảng JSON dịch vụ phát sinh tại quầy để truyền vào Procedure (giải quyết Conflict 3)
+                string dichVuJson = null;
+                if (chiTiet != null && chiTiet.Count > 0)
+                {
+                    var items = chiTiet.Select(c => new
+                    {
+                        MaDichVu = c.MaDichVu,
+                        SoLuong = c.SoLuong,
+                        DonGia = c.DonGia,
+                        ThanhTien = c.ThanhTien > 0 ? c.ThanhTien : (c.SoLuong * c.DonGia)
+                    });
+                    dichVuJson = System.Text.Json.JsonSerializer.Serialize(items);
+                }
+
+                // 4. Thực thi Stored Procedure sp_ThucHienCheckOut từ Chuyên Đề 1
                 try
                 {
-                    LeTanDatPhongDAL.KhoaDatPhong(conn, trans);
-                    int id;
-                    string maDat;
-                    using (var don = new NpgsqlCommand(@"
-SELECT MaDatPhong, MaDat, TienCoc, TongTien, TrangThai FROM DatPhong
-WHERE MaDat = @Ma OR CAST(MaDatPhong AS text) = @Ma FOR UPDATE", conn, trans))
+                    using var cmd = new NpgsqlCommand("CALL sp_ThucHienCheckOut(@MaDP, @PTTT, @MaVC, @MaHD, @MaNV, @DV::jsonb, @GiamGia, @TongThu, @HoanCoc)", conn);
+                    cmd.Parameters.AddWithValue("@MaDP", id);
+                    cmd.Parameters.AddWithValue("@PTTT", hd.MaPTTT ?? "TM");
+                    cmd.Parameters.AddWithValue("@MaVC", hd.MaVoucher.HasValue ? (object)hd.MaVoucher.Value : DBNull.Value);
+
+                    var pMaHD = new NpgsqlParameter("@MaHD", NpgsqlTypes.NpgsqlDbType.Varchar, 20)
                     {
-                        don.Parameters.AddWithValue("@Ma", maDatPhong);
-                        using var reader = don.ExecuteReader();
-                        if (!reader.Read()) throw new BLL.NghiepVuException("Không tìm thấy đơn đặt phòng cần thanh toán.");
-                        id = Convert.ToInt32(reader["MaDatPhong"]);
-                        maDat = Convert.ToString(reader["MaDat"]);
-                        string trangThai = Convert.ToString(reader["TrangThai"]);
-                        if (trangThai != "Đang ở" && trangThai != "Đã trả")
-                            throw new BLL.NghiepVuException("Chỉ thanh toán đơn đã nhận phòng hoặc đã trả phòng.");
-                        if (hd.TienDatCoc != Convert.ToDecimal(reader["TienCoc"]) || hd.TienPhong != Convert.ToDecimal(reader["TongTien"]))
-                            throw new BLL.NghiepVuException("Tiền phòng/cọc không khớp đơn đã lưu. Hãy chọn lại đơn để tải số tiền mới nhất.");
-                    }
-                    using (var duplicate = new NpgsqlCommand(@"SELECT COUNT(*) FROM HoaDon
-WHERE MaDatPhong IN (@Id, @Ma) AND TrangThai = 'Đã thanh toán'", conn, trans))
+                        Direction = ParameterDirection.InputOutput,
+                        Value = string.IsNullOrWhiteSpace(hd.MaHoaDon) ? DBNull.Value : (object)hd.MaHoaDon
+                    };
+                    cmd.Parameters.Add(pMaHD);
+
+                    cmd.Parameters.AddWithValue("@MaNV", maNhanVien ?? 1);
+
+                    var pDV = new NpgsqlParameter("@DV", NpgsqlTypes.NpgsqlDbType.Jsonb)
                     {
-                        duplicate.Parameters.AddWithValue("@Id", id.ToString());
-                        duplicate.Parameters.AddWithValue("@Ma", maDat);
-                        if (Convert.ToInt32(duplicate.ExecuteScalar()) > 0)
-                            throw new BLL.NghiepVuException("Đơn này đã được thanh toán. Vui lòng làm mới danh sách.");
+                        Value = string.IsNullOrEmpty(dichVuJson) ? DBNull.Value : (object)dichVuJson
+                    };
+                    cmd.Parameters.Add(pDV);
+
+                    cmd.Parameters.AddWithValue("@GiamGia", hd.TienGiamGia > 0 ? (object)hd.TienGiamGia : DBNull.Value);
+
+                    var pTongThu = new NpgsqlParameter("@TongThu", NpgsqlTypes.NpgsqlDbType.Numeric)
+                    {
+                        Direction = ParameterDirection.InputOutput,
+                        Value = 0m
+                    };
+                    cmd.Parameters.Add(pTongThu);
+
+                    var pHoanCoc = new NpgsqlParameter("@HoanCoc", NpgsqlTypes.NpgsqlDbType.Numeric)
+                    {
+                        Direction = ParameterDirection.InputOutput,
+                        Value = 0m
+                    };
+                    cmd.Parameters.Add(pHoanCoc);
+
+                    using var reader = cmd.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            string colName = reader.GetName(i).ToLowerInvariant();
+                            if (colName.Contains("mahoadon") && !reader.IsDBNull(i))
+                                hd.MaHoaDon = Convert.ToString(reader.GetValue(i));
+                            else if (colName.Contains("tongthucthu") && !reader.IsDBNull(i))
+                                hd.TongTien = Convert.ToDecimal(reader.GetValue(i));
+                        }
                     }
-                    hd.MaDatPhong = maDat;
-                    // Module dịch vụ của nhóm tạo hóa đơn tạm. Thay bằng hóa đơn chốt
-                    // trong cùng transaction để lỗi lưu chi tiết sẽ khôi phục cả dữ liệu tạm.
-                    using (var clean = new NpgsqlCommand(@"
+
+                    if (pMaHD.Value != DBNull.Value && pMaHD.Value != null && !string.IsNullOrWhiteSpace(pMaHD.Value.ToString()))
+                        hd.MaHoaDon = pMaHD.Value.ToString();
+                    if (pTongThu.Value != DBNull.Value && pTongThu.Value != null)
+                        hd.TongTien = Convert.ToDecimal(pTongThu.Value);
+
+                    hd.TrangThai = "Đã thanh toán";
+                    return true;
+                }
+                catch (PostgresException ex) when (ex.SqlState == "P0001")
+                {
+                    throw new BLL.NghiepVuException(ex.MessageText);
+                }
+                catch (PostgresException ex) when (ex.SqlState == "42883")
+                {
+                    // Fallback giao dịch nội bộ nếu schema chưa triển khai Stored Procedure
+                    using NpgsqlTransaction trans = conn.BeginTransaction();
+                    try
+                    {
+                        LeTanDatPhongDAL.KhoaDatPhong(conn, trans);
+                        using (var clean = new NpgsqlCommand(@"
 DELETE FROM ChiTietHoaDon WHERE MaHoaDon IN
     (SELECT MaHoaDon FROM HoaDon WHERE MaDatPhong IN (@Id, @Ma) AND TrangThai = 'Chưa thanh toán');
 DELETE FROM HoaDon WHERE MaDatPhong IN (@Id, @Ma) AND TrangThai = 'Chưa thanh toán';", conn, trans))
-                    {
-                        clean.Parameters.AddWithValue("@Id", id.ToString());
-                        clean.Parameters.AddWithValue("@Ma", maDat);
-                        clean.ExecuteNonQuery();
-                    }
-                    // 1. Thêm mới Hóa Đơn
-                    string sqlHoaDon = @"INSERT INTO HoaDon (MaHoaDon, MaDatPhong, NgayLap, NgayThanhToan, TienPhong, TienDichVu, TienGiamGia, TienDatCoc, TongTien, MaPTTT, MaVoucher, TrangThai)
-                                         VALUES (@MaHD, @MaDP, @NgayLap, @NgayTT, @TienPhong, @TienDV, @GiamGia, @DatCoc, @TongTien, @PTTT, @MaVoucher, @TrangThai)";
-                    using (NpgsqlCommand cmd = new NpgsqlCommand(sqlHoaDon, conn, trans))
-                    {
-                        cmd.Parameters.AddWithValue("@MaHD", hd.MaHoaDon);
-                        cmd.Parameters.AddWithValue("@MaDP", hd.MaDatPhong ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@NgayLap", hd.NgayLap);
-                        cmd.Parameters.AddWithValue("@NgayTT", hd.NgayThanhToan);
-                        cmd.Parameters.AddWithValue("@TienPhong", hd.TienPhong);
-                        cmd.Parameters.AddWithValue("@TienDV", hd.TienDichVu);
-                        cmd.Parameters.AddWithValue("@GiamGia", hd.TienGiamGia);
-                        cmd.Parameters.AddWithValue("@DatCoc", hd.TienDatCoc);
-                        cmd.Parameters.AddWithValue("@TongTien", hd.TongTien);
-                        cmd.Parameters.AddWithValue("@PTTT", hd.MaPTTT ?? "TM");
-                        cmd.Parameters.AddWithValue("@MaVoucher", hd.MaVoucher.HasValue ? (object)hd.MaVoucher.Value : DBNull.Value);
-                        cmd.Parameters.AddWithValue("@TrangThai", hd.TrangThai ?? "Đã thanh toán");
-                        cmd.ExecuteNonQuery();
-                    }
+                        {
+                            clean.Parameters.AddWithValue("@Id", id.ToString());
+                            clean.Parameters.AddWithValue("@Ma", maDat);
+                            clean.ExecuteNonQuery();
+                        }
 
-                    // Nếu CSDL chưa bật trigger trg_XuLyVoucherHoaDon thì trừ lượt Voucher ngay trong cùng Transaction
-                    if (hd.MaVoucher.HasValue)
-                    {
-                        using var cmdVc = new NpgsqlCommand(@"
-                            UPDATE Voucher
-                            SET SoLuong = SoLuong - 1,
-                                TrangThai = CASE WHEN (SoLuong - 1) <= 0 THEN FALSE ELSE TrangThai END
-                            WHERE MaVoucher = @MaVC
-                              AND SoLuong > 0
-                              AND NOT EXISTS (
-                                  SELECT 1
-                                  FROM pg_trigger t
-                                  JOIN pg_class c ON c.oid = t.tgrelid
-                                  WHERE c.relname = 'hoadon'
-                                    AND t.tgname = 'trg_xulyvoucherhoadon'
-                                    AND t.tgenabled <> 'D'
-                              )", conn, trans);
-                        cmdVc.Parameters.AddWithValue("@MaVC", hd.MaVoucher.Value);
-                        cmdVc.ExecuteNonQuery();
-                    }
+                        string sqlHoaDon = @"INSERT INTO HoaDon (MaHoaDon, MaDatPhong, NgayLap, NgayThanhToan, TienPhong, TienDichVu, TienGiamGia, TienDatCoc, TongTien, MaPTTT, MaVoucher, TrangThai)
+                                             VALUES (@MaHD, @MaDP, @NgayLap, @NgayTT, @TienPhong, @TienDV, @GiamGia, @DatCoc, @TongTien, @PTTT, @MaVoucher, @TrangThai)";
+                        using (NpgsqlCommand cmdFallback = new NpgsqlCommand(sqlHoaDon, conn, trans))
+                        {
+                            cmdFallback.Parameters.AddWithValue("@MaHD", hd.MaHoaDon);
+                            cmdFallback.Parameters.AddWithValue("@MaDP", hd.MaDatPhong ?? (object)DBNull.Value);
+                            cmdFallback.Parameters.AddWithValue("@NgayLap", hd.NgayLap);
+                            cmdFallback.Parameters.AddWithValue("@NgayTT", hd.NgayThanhToan);
+                            cmdFallback.Parameters.AddWithValue("@TienPhong", hd.TienPhong);
+                            cmdFallback.Parameters.AddWithValue("@TienDV", hd.TienDichVu);
+                            cmdFallback.Parameters.AddWithValue("@GiamGia", hd.TienGiamGia);
+                            cmdFallback.Parameters.AddWithValue("@DatCoc", hd.TienDatCoc);
+                            cmdFallback.Parameters.AddWithValue("@TongTien", hd.TongTien);
+                            cmdFallback.Parameters.AddWithValue("@PTTT", hd.MaPTTT ?? "TM");
+                            cmdFallback.Parameters.AddWithValue("@MaVoucher", hd.MaVoucher.HasValue ? (object)hd.MaVoucher.Value : DBNull.Value);
+                            cmdFallback.Parameters.AddWithValue("@TrangThai", hd.TrangThai ?? "Đã thanh toán");
+                            cmdFallback.ExecuteNonQuery();
+                        }
 
-                    // Chi tiết dịch vụ cùng transaction với hóa đơn và trả phòng.
-                    foreach (var ct in chiTiet)
-                    {
-                        using var detail = new NpgsqlCommand(@"
+                        if (hd.MaVoucher.HasValue)
+                        {
+                            using var cmdVc = new NpgsqlCommand(@"
+                                UPDATE Voucher
+                                SET SoLuong = SoLuong - 1,
+                                    TrangThai = CASE WHEN (SoLuong - 1) <= 0 THEN FALSE ELSE TrangThai END
+                                WHERE MaVoucher = @MaVC
+                                  AND SoLuong > 0
+                                  AND NOT EXISTS (
+                                      SELECT 1
+                                      FROM pg_trigger t
+                                      JOIN pg_class c ON c.oid = t.tgrelid
+                                      WHERE c.relname = 'hoadon'
+                                        AND t.tgname = 'trg_xulyvoucherhoadon'
+                                        AND t.tgenabled <> 'D'
+                                  )", conn, trans);
+                            cmdVc.Parameters.AddWithValue("@MaVC", hd.MaVoucher.Value);
+                            cmdVc.ExecuteNonQuery();
+                        }
+
+                        foreach (var ct in chiTiet)
+                        {
+                            using var detail = new NpgsqlCommand(@"
 INSERT INTO ChiTietHoaDon (MaHoaDon, MaDichVu, SoLuong, DonGia, ThanhTien)
 VALUES (@HD, @DV, @SL, @Gia, @Tien)", conn, trans);
-                        detail.Parameters.AddWithValue("@HD", hd.MaHoaDon);
-                        detail.Parameters.AddWithValue("@DV", ct.MaDichVu);
-                        detail.Parameters.AddWithValue("@SL", ct.SoLuong);
-                        detail.Parameters.AddWithValue("@Gia", ct.DonGia);
-                        detail.Parameters.AddWithValue("@Tien", ct.ThanhTien);
-                        detail.ExecuteNonQuery();
-                    }
+                            detail.Parameters.AddWithValue("@HD", hd.MaHoaDon);
+                            detail.Parameters.AddWithValue("@DV", ct.MaDichVu);
+                            detail.Parameters.AddWithValue("@SL", ct.SoLuong);
+                            detail.Parameters.AddWithValue("@Gia", ct.DonGia);
+                            detail.Parameters.AddWithValue("@Tien", ct.ThanhTien);
+                            detail.ExecuteNonQuery();
+                        }
 
-                    // Cập nhật chính xác đơn đã khóa và kiểm tra ở trên.
-                    if (!string.IsNullOrWhiteSpace(maDatPhong))
-                    {
                         string sqlDatPhong = @"UPDATE DatPhong
                                                SET TrangThai = 'Đã trả',
                                                    GioTraThucTe = COALESCE(GioTraThucTe, CURRENT_TIMESTAMP)
@@ -197,22 +278,21 @@ VALUES (@HD, @DV, @SL, @Gia, @Tien)", conn, trans);
                         using (NpgsqlCommand cmdDP = new NpgsqlCommand(sqlDatPhong, conn, trans))
                         {
                             cmdDP.Parameters.AddWithValue("@MaDP", id);
-                            if (cmdDP.ExecuteNonQuery() != 1)
-                                throw new BLL.NghiepVuException("Không thể cập nhật trạng thái trả phòng.");
+                            cmdDP.ExecuteNonQuery();
                         }
-                    }
 
-                    decimal hoanDu = hd.TienDatCoc - (hd.TienPhong + hd.TienDichVu - hd.TienGiamGia);
-                    if (hoanDu > 0)
-                        PhieuDatCocDAL.GhiPhieu(conn, trans, id, "Hoan", hoanDu, BLL.LeTanDatPhongBLL.PhuongThucGhiSoCoc(hd.MaPTTT),
-                            maNhanVien.Value, "Hoàn cọc dư khi thanh toán " + hd.MaHoaDon + " qua " + hd.MaPTTT);
-                    trans.Commit();
-                    return true;
-                }
-                catch
-                {
-                    try { trans.Rollback(); } catch { }
-                    throw;
+                        decimal hoanDu = hd.TienDatCoc - (hd.TienPhong + hd.TienDichVu - hd.TienGiamGia);
+                        if (hoanDu > 0)
+                            PhieuDatCocDAL.GhiPhieu(conn, trans, id, "Hoan", hoanDu, BLL.LeTanDatPhongBLL.PhuongThucGhiSoCoc(hd.MaPTTT),
+                                maNhanVien.Value, "Hoàn cọc dư khi thanh toán " + hd.MaHoaDon + " qua " + hd.MaPTTT);
+                        trans.Commit();
+                        return true;
+                    }
+                    catch
+                    {
+                        try { trans.Rollback(); } catch { }
+                        throw;
+                    }
                 }
             }
         }

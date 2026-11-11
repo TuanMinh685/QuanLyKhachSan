@@ -170,7 +170,8 @@ internal static class Program
             Sql(@"INSERT INTO LoaiPhong(TenLoai,GiaMotDem,SoNguoiToiDa) VALUES ('Standard',500000,2),('Deluxe',800000,3);
                 INSERT INTO Phong(SoPhong,Tang,MaLoai) VALUES ('P101',1,1),('P102',1,1),('P201',2,2);
                 INSERT INTO NhanVien(HoTen,ChucVu,SoDienThoai) VALUES ('Test','Lễ tân','0901234567');
-                INSERT INTO DichVu(MaDichVu,TenDichVu,DonGia) VALUES ('DV001','Test',120000);");
+                INSERT INTO DichVu(MaDichVu,TenDichVu,DonGia) VALUES ('DV001','Test',120000);
+                INSERT INTO PhuongThucThanhToan(TenPhuongThuc, MaPTTT) VALUES ('Tiền mặt', 'TM'), ('Chuyển khoản', 'CK') ON CONFLICT DO NOTHING;");
             string migration = File.ReadAllText(Path.Combine(root, "Database", "Migrations", "002_Supabase_PhieuDatCoc.sql"));
             Sql(migration); Sql(migration);
             Check(Number("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=current_schema() AND table_name='phieudatcoc'") == 1, "Migration is repeatable");

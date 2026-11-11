@@ -555,11 +555,13 @@ DECLARE
     v_MaPhong INT;
     v_SoPhong VARCHAR(20);
     v_TinhTrangPhong VARCHAR(30);
+    v_CCCD VARCHAR(50);
 BEGIN
-    SELECT dp.TrangThai, dp.NgayNhan, dp.MaPhong, p.SoPhong, p.TinhTrang
-    INTO v_TrangThai, v_NgayNhan, v_MaPhong, v_SoPhong, v_TinhTrangPhong
+    SELECT dp.TrangThai, dp.NgayNhan, dp.MaPhong, p.SoPhong, p.TinhTrang, kh.CCCD
+    INTO v_TrangThai, v_NgayNhan, v_MaPhong, v_SoPhong, v_TinhTrangPhong, v_CCCD
     FROM DatPhong dp
     JOIN Phong p ON dp.MaPhong = p.MaPhong
+    LEFT JOIN KhachHang kh ON dp.MaKH = kh.MaKH
     WHERE dp.MaDatPhong = p_MaDatPhong
     FOR UPDATE;
 
@@ -573,6 +575,10 @@ BEGIN
 
     IF v_TinhTrangPhong = 'Bảo trì' THEN
         RAISE EXCEPTION 'Phòng % hiện đang Bảo trì, không thể nhận phòng!', v_SoPhong;
+    END IF;
+
+    IF v_CCCD IS NULL OR btrim(v_CCCD) = '' THEN
+        RAISE EXCEPTION 'Khách chưa có CCCD/hộ chiếu. Hãy cập nhật hồ sơ khách hàng trước khi nhận phòng.';
     END IF;
 
     IF v_NgayNhan > CURRENT_DATE THEN
@@ -600,13 +606,21 @@ $$;
 
 -- ----------------------------------------------------------------------------
 -- PROCEDURE 2: Quy trình Check-out, tính toán hóa đơn, kiểm tra Voucher & hoàn cọc dư
+-- Hỗ trợ đầy đủ dịch vụ tại quầy (p_DichVuJson) và kết nối trực tiếp với WinForms C#
 -- ----------------------------------------------------------------------------
+DROP PROCEDURE IF EXISTS sp_ThucHienCheckOut(INT, VARCHAR, INT, VARCHAR, INT);
+DROP PROCEDURE IF EXISTS sp_ThucHienCheckOut(INT, VARCHAR, INT, VARCHAR, INT, JSONB, NUMERIC, NUMERIC, NUMERIC);
+
 CREATE OR REPLACE PROCEDURE sp_ThucHienCheckOut(
-    p_MaDatPhong     INT,
-    p_MaPTTT         VARCHAR(10),
-    p_MaVoucher      INT,
-    INOUT p_MaHoaDon VARCHAR(20) DEFAULT NULL,
-    p_MaNhanVien     INT DEFAULT 1
+    p_MaDatPhong        INT,
+    p_MaPTTT            VARCHAR(10) DEFAULT 'TM',
+    p_MaVoucher         INT DEFAULT NULL,
+    INOUT p_MaHoaDon    VARCHAR(20) DEFAULT NULL,
+    p_MaNhanVien        INT DEFAULT 1,
+    p_DichVuJson        JSONB DEFAULT NULL,
+    p_TienGiamGia       NUMERIC(18,2) DEFAULT NULL,
+    INOUT p_TongThucThu NUMERIC(18,2) DEFAULT 0,
+    INOUT p_HoanCocDu   NUMERIC(18,2) DEFAULT 0
 )
 LANGUAGE plpgsql
 AS $$
@@ -619,8 +633,6 @@ DECLARE
     v_TienCoc NUMERIC(18,2);
     v_TienDV NUMERIC(18,2) := 0;
     v_TienGiam NUMERIC(18,2) := 0;
-    v_TongCanThu NUMERIC(18,2) := 0;
-    v_HoanCocDu NUMERIC(18,2) := 0;
     v_LoaiGiam VARCHAR(10);
     v_GiaTriVoucher NUMERIC(18,2);
     v_DonToiThieu NUMERIC(18,2);
@@ -630,7 +642,7 @@ DECLARE
     v_TrangThaiVC BOOLEAN;
     v_PhuongThucCoc VARCHAR(10);
 BEGIN
-    -- 1. Lấy thông tin đơn đặt phòng
+    -- 1. Lấy thông tin đơn đặt phòng và khóa dòng FOR UPDATE
     SELECT dp.MaDat, dp.MaPhong, p.SoPhong, COALESCE(dp.TongTien, 0), COALESCE(dp.TienCoc, 0), COALESCE(p_MaNhanVien, dp.MaNhanVien, 1)
     INTO v_MaDat, v_MaPhong, v_SoPhong, v_TienPhong, v_TienCoc, v_MaNV
     FROM DatPhong dp
@@ -656,7 +668,7 @@ BEGIN
         p_MaHoaDon := 'HD' || TO_CHAR(CURRENT_TIMESTAMP, 'YYYYMMDD') || LPAD(p_MaDatPhong::TEXT, 4, '0');
     END IF;
 
-    -- 3. Tạo trước bản ghi HoaDon đích và gộp các dòng dịch vụ từ hóa đơn tạm 'Chưa thanh toán'
+    -- 3. Tạo trước bản ghi HoaDon đích
     INSERT INTO HoaDon (
         MaHoaDon, MaDatPhong, NgayLap, NgayThanhToan,
         TienPhong, TienDichVu, TienGiamGia, TienDatCoc, TongTien,
@@ -669,14 +681,28 @@ BEGIN
     )
     ON CONFLICT (MaHoaDon) DO NOTHING;
 
-    UPDATE ChiTietHoaDon
-    SET MaHoaDon = p_MaHoaDon
-    WHERE MaHoaDon IN (
-        SELECT MaHoaDon FROM HoaDon
-        WHERE MaDatPhong IN (v_MaDat, p_MaDatPhong::TEXT)
-          AND TrangThai = 'Chưa thanh toán'
-          AND MaHoaDon <> p_MaHoaDon
-    );
+    -- 4. Xử lý dịch vụ phát sinh (On-the-spot Services):
+    IF p_DichVuJson IS NOT NULL AND jsonb_typeof(p_DichVuJson) = 'array' AND jsonb_array_length(p_DichVuJson) > 0 THEN
+        DELETE FROM ChiTietHoaDon WHERE MaHoaDon = p_MaHoaDon;
+
+        INSERT INTO ChiTietHoaDon (MaHoaDon, MaDichVu, SoLuong, DonGia, ThanhTien)
+        SELECT
+            p_MaHoaDon,
+            x->>'MaDichVu',
+            COALESCE((x->>'SoLuong')::INT, 1),
+            COALESCE((x->>'DonGia')::NUMERIC(18,2), 0),
+            COALESCE((x->>'ThanhTien')::NUMERIC(18,2), COALESCE((x->>'SoLuong')::INT, 1) * COALESCE((x->>'DonGia')::NUMERIC(18,2), 0))
+        FROM jsonb_array_elements(p_DichVuJson) AS x;
+    ELSE
+        UPDATE ChiTietHoaDon
+        SET MaHoaDon = p_MaHoaDon
+        WHERE MaHoaDon IN (
+            SELECT MaHoaDon FROM HoaDon
+            WHERE MaDatPhong IN (v_MaDat, p_MaDatPhong::TEXT)
+              AND TrangThai = 'Chưa thanh toán'
+              AND MaHoaDon <> p_MaHoaDon
+        );
+    END IF;
 
     DELETE FROM HoaDon
     WHERE MaDatPhong IN (v_MaDat, p_MaDatPhong::TEXT)
@@ -687,8 +713,10 @@ BEGIN
     FROM ChiTietHoaDon
     WHERE MaHoaDon = p_MaHoaDon;
 
-    -- 4. Kiểm tra đầy đủ điều kiện của Voucher (TrangThai, NgayBatDau, NgayHetHan, SoLuong, DonToiThieu)
-    IF p_MaVoucher IS NOT NULL THEN
+    -- 5. Kiểm tra đầy đủ điều kiện Voucher & tính giảm giá
+    IF p_TienGiamGia IS NOT NULL AND p_TienGiamGia > 0 THEN
+        v_TienGiam := p_TienGiamGia;
+    ELSIF p_MaVoucher IS NOT NULL THEN
         SELECT LoaiGiam, GiaTri, COALESCE(DonToiThieu, 0), NgayBatDau, NgayHetHan, SoLuong, TrangThai
         INTO v_LoaiGiam, v_GiaTriVoucher, v_DonToiThieu, v_NgayBD, v_NgayKT, v_SoLuongVC, v_TrangThaiVC
         FROM Voucher
@@ -723,11 +751,11 @@ BEGIN
         END IF;
     END IF;
 
-    -- 5. Tổng tiền thực tế cần thanh toán & khoản hoàn cọc dư
-    v_TongCanThu := GREATEST(0, (v_TienPhong + v_TienDV - v_TienCoc - v_TienGiam));
-    v_HoanCocDu  := GREATEST(0, v_TienCoc - (v_TienPhong + v_TienDV - v_TienGiam));
+    -- 6. Tính tổng tiền thực thu và hoàn cọc dư
+    p_TongThucThu := GREATEST(0, (v_TienPhong + v_TienDV - v_TienCoc - v_TienGiam));
+    p_HoanCocDu   := GREATEST(0, v_TienCoc - (v_TienPhong + v_TienDV - v_TienGiam));
 
-    -- 6. Cập nhật chốt hóa đơn thanh toán (sẽ kích hoạt trg_XuLyVoucherHoaDon nếu có MaVoucher)
+    -- 7. Cập nhật chốt hóa đơn 'Đã thanh toán' (kích hoạt trg_XuLyVoucherHoaDon trên Supabase)
     UPDATE HoaDon
     SET MaDatPhong    = v_MaDat,
         NgayThanhToan = CURRENT_TIMESTAMP,
@@ -735,14 +763,26 @@ BEGIN
         TienDichVu    = v_TienDV,
         TienGiamGia   = v_TienGiam,
         TienDatCoc    = v_TienCoc,
-        TongTien      = v_TongCanThu,
+        TongTien      = p_TongThucThu,
         MaPTTT        = COALESCE(p_MaPTTT, 'TM'),
         MaVoucher     = p_MaVoucher,
         TrangThai     = 'Đã thanh toán'
     WHERE MaHoaDon = p_MaHoaDon;
 
-    -- 7. Ghi sổ hoàn cọc dư vào bảng PhieuDatCoc (đồng bộ với HoaDonDAL.LuuHoaDonVaCheckOut)
-    IF v_HoanCocDu > 0 THEN
+    -- Tránh trừ kép: nếu trigger chưa có thì thủ tục tự cập nhật an toàn
+    IF p_MaVoucher IS NOT NULL AND NOT EXISTS (
+        SELECT 1 FROM pg_trigger t
+        JOIN pg_class c ON c.oid = t.tgrelid
+        WHERE c.relname = 'hoadon' AND t.tgname = 'trg_xulyvoucherhoadon' AND t.tgenabled <> 'D'
+    ) THEN
+        UPDATE Voucher
+        SET SoLuong = CASE WHEN SoLuong IS NOT NULL THEN SoLuong - 1 ELSE NULL END,
+            TrangThai = CASE WHEN SoLuong IS NOT NULL AND (SoLuong - 1) <= 0 THEN FALSE ELSE TrangThai END
+        WHERE MaVoucher = p_MaVoucher AND (SoLuong IS NULL OR SoLuong > 0);
+    END IF;
+
+    -- 8. Ghi sổ hoàn cọc dư vào bảng PhieuDatCoc
+    IF p_HoanCocDu > 0 THEN
         v_PhuongThucCoc := CASE
             WHEN COALESCE(p_MaPTTT, 'TM') IN ('CK', 'VNPAY', 'MOMO') THEN 'CK'
             WHEN COALESCE(p_MaPTTT, 'TM') IN ('POS', 'APPLEPAY') THEN 'POS'
@@ -753,14 +793,14 @@ BEGIN
         VALUES (
             p_MaDatPhong,
             'Hoan',
-            v_HoanCocDu,
+            p_HoanCocDu,
             v_PhuongThucCoc,
             v_MaNV,
             'Hoàn cọc dư khi thanh toán ' || p_MaHoaDon || ' qua ' || COALESCE(p_MaPTTT, 'TM')
         );
     END IF;
 
-    -- 8. Cập nhật đơn đặt phòng sang 'Đã trả' và giữ Phong.TinhTrang = 'Hoạt động'
+    -- 9. Cập nhật đơn đặt phòng sang 'Đã trả' và giữ Phong.TinhTrang = 'Hoạt động'
     UPDATE DatPhong
     SET TrangThai = 'Đã trả',
         GioTraThucTe = COALESCE(GioTraThucTe, CURRENT_TIMESTAMP)
@@ -770,8 +810,36 @@ BEGIN
     SET TinhTrang = 'Hoạt động'
     WHERE MaPhong = v_MaPhong AND TinhTrang <> 'Bảo trì';
 
-    RAISE NOTICE 'Đã Check-out và xuất hóa đơn % thành công cho phòng %. Tổng thu: % VNĐ', 
-        p_MaHoaDon, v_SoPhong, v_TongCanThu;
+    RAISE NOTICE 'Đã Check-out và xuất hóa đơn % thành công cho phòng %. Tổng thu: % VNĐ (Hoàn cọc dư: % VNĐ)', 
+        p_MaHoaDon, v_SoPhong, p_TongThucThu, p_HoanCocDu;
+END;
+$$;
+
+-- Overload 5 tham số nguyên bản đúng đặc tả Mục 4.3.4 Báo Cáo Chuyên Đề 1 của Tuấn Minh
+CREATE OR REPLACE PROCEDURE sp_ThucHienCheckOut(
+    p_MaDatPhong     INT,
+    p_MaPTTT         VARCHAR(10),
+    p_MaVoucher      INT,
+    INOUT p_MaHoaDon VARCHAR(20) DEFAULT NULL,
+    p_MaNhanVien     INT DEFAULT 1
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_TongThucThu NUMERIC(18,2) := 0;
+    v_HoanCocDu   NUMERIC(18,2) := 0;
+BEGIN
+    CALL sp_ThucHienCheckOut(
+        p_MaDatPhong,
+        p_MaPTTT,
+        p_MaVoucher,
+        p_MaHoaDon,
+        p_MaNhanVien,
+        NULL::jsonb,
+        NULL::numeric,
+        v_TongThucThu,
+        v_HoanCocDu
+    );
 END;
 $$;
 
@@ -939,6 +1007,8 @@ GRANT SELECT, INSERT, UPDATE ON DatPhong, KhachHang, HoaDon, ChiTietHoaDon, Phon
 GRANT SELECT ON LoaiPhong, DichVu, Voucher, PhuongThucThanhToan, vw_KhaiThacDoanhThuTheoThang, vw_KhaiThacCongSuatLoaiPhong, vw_KhaiThacTopDichVu, vw_KhaiThacKhachHangVIP, vw_KhaiThacDashboardTongHop TO role_le_tan_ks;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO role_le_tan_ks;
 GRANT EXECUTE ON FUNCTION fn_TimPhongTrong, fn_TinhToanChiPhiDatPhong TO role_le_tan_ks;
-GRANT EXECUTE ON PROCEDURE sp_ThucHienCheckIn, sp_ThucHienCheckOut TO role_le_tan_ks;
+GRANT EXECUTE ON PROCEDURE sp_ThucHienCheckIn(INT, INT) TO role_le_tan_ks;
+GRANT EXECUTE ON PROCEDURE sp_ThucHienCheckOut(INT, VARCHAR, INT, VARCHAR, INT) TO role_le_tan_ks;
+GRANT EXECUTE ON PROCEDURE sp_ThucHienCheckOut(INT, VARCHAR, INT, VARCHAR, INT, JSONB, NUMERIC, NUMERIC, NUMERIC) TO role_le_tan_ks;
 
 REVOKE ALL ON TaiKhoan FROM role_le_tan_ks;
