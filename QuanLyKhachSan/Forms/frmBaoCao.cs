@@ -132,6 +132,14 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void btnTabKhachHang_Click(object sender, EventArgs e) => SwitchTab(2);
 
+        public void TaiLaiDuLieu()
+        {
+            if (IsHandleCreated && !IsDisposed)
+            {
+                NapDuLieuBaoCao();
+            }
+        }
+
         private void NapDuLieuBaoCao()
         {
             try

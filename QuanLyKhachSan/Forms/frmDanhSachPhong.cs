@@ -56,6 +56,14 @@ namespace Quản_Lý_Khách_Sạn.Forms
             base.OnVisibleChanged(e);
             if (Visible && !DesignMode && IsHandleCreated && dtPhong != null)
             {
+                // Chỉ nạp lại nếu dữ liệu chưa có
+            }
+        }
+
+        public void TaiLaiDuLieu()
+        {
+            if (IsHandleCreated && !IsDisposed)
+            {
                 LoadPhong();
             }
         }

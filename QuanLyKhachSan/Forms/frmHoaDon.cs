@@ -682,6 +682,15 @@ namespace Quản_Lý_Khách_Sạn.Forms
             }
         }
 
+        public void TaiLaiDuLieu()
+        {
+            if (IsHandleCreated && !IsDisposed)
+            {
+                TaiDanhSachHoaDon();
+                LamMoiForm();
+            }
+        }
+
         private void btnLamMoi_Click(object sender, EventArgs e)
         {
             TaiDanhSachHoaDon();

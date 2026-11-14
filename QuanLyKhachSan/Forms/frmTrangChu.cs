@@ -12,6 +12,15 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private ucDatPhong manHinhDatPhong;
         private frmKhachHang manHinhKhachHang;
         private ucBanLamViecLeTan manHinhBanLamViec;
+        private frmDanhSachPhong manHinhPhong;
+        private frmDichVu manHinhDichVu;
+        private frmHoaDon manHinhHoaDon;
+        private frmVoucher manHinhVoucher;
+        private frmBaoCao manHinhBaoCao;
+        private frmTaiKhoan manHinhTaiKhoan;
+        private frmLoaiPhong manHinhLoaiPhong;
+        private frmPhuongThucThanhToan manHinhPhuongThucTT;
+
         private Button nutDangChon = null;
         private Button btnBanLamViec;
         private Button btnTaiKhoan;
@@ -77,7 +86,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 UseMnemonic = false
             };
             btnTaiKhoan.FlatAppearance.BorderSize = 0;
-            btnTaiKhoan.Click += (_, __) => { if (YeuCauAdmin()) MoFormCon(new frmTaiKhoan(), btnTaiKhoan, "QUẢN LÝ TÀI KHOẢN & PHÂN QUYỀN"); };
+            btnTaiKhoan.Click += (_, __) => MoTaiKhoan();
             pnlSidebar.Controls.Add(btnTaiKhoan);
             pnlSidebar.Controls.SetChildIndex(btnTaiKhoan, 1);
 
@@ -98,7 +107,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 Visible = false
             };
             btnPhuongThucTT.FlatAppearance.BorderSize = 0;
-            btnPhuongThucTT.Click += (_, __) => { if (YeuCauAdmin()) MoFormCon(new frmPhuongThucThanhToan(), btnPhuongThucTT, "QUẢN LÝ PHƯƠNG THỨC THANH TOÁN"); };
+            btnPhuongThucTT.Click += (_, __) => MoPhuongThucTT();
 
             // Menu "Loại phòng & giá" (Admin): đặt ngay dưới "Quản lý phòng"
             btnLoaiPhong = new Button
@@ -117,7 +126,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 UseMnemonic = false
             };
             btnLoaiPhong.FlatAppearance.BorderSize = 0;
-            btnLoaiPhong.Click += (_, __) => { if (YeuCauAdmin()) MoFormCon(new frmLoaiPhong(), btnLoaiPhong, "QUẢN LÝ LOẠI PHÒNG & GIÁ"); };
+            btnLoaiPhong.Click += (_, __) => MoLoaiPhong();
             pnlSidebar.Controls.Add(btnLoaiPhong);
             pnlSidebar.Controls.SetChildIndex(btnLoaiPhong, pnlSidebar.Controls.GetChildIndex(btnPhong));
 
@@ -291,7 +300,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 manHinhBanLamViec.YeuCauNhanPhong += (_, __) => ThucHienNhanPhong();
                 manHinhBanLamViec.YeuCauTraPhong += (_, __) => ThucHienTraPhong();
                 manHinhBanLamViec.YeuCauTraCuuKhach += (_, __) => MoKhachHang();
-                manHinhBanLamViec.YeuCauQuanLyPhong += (_, __) => MoFormCon(new frmDanhSachPhong(), btnPhong, "SƠ ĐỒ & QUẢN LÝ PHÒNG");
+                manHinhBanLamViec.YeuCauQuanLyPhong += (_, __) => MoDanhSachPhong();
             }
             else
             {
@@ -319,6 +328,75 @@ namespace Quản_Lý_Khách_Sạn.Forms
             if (daMo) manHinhKhachHang.LamMoiLuuTru();
         }
 
+        private void MoDanhSachPhong()
+        {
+            if (manHinhPhong == null || manHinhPhong.IsDisposed)
+                manHinhPhong = new frmDanhSachPhong();
+
+            HienThiManHinh(manHinhPhong, btnPhong, "DANH SÁCH & TRẠNG THÁI PHÒNG");
+        }
+
+        private void MoDichVu()
+        {
+            if (manHinhDichVu == null || manHinhDichVu.IsDisposed)
+                manHinhDichVu = new frmDichVu();
+
+            HienThiManHinh(manHinhDichVu, btnDichVu, "DANH MỤC DỊCH VỤ PHÒNG");
+        }
+
+        private void MoHoaDon()
+        {
+            if (manHinhHoaDon == null || manHinhHoaDon.IsDisposed)
+                manHinhHoaDon = new frmHoaDon();
+
+            HienThiManHinh(manHinhHoaDon, btnHoaDon, "HÓA ĐƠN & THANH TOÁN TRẢ PHÒNG");
+        }
+
+        private void MoVoucher()
+        {
+            if (!YeuCauAdmin()) return;
+            if (manHinhVoucher == null || manHinhVoucher.IsDisposed)
+                manHinhVoucher = new frmVoucher();
+
+            HienThiManHinh(manHinhVoucher, btnVoucher, "QUẢN LÝ MÃ GIẢM GIÁ (VOUCHER)");
+        }
+
+        private void MoBaoCao()
+        {
+            if (!YeuCauAdmin()) return;
+            if (manHinhBaoCao == null || manHinhBaoCao.IsDisposed)
+                manHinhBaoCao = new frmBaoCao();
+
+            HienThiManHinh(manHinhBaoCao, btnBaoCao, "BÁO CÁO DOANH THU & THỐNG KÊ");
+        }
+
+        private void MoTaiKhoan()
+        {
+            if (!YeuCauAdmin()) return;
+            if (manHinhTaiKhoan == null || manHinhTaiKhoan.IsDisposed)
+                manHinhTaiKhoan = new frmTaiKhoan();
+
+            HienThiManHinh(manHinhTaiKhoan, btnTaiKhoan, "QUẢN LÝ TÀI KHOẢN & PHÂN QUYỀN");
+        }
+
+        private void MoLoaiPhong()
+        {
+            if (!YeuCauAdmin()) return;
+            if (manHinhLoaiPhong == null || manHinhLoaiPhong.IsDisposed)
+                manHinhLoaiPhong = new frmLoaiPhong();
+
+            HienThiManHinh(manHinhLoaiPhong, btnLoaiPhong, "QUẢN LÝ LOẠI PHÒNG & GIÁ");
+        }
+
+        private void MoPhuongThucTT()
+        {
+            if (!YeuCauAdmin()) return;
+            if (manHinhPhuongThucTT == null || manHinhPhuongThucTT.IsDisposed)
+                manHinhPhuongThucTT = new frmPhuongThucThanhToan();
+
+            HienThiManHinh(manHinhPhuongThucTT, btnPhuongThucTT, "QUẢN LÝ PHƯƠNG THỨC THANH TOÁN");
+        }
+
         private void ThucHienNhanPhong()
         {
             using var f = new frmChonDatPhong(ThaoTacDatPhong.NhanPhong);
@@ -332,6 +410,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                         LeTanLuuTruBLL.NhanPhong(f.MaDatPhong);
                         MessageBox.Show($"🎉 Nhận phòng thành công!\nKhách hàng {f.TenKhach} đã nhận phòng {f.SoPhong}.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         manHinhBanLamViec?.TaiDuLieuHoatDong();
+                        manHinhPhong?.TaiLaiDuLieu();
                     }
                     catch (NghiepVuException ex)
                     {
@@ -355,6 +434,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 if (fTT.ShowDialog(this) == DialogResult.OK)
                 {
                     manHinhBanLamViec?.TaiDuLieuHoatDong();
+                    manHinhPhong?.TaiLaiDuLieu();
+                    manHinhHoaDon?.TaiLaiDuLieu();
                 }
                 else
                 {
@@ -367,6 +448,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
                             LeTanLuuTruBLL.TraPhong(f.MaDatPhong);
                             MessageBox.Show($"Đã ghi nhận trả phòng {f.SoPhong}.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             manHinhBanLamViec?.TaiDuLieuHoatDong();
+                            manHinhPhong?.TaiLaiDuLieu();
+                            manHinhHoaDon?.TaiLaiDuLieu();
                         }
                         catch (Exception ex)
                         {
@@ -413,18 +496,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
                 if (manHinhCu != null && !manHinhCu.IsDisposed)
                 {
-                    // Giữ dữ liệu chưa lưu của các màn hình chính
-                    if (ReferenceEquals(manHinhCu, manHinhDatPhong)
-                        || ReferenceEquals(manHinhCu, manHinhKhachHang)
-                        || ReferenceEquals(manHinhCu, manHinhBanLamViec))
-                    {
-                        manHinhCu.Hide();
-                    }
-                    else
-                    {
-                        if (manHinhCu is Form formCu) formCu.Close();
-                        manHinhCu.Dispose();
-                    }
+                    // Tối ưu đa nhiệm Pro Max: Ẩn màn hình cũ, giữ nguyên bộ nhớ & trạng thái làm việc (không Dispose)
+                    manHinhCu.Hide();
                 }
 
                 manHinhHienTai = manHinh;
@@ -554,8 +627,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void btnPhong_Click(object sender, EventArgs e)
         {
-            try { MoFormCon(new frmDanhSachPhong(), btnPhong, "DANH SÁCH & TRẠNG THÁI PHÒNG"); }
-            catch { MessageBox.Show("Form Danh sách phòng đang được đồng bộ.", "Thông báo"); }
+            MoDanhSachPhong();
         }
 
         private void btnDatPhong_Click(object sender, EventArgs e)
@@ -570,25 +642,22 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void btnDichVu_Click(object sender, EventArgs e)
         {
-            MoFormCon(new frmDichVu(), btnDichVu, "DANH MỤC DỊCH VỤ PHÒNG");
+            MoDichVu();
         }
 
         private void btnHoaDon_Click(object sender, EventArgs e)
         {
-            MoFormCon(new frmHoaDon(), btnHoaDon, "HÓA ĐƠN & THANH TOÁN TRẢ PHÒNG");
+            MoHoaDon();
         }
 
         private void btnVoucher_Click(object sender, EventArgs e)
         {
-            if (!YeuCauAdmin()) return;
-            MoFormCon(new frmVoucher(), btnVoucher, "QUẢN LÝ MÃ GIẢM GIÁ (VOUCHER)");
+            MoVoucher();
         }
 
         private void btnBaoCao_Click(object sender, EventArgs e)
         {
-            if (!YeuCauAdmin()) return;
-            // Mở trực tiếp frmBaoCao sẵn có
-            MoFormCon(new frmBaoCao(), btnBaoCao, "BÁO CÁO DOANH THU & THỐNG KÊ");
+            MoBaoCao();
         }
 
         private void btnDangXuat_Click(object sender, EventArgs e)

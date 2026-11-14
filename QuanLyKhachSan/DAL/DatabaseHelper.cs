@@ -9,7 +9,7 @@ namespace Quản_Lý_Khách_Sạn.DAL
     {
         // Chuỗi kết nối trực tiếp đến Supabase PostgreSQL Cloud (Pooler Session mode IPv4)
         private static string connectionString = ConfigurationManager.ConnectionStrings["HotelDB"]?.ConnectionString
-            ?? "Host=aws-0-ap-northeast-2.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.xfudgdoksedzyqinnkup;Password=TuanMinh@2004;SSL Mode=Require;Trust Server Certificate=true;Timeout=30;Command Timeout=60;";
+            ?? "Host=aws-0-ap-northeast-2.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.xfudgdoksedzyqinnkup;Password=TuanMinh@2004;SSL Mode=Require;Trust Server Certificate=true;Timeout=30;Command Timeout=60;Pooling=true;MinPoolSize=1;MaxPoolSize=20;ConnectionIdleLifetime=300;Keepalive=30;";
 
         public static NpgsqlConnection GetConnection()
         {
