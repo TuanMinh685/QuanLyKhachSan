@@ -45,12 +45,16 @@ namespace Quản_Lý_Khách_Sạn.Forms
             UITheme.DisableMnemonics(this);
             lblTitleSection.UseMnemonic = false; // hiển thị đúng ký tự '&' trong tiêu đề
 
-            // 1. NÂNG CẤP LOGO THƯƠNG HIỆU TRÊN SIDEBAR (PRO MAX BRAND HEADER)
-            lblHotelName.Location = new Point(74, 19);
-            lblHotelName.Font = new Font("Segoe UI", 12.5F, FontStyle.Bold);
+            // 1. NÂNG CẤP LOGO THƯƠNG HIỆU TRÊN SIDEBAR & CHUẨN HÓA KÍCH THƯỚC KHUNG (CHỐNG LỆCH DPI)
+            pnlSidebar.Width = 260;
+            pnlLogo.Height = 82;
+            pnlHeader.Height = 68;
+
+            lblHotelName.Location = new Point(68, 19);
+            lblHotelName.Font = new Font("Segoe UI", 11.5F, FontStyle.Bold);
             lblHotelName.ForeColor = Color.White;
-            lblHotelSub.Location = new Point(75, 48);
-            lblHotelSub.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+            lblHotelSub.Location = new Point(69, 46);
+            lblHotelSub.Font = new Font("Segoe UI", 7.8F, FontStyle.Bold);
             lblHotelSub.ForeColor = Color.FromArgb(251, 146, 60);
             lblHotelSub.Text = "HOSPITALITY PMS PRO";
             pnlLogo.Paint += PnlLogo_Paint;
@@ -169,7 +173,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 Text = "AN NHIÊN HOTEL  •  PHÂN HỆ TÁC NGHIỆP",
                 Font = new Font("Segoe UI", 7.8F, FontStyle.Bold),
                 ForeColor = Color.FromArgb(100, 116, 139),
-                Location = new Point(38, 13),
+                Location = new Point(38, 12),
                 AutoSize = true,
                 UseMnemonic = false
             };
@@ -184,8 +188,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 Name = "btnKhoaManHinh",
                 Text = "🔒 Khóa máy (Ctrl+L)",
                 Anchor = AnchorStyles.Top | AnchorStyles.Right,
-                Size = new Size(158, 36),
-                Location = new Point(pnlHeader.Width - 175, 19),
+                Size = new Size(176, 36),
+                Location = new Point(pnlHeader.Width - 196, 16),
                 BackColor = Color.FromArgb(248, 250, 252),
                 ForeColor = Color.FromArgb(30, 41, 59),
                 FlatStyle = FlatStyle.Flat,
@@ -202,8 +206,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 Name = "btnDoiMK",
                 Text = "🔑 Đổi MK",
                 Anchor = AnchorStyles.Top | AnchorStyles.Right,
-                Size = new Size(98, 36),
-                Location = new Point(pnlHeader.Width - 282, 19),
+                Size = new Size(104, 36),
+                Location = new Point(pnlHeader.Width - 308, 16),
                 BackColor = Color.FromArgb(248, 250, 252),
                 ForeColor = Color.FromArgb(30, 41, 59),
                 FlatStyle = FlatStyle.Flat,
@@ -219,7 +223,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             {
                 Name = "lblClock",
                 Anchor = AnchorStyles.Top | AnchorStyles.Right,
-                Location = new Point(pnlHeader.Width - 690, 14),
+                Location = new Point(pnlHeader.Width - 715, 12),
                 Size = new Size(395, 20),
                 Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
                 ForeColor = UITheme.PrimaryOrange,
@@ -228,8 +232,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
             };
 
             lblUserGreeting.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            lblUserGreeting.Location = new Point(pnlHeader.Width - 690, 35);
-            lblUserGreeting.Size = new Size(395, 24);
+            lblUserGreeting.Location = new Point(pnlHeader.Width - 715, 34);
+            lblUserGreeting.Size = new Size(395, 22);
             lblUserGreeting.Font = new Font("Segoe UI", 9.25F, FontStyle.Bold);
             lblUserGreeting.ForeColor = UITheme.DarkNavy;
 
@@ -707,7 +711,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
             // Huy hiệu thương hiệu bo góc 40x40 bên trái
-            var badgeRect = new Rectangle(22, 20, 40, 40);
+            var badgeRect = new Rectangle(18, 20, 40, 40);
             using (var badgePath = UITheme.GetRoundedRectPath(badgeRect, 10))
             using (var badgeBrush = new LinearGradientBrush(
                 badgeRect,

@@ -39,17 +39,16 @@ namespace Quản_Lý_Khách_Sạn.Forms
             // 
             // frmChiTietPhongModal
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9.5F, 21.5F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(680, 760);
+            this.ClientSize = new System.Drawing.Size(920, 580);
             this.Font = new System.Drawing.Font("Segoe UI", 9.5F);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "frmChiTietPhongModal";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Hồ sơ buồng phòng & Tiện nghi chi tiết";
+            this.Text = "Thông tin chi tiết buồng phòng";
             ((System.ComponentModel.ISupportInitialize)(this.picHinhAnh)).EndInit();
             this.ResumeLayout(false);
         }

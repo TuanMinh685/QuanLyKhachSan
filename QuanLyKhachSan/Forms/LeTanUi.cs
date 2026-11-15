@@ -41,15 +41,15 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         internal static Panel Header(Label title, Label subtitle, Control trailing = null)
         {
-            var header = new Panel { Dock = DockStyle.Fill, BackColor = Color.White, Padding = new Padding(28, 15, 24, 12) };
+            var header = new Panel { Dock = DockStyle.Fill, BackColor = Color.White, Padding = new Padding(28, 12, 24, 10) };
             var layout = Table(2);
             layout.ColumnStyles[0] = new ColumnStyle(SizeType.Percent, 100);
             layout.ColumnStyles[1] = new ColumnStyle(SizeType.Absolute, trailing == null ? 0 : 225);
             layout.RowCount = 2;
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 36));
             layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             title.AutoSize = false; title.Dock = DockStyle.Fill; title.Margin = Padding.Empty;
-            title.Font = new Font("Segoe UI", 13F, FontStyle.Bold); title.ForeColor = UITheme.DarkNavy;
+            title.Font = new Font("Segoe UI", 14.5F, FontStyle.Bold); title.ForeColor = UITheme.DarkNavy;
             title.TextAlign = ContentAlignment.MiddleLeft; title.AutoEllipsis = true;
             subtitle.AutoSize = false; subtitle.Dock = DockStyle.Fill; subtitle.Margin = Padding.Empty;
             subtitle.Font = new Font("Segoe UI", 9F); subtitle.ForeColor = UITheme.TextMuted;
@@ -64,15 +64,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
             header.Paint += (_, e) =>
             {
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                // Dải màu thương hiệu 3px trên cùng
-                using (var topBrush = new LinearGradientBrush(
-                    new Rectangle(0, 0, Math.Max(1, header.Width), 4),
-                    UITheme.PrimaryOrange, UITheme.DarkNavy, LinearGradientMode.Horizontal))
-                {
-                    e.Graphics.FillRectangle(topBrush, 0, 0, header.Width, 3);
-                }
                 // Thanh nhấn dọc 4px bên trái tiêu đề
-                using (var pillPath = UITheme.GetRoundedRectPath(new Rectangle(14, 17, 4, Math.Max(18, header.Height - 34)), 2))
+                using (var pillPath = UITheme.GetRoundedRectPath(new Rectangle(14, 15, 4, Math.Max(20, header.Height - 30)), 2))
                 using (var pillBrush = new SolidBrush(UITheme.PrimaryOrange))
                 {
                     e.Graphics.FillPath(pillBrush, pillPath);

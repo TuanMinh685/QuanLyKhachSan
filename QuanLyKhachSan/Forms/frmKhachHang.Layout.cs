@@ -23,8 +23,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
             LeTanUi.Button(btnThemKhachHang, UITheme.PrimaryOrange, true);
             var root = LeTanUi.Table();
             var header = LeTanUi.Header(lblTieuDe, lblMoTa, btnThemKhachHang);
-            lblTieuDe.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
-            LeTanUi.Row(root, header, 86);
+            lblTieuDe.Font = new Font("Segoe UI", 14.5F, FontStyle.Bold);
+            LeTanUi.Row(root, header, 84);
 
             var left = LeTanUi.Table();
             LeTanUi.Row(left, TaoTheDanhSach());
