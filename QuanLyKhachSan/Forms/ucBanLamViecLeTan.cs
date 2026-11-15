@@ -21,6 +21,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
         public event EventHandler YeuCauQuanLyPhong;
 
         private static string GhiChuCaHienTai = "Khách phòng 305 sẽ đến muộn sau 21:00. Phòng 108 yêu cầu xuất hóa đơn công ty khi trả phòng.";
+        private Panel[] _quickCards;
 
         public ucBanLamViecLeTan()
         {
@@ -121,6 +122,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             tblQuickActions.Controls.Add(card2, 1, 0);
             tblQuickActions.Controls.Add(card3, 2, 0);
             tblQuickActions.Controls.Add(card4, 3, 0);
+            _quickCards = new[] { card1, card2, card3, card4 };
 
             // 3. MAIN SECTION: 2 COLUMNS (Left 66%, Right 34%)
             tblMainColumns = new TableLayoutPanel
@@ -716,6 +718,38 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             formPrompt.Controls.AddRange(new Control[] { lblPrompt, txtPrompt, btnLuuPrompt, btnHuyPrompt });
             formPrompt.ShowDialog(this);
+        }
+
+        /// <summary>
+        /// Hiệu ứng Staggered Entrance cho 4 thẻ tác vụ nhanh và tiêu đề Bàn làm việc khi vừa đăng nhập.
+        /// Chỉ di chuyển các control con bên trong từng thẻ nên không gây tái bố cục (0ms layout cost).
+        /// </summary>
+        public void CapNhatKhungHinhIntro(int step, int totalSteps)
+        {
+            if (IsDisposed) return;
+
+            double tHeader = Math.Clamp((double)step / (totalSteps * 0.65), 0.0, 1.0);
+            double easeHeader = 1.0 - Math.Pow(1.0 - tHeader, 3);
+            int headerX = (int)Math.Round(28 * (1.0 - easeHeader));
+            if (lblTitle != null) lblTitle.Location = new Point(headerX, 0);
+            if (lblSubtitle != null) lblSubtitle.Location = new Point(headerX, 32);
+
+            if (_quickCards == null) return;
+            for (int i = 0; i < _quickCards.Length; i++)
+            {
+                var card = _quickCards[i];
+                if (card == null || card.Controls.Count < 3) continue;
+
+                double startStep = i * 2.0;
+                double duration = Math.Max(1.0, totalSteps - 6.0);
+                double tCard = Math.Clamp((step - startStep) / duration, 0.0, 1.0);
+                double easeCard = 1.0 - Math.Pow(1.0 - tCard, 3); // Cubic Ease-Out
+                int dy = (int)Math.Round(18 * (1.0 - easeCard));
+
+                card.Controls[0].Location = new Point(14, 18 + dy); // pnlIconBox
+                card.Controls[1].Location = new Point(66, 18 + dy); // lblT
+                card.Controls[2].Location = new Point(66, 40 + dy); // lblSub
+            }
         }
     }
 }

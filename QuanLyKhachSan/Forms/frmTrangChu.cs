@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
 using System.Windows.Forms;
 using Quản_Lý_Khách_Sạn.BLL;
 
@@ -31,6 +33,10 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private Label lblBreadcrumb;
         private Label lblClock;
         private System.Windows.Forms.Timer timerClock;
+        private System.Windows.Forms.Timer _timerTabAnim;
+        private float _headerSweepProgress = 1.0f;
+        private float _activePillScale = 1.0f;
+        private bool _daChayIntro = false;
 
         public frmTrangChu()
         {
@@ -240,6 +246,159 @@ namespace Quản_Lý_Khách_Sạn.Forms
             timerClock.Start();
 
             ApDungPhanQuyen();
+
+            // 5. HIỆU ỨNG ENTRANCE ANIMATION KHI ĐĂNG NHẬP VÀO TRANG CHỦ (60FPS HARDWARE + STAGGERED CASCADE)
+            Opacity = 0.02;
+            Shown += frmTrangChu_Shown;
+        }
+
+        private void frmTrangChu_Shown(object sender, EventArgs e)
+        {
+            var navButtons = pnlSidebar.Controls
+                .OfType<Button>()
+                .Where(b => b.Visible && b != btnDangXuat)
+                .OrderBy(b => b.Top)
+                .ToList();
+
+            Color bgDark = Color.FromArgb(15, 37, 55);
+            Color fgNormal = Color.FromArgb(203, 213, 225);
+
+            // Đặt trạng thái khởi đầu của hiệu ứng Staggered Cascade
+            foreach (var btn in navButtons)
+            {
+                btn.Padding = new Padding(58, 0, 0, 0);
+                btn.ForeColor = bgDark;
+            }
+            lblBreadcrumb.Location = new Point(76, 13);
+            lblTitleSection.Location = new Point(76, 30);
+            _headerSweepProgress = 0.0f;
+            _activePillScale = 0.1f;
+            manHinhBanLamViec?.CapNhatKhungHinhIntro(0, 24);
+
+            int step = 0;
+            const int totalSteps = 24; // ~360ms ở 60FPS
+            var tmrIntro = new System.Windows.Forms.Timer { Interval = 15 };
+            tmrIntro.Tick += (s, ev) =>
+            {
+                if (IsDisposed || !IsHandleCreated)
+                {
+                    tmrIntro.Stop();
+                    tmrIntro.Dispose();
+                    return;
+                }
+
+                step++;
+                double t = Math.Min(1.0, (double)step / totalSteps);
+                double easeOut = 1.0 - Math.Pow(1.0 - t, 3); // Cubic Ease-Out
+
+                // 1) Fade-In toàn cửa sổ (GPU DWM Compositor)
+                Opacity = Math.Max(0.02, easeOut);
+
+                // 2) Trượt tiêu đề Header & Dải sáng Shimmer
+                int headerX = 38 + (int)Math.Round(38 * (1.0 - easeOut));
+                lblBreadcrumb.Location = new Point(headerX, 13);
+                lblTitleSection.Location = new Point(headerX, 30);
+                _headerSweepProgress = (float)easeOut;
+                _activePillScale = (float)(0.1 + 0.9 * easeOut);
+                pnlHeader.Invalidate();
+
+                // 3) Staggered Cascade cho từng nút Menu trên Sidebar từ trên xuống
+                for (int i = 0; i < navButtons.Count; i++)
+                {
+                    var btn = navButtons[i];
+                    double startStep = i * 1.5;
+                    double duration = Math.Max(1.0, totalSteps - 8.0);
+                    double tBtn = Math.Clamp((step - startStep) / duration, 0.0, 1.0);
+                    double easeBtn = 1.0 - Math.Pow(1.0 - tBtn, 3);
+
+                    int padLeft = 26 + (int)Math.Round(32 * (1.0 - easeBtn));
+                    btn.Padding = new Padding(padLeft, 0, 0, 0);
+
+                    Color targetFg = ReferenceEquals(btn, nutDangChon) ? Color.White : fgNormal;
+                    btn.ForeColor = PhaMau(bgDark, targetFg, easeBtn);
+                    btn.Invalidate();
+                }
+
+                // 4) Hiệu ứng nổi tuần tự 4 thẻ Quick Actions trên Bàn làm việc Lễ tân
+                manHinhBanLamViec?.CapNhatKhungHinhIntro(step, totalSteps);
+
+                if (step >= totalSteps)
+                {
+                    Opacity = 1.0;
+                    _headerSweepProgress = 1.0f;
+                    _activePillScale = 1.0f;
+                    lblBreadcrumb.Location = new Point(38, 13);
+                    lblTitleSection.Location = new Point(38, 30);
+                    foreach (var btn in navButtons)
+                    {
+                        btn.Padding = new Padding(26, 0, 0, 0);
+                        btn.ForeColor = ReferenceEquals(btn, nutDangChon) ? Color.White : fgNormal;
+                        btn.Invalidate();
+                    }
+                    pnlHeader.Invalidate();
+                    _daChayIntro = true;
+                    tmrIntro.Stop();
+                    tmrIntro.Dispose();
+                }
+            };
+            tmrIntro.Start();
+        }
+
+        private static Color PhaMau(Color c1, Color c2, double ratio)
+        {
+            ratio = Math.Clamp(ratio, 0.0, 1.0);
+            int r = (int)Math.Round(c1.R + (c2.R - c1.R) * ratio);
+            int g = (int)Math.Round(c1.G + (c2.G - c1.G) * ratio);
+            int b = (int)Math.Round(c1.B + (c2.B - c1.B) * ratio);
+            return Color.FromArgb(r, g, b);
+        }
+
+        private void ChayHieuUngChuyenTab()
+        {
+            if (!_daChayIntro || IsDisposed || !IsHandleCreated) return;
+
+            _timerTabAnim?.Stop();
+            _timerTabAnim?.Dispose();
+
+            int step = 0;
+            const int totalSteps = 10; // ~150ms phản hồi tức thì
+            _headerSweepProgress = 0.0f;
+            _activePillScale = 0.2f;
+            lblTitleSection.Location = new Point(58, 30);
+
+            _timerTabAnim = new System.Windows.Forms.Timer { Interval = 15 };
+            _timerTabAnim.Tick += (s, e) =>
+            {
+                if (IsDisposed || !IsHandleCreated)
+                {
+                    _timerTabAnim?.Stop();
+                    return;
+                }
+
+                step++;
+                double t = Math.Min(1.0, (double)step / totalSteps);
+                double easeOut = 1.0 - Math.Pow(1.0 - t, 3);
+
+                lblTitleSection.Location = new Point(38 + (int)Math.Round(20 * (1.0 - easeOut)), 30);
+                _headerSweepProgress = (float)easeOut;
+                _activePillScale = (float)(0.2 + 0.8 * easeOut);
+
+                pnlHeader.Invalidate();
+                nutDangChon?.Invalidate();
+
+                if (step >= totalSteps)
+                {
+                    lblTitleSection.Location = new Point(38, 30);
+                    _headerSweepProgress = 1.0f;
+                    _activePillScale = 1.0f;
+                    pnlHeader.Invalidate();
+                    nutDangChon?.Invalidate();
+                    _timerTabAnim.Stop();
+                    _timerTabAnim.Dispose();
+                    _timerTabAnim = null;
+                }
+            };
+            _timerTabAnim.Start();
         }
 
         private void frmTrangChu_KeyDown(object sender, KeyEventArgs e)
@@ -504,6 +663,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 pnlContent.Tag = manHinh;
                 lblTitleSection.Text = tieuDe;
                 DoiTrangThaiNutMenu(nutMenu);
+                ChayHieuUngChuyenTab();
                 manHinh.Select();
             }
             catch (Exception ex)
@@ -584,18 +744,22 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-            // Thanh chỉ báo trạng thái đang chọn (Active Left Pill Bar) chuẩn Pro Max
-            var pillRect = new Rectangle(6, 10, 4, Math.Max(16, btn.Height - 20));
+            // Thanh chỉ báo trạng thái đang chọn (Active Left Pill Bar) co giãn mượt theo _activePillScale
+            int fullH = Math.Max(16, btn.Height - 20);
+            int curH = Math.Max(6, (int)Math.Round(fullH * _activePillScale));
+            int topY = (btn.Height - curH) / 2;
+            var pillRect = new Rectangle(6, topY, 4, curH);
             using (var pillPath = UITheme.GetRoundedRectPath(pillRect, 2))
             using (var pillBrush = new SolidBrush(Color.FromArgb(249, 115, 22)))
             {
                 e.Graphics.FillPath(pillBrush, pillPath);
             }
 
-            // Dấu mũi tên điều hướng bên phải
+            // Dấu mũi tên điều hướng bên phải trượt êm vào vị trí
+            int chevronOffset = (int)Math.Round(10 * (1.0f - _activePillScale));
             using (var chevronFont = new Font("Segoe UI", 11F, FontStyle.Bold))
             {
-                var chevronRect = new Rectangle(btn.Width - 28, 0, 20, btn.Height);
+                var chevronRect = new Rectangle(btn.Width - 28 - chevronOffset, 0, 20, btn.Height);
                 TextRenderer.DrawText(
                     e.Graphics,
                     "›",
@@ -610,8 +774,26 @@ namespace Quản_Lý_Khách_Sạn.Forms
         {
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-            // Thanh nhấn dọc màu cam bên trái tiêu đề trang
-            var accentRect = new Rectangle(22, 16, 4, Math.Max(20, pnlHeader.Height - 32));
+            // Dải sáng Shimmer chạy ngang đỉnh Header khi khởi chạy hoặc chuyển Tab
+            if (_headerSweepProgress > 0.0f && _headerSweepProgress < 1.0f && pnlHeader.Width > 10)
+            {
+                int sweepWidth = Math.Max(4, (int)Math.Round(pnlHeader.Width * _headerSweepProgress));
+                var sweepRect = new Rectangle(0, 0, sweepWidth, 3);
+                using (var sweepBrush = new LinearGradientBrush(
+                    sweepRect,
+                    UITheme.PrimaryOrange,
+                    Color.FromArgb(251, 191, 36),
+                    LinearGradientMode.Horizontal))
+                {
+                    e.Graphics.FillRectangle(sweepBrush, sweepRect);
+                }
+            }
+
+            // Thanh nhấn dọc màu cam bên trái tiêu đề trang co giãn mượt
+            int fullAccentH = Math.Max(20, pnlHeader.Height - 32);
+            int curAccentH = Math.Max(8, (int)Math.Round(fullAccentH * _activePillScale));
+            int accentTop = (pnlHeader.Height - curAccentH) / 2;
+            var accentRect = new Rectangle(22, accentTop, 4, curAccentH);
             using (var accentPath = UITheme.GetRoundedRectPath(accentRect, 2))
             using (var accentBrush = new SolidBrush(UITheme.PrimaryOrange))
             {

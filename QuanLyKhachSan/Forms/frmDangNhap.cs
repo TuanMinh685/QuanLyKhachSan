@@ -16,6 +16,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
         private readonly Nhan lblLoi = new();
         private readonly System.Windows.Forms.Timer tmrDemNguocKhoa = new();
         private int _giayConLaiKhoa = 0;
+        private int _animOffsetY = 22;
+        private bool _dangChuyenCanh = false;
 
         public frmDangNhap()
         {
@@ -193,7 +195,7 @@ namespace Quản_Lý_Khách_Sạn.Forms
             {
                 noiDung.Location = new Point(
                     Math.Max(0, (pnlPhai.ClientSize.Width - noiDung.Width) / 2),
-                    Math.Max(0, (pnlPhai.ClientSize.Height - noiDung.Height) / 2));
+                    Math.Max(0, (pnlPhai.ClientSize.Height - noiDung.Height) / 2 + _animOffsetY));
             }
             pnlPhai.Resize += (_, __) => CanGiua();
             noiDung.SizeChanged += (_, __) => CanGiua();
@@ -208,6 +210,40 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
             AcceptButton = btnDangNhap;
             ActiveControl = txtTenDangNhap;
+
+            // Hiệu ứng Entrance Animation (Fade-In + Slide-Up Cubic Ease-Out 60FPS)
+            Opacity = 0.0;
+            Shown += (_, __) =>
+            {
+                int step = 0;
+                const int totalSteps = 16; // ~240ms
+                var tmrIntro = new System.Windows.Forms.Timer { Interval = 15 };
+                tmrIntro.Tick += (s, e) =>
+                {
+                    if (IsDisposed || !IsHandleCreated)
+                    {
+                        tmrIntro.Stop();
+                        tmrIntro.Dispose();
+                        return;
+                    }
+                    step++;
+                    double t = Math.Min(1.0, (double)step / totalSteps);
+                    double easeOut = 1.0 - Math.Pow(1.0 - t, 3); // Cubic Ease-Out
+                    Opacity = easeOut;
+                    _animOffsetY = (int)Math.Round(22 * (1.0 - easeOut));
+                    CanGiua();
+
+                    if (step >= totalSteps)
+                    {
+                        Opacity = 1.0;
+                        _animOffsetY = 0;
+                        CanGiua();
+                        tmrIntro.Stop();
+                        tmrIntro.Dispose();
+                    }
+                };
+                tmrIntro.Start();
+            };
 
             tmrDemNguocKhoa.Interval = 1000;
             tmrDemNguocKhoa.Tick += TmrDemNguocKhoa_Tick;
@@ -494,6 +530,8 @@ namespace Quản_Lý_Khách_Sạn.Forms
 
         private void BtnDangNhap_Click(object sender, EventArgs e)
         {
+            if (_dangChuyenCanh) return;
+
             lblLoi.ForeColor = Color.FromArgb(220, 38, 38);
             lblLoi.Text = "";
 
@@ -555,8 +593,38 @@ namespace Quản_Lý_Khách_Sạn.Forms
                 Session.TenDangNhap = user;
                 Session.VaiTro = role ?? "LeTan";
                 Session.MaNhanVien = maNhanVien;
-                DialogResult = DialogResult.OK;
-                Close();
+
+                // Hiệu ứng chuyển cảnh mượt mà sang Trang chủ (Pro Max Exit Animation)
+                _dangChuyenCanh = true;
+                btnDangNhap.Enabled = false;
+                btnDangNhap.BackColor = Color.FromArgb(22, 163, 74);
+                btnDangNhap.Text = "✓ XÁC THỰC THÀNH CÔNG — ĐANG MỞ...";
+                lblLoi.ForeColor = Color.FromArgb(22, 163, 74);
+                lblLoi.Text = $"Xin chào {user}! Đang khởi tạo không gian làm việc...";
+
+                int stepOut = 0;
+                const int totalOutSteps = 12; // ~180ms
+                var tmrExit = new System.Windows.Forms.Timer { Interval = 15 };
+                tmrExit.Tick += (s, ev) =>
+                {
+                    if (IsDisposed || !IsHandleCreated)
+                    {
+                        tmrExit.Stop();
+                        tmrExit.Dispose();
+                        return;
+                    }
+                    stepOut++;
+                    double t = Math.Min(1.0, (double)stepOut / totalOutSteps);
+                    Opacity = Math.Max(0.0, 1.0 - t * t);
+                    if (stepOut >= totalOutSteps)
+                    {
+                        tmrExit.Stop();
+                        tmrExit.Dispose();
+                        DialogResult = DialogResult.OK;
+                        Close();
+                    }
+                };
+                tmrExit.Start();
             }
             catch (Exception ex)
             {
